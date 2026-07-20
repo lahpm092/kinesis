@@ -1,0 +1,20 @@
+# --- Python env ---
+.venv/
+__pycache__/
+*.pyc
+
+# --- Gated / large model weights (do NOT redistribute; see README) ---
+models/
+
+# --- Heavy pipeline inputs & intermediates (raw footage, match videos, QA shots) ---
+/data/
+
+# --- Node ---
+node_modules/
+web/dist/
+dist/
+
+# --- OS / editor ---
+.DS_Store
+*.log
+scratchpad/

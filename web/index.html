@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KINESIS — Ecological Performance Intelligence</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23F2EAD9'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='Georgia,serif' font-size='20' fill='%23A34A24'%3EK%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/styles/main.css" />
+</head>
+<body>
+
+  <header class="topbar" id="topbar">
+    <a class="wordmark" href="#hero">KINESIS<span class="wordmark-dot">.</span></a>
+    <nav class="topnav" id="topnav">
+      <a href="#match" data-nav>Match</a>
+      <a href="#segment" data-nav>Segment</a>
+      <a href="#skeleton" data-nav>Skeleton</a>
+      <a href="#metrics" data-nav>Kinematics</a>
+      <a href="#field" data-nav>Field</a>
+      <a href="#sim" data-nav>Simulate</a>
+      <a href="#attributes" data-nav>Athletes</a>
+      <a href="#regime" data-nav>Regime</a>
+      <a href="#affordance" data-nav>Affordance</a>
+      <a href="#theory" data-nav>Theory</a>
+    </nav>
+    <div class="progress-hair" id="progressHair"></div>
+  </header>
+
+  <main id="app">
+
+    <!-- ============================== HERO =============================== -->
+    <section class="scene scene--hero" id="hero">
+      <div class="hero-inner">
+        <p class="kicker reveal">Performance Lab · Field Study 01</p>
+        <h1 class="hero-title reveal">
+          Movement is<br /><em>knowledge</em> of the field.
+        </h1>
+        <p class="hero-sub reveal">
+          KINESIS reads a match the way a player does — as a living field of
+          affordances. One camera. Segmentation, skeletons, and the
+          ecological dynamics of twenty-two athletes, computed in place.
+        </p>
+        <div class="hero-cta reveal">
+          <a class="btn btn--primary" href="#segment">Begin the study</a>
+          <span class="hero-note">France – Germany · Stade de France · 16 Oct 2018</span>
+        </div>
+      </div>
+      <div class="hero-film reveal" id="heroFilm">
+        <video id="heroVideo" muted loop playsinline preload="auto" src="/clip.mp4"></video>
+        <div class="hero-film-caption">
+          <span>Source footage — Wikimedia Commons · CC BY-SA 4.0</span>
+          <span class="mono" id="heroClock">00:00.0</span>
+        </div>
+      </div>
+      <div class="scroll-cue" aria-hidden="true"><span></span></div>
+    </section>
+
+    <!-- ============================= MATCH =============================== -->
+    <section class="scene" id="match">
+      <div class="scene-head">
+        <p class="kicker">01 · Scale</p>
+        <h2>A whole half, cut to<br />what actually happened.</h2>
+        <p class="scene-lede">
+          One fixed camera watched forty-five minutes of football. Our motion
+          pipeline finds every live passage, discards the dead time, and tracks
+          all twenty-two players through what remains — pitch-calibrated, at
+          laptop speed. The reel below is that half, compressed and annotated.
+        </p>
+      </div>
+      <div class="match-stage" id="matchStage"><!-- scene module mounts here --></div>
+    </section>
+
+    <!-- ============================ SEGMENT ============================== -->
+    <section class="scene" id="segment">
+      <div class="scene-head">
+        <p class="kicker">02 · Perception</p>
+        <h2>Every body on the pitch,<br />segmented as it moves.</h2>
+        <p class="scene-lede">
+          SAM&nbsp;3 — Meta’s promptable concept-segmentation model — runs locally
+          over the raw footage. Asked for <em>“person”</em>, it returns a mask and a
+          persistent identity for each player, every frame, no markers, no wearables.
+        </p>
+      </div>
+      <div class="segment-stage" id="segmentStage"><!-- scene module mounts here --></div>
+    </section>
+
+    <!-- ============================ SKELETON ============================= -->
+    <section class="scene scene--dark" id="skeleton">
+      <div class="scene-head">
+        <p class="kicker kicker--dark">03 · Articulation</p>
+        <h2>From silhouette<br />to skeleton.</h2>
+        <p class="scene-lede">
+          Inside each mask, RTMPose recovers the articulated body — 26 joints,
+          angles resolved per frame. This is the raw material of coordination:
+          how a knee loads, how a torso turns before the pass arrives.
+        </p>
+      </div>
+      <div class="skeleton-stage" id="skeletonStage"><!-- three.js scene mounts here --></div>
+    </section>
+
+    <!-- ============================ METRICS =============================== -->
+    <section class="scene" id="metrics">
+      <div class="scene-head">
+        <p class="kicker">04 · Kinematics</p>
+        <h2>The signatures of effort.</h2>
+        <p class="scene-lede">
+          Pitch-calibrated trajectories yield speed, acceleration and braking
+          load for every player — the same measures elite clubs buy hardware for,
+          read here from light alone.
+        </p>
+      </div>
+      <div class="metrics-stage" id="metricsStage"><!-- scene module mounts here --></div>
+    </section>
+
+    <!-- ============================== FIELD =============================== -->
+    <section class="scene scene--dark" id="field">
+      <div class="scene-head">
+        <p class="kicker kicker--dark">05 · Ecology</p>
+        <h2>No player moves alone.</h2>
+        <p class="scene-lede">
+          Ecological dynamics treats the team as one perceiving organism.
+          Stretch, synchrony, dominant regions, dyadic coupling — the geometry
+          of cooperation, drawn live from the same ten seconds of film.
+        </p>
+      </div>
+      <div class="field-stage" id="fieldStage"><!-- three.js scene mounts here --></div>
+    </section>
+
+    <!-- =============================== SIM ================================ -->
+    <section class="scene scene--dark" id="sim">
+      <div class="scene-head">
+        <p class="kicker kicker--dark">06 · Projection</p>
+        <h2>Metrics that can<br />play the game forward.</h2>
+        <p class="scene-lede">
+          The proof that a measurement matters is that it predicts. Here the
+          measured envelopes — top speed, acceleration, work-rate, passing
+          share — drive twenty-two agents through open play. Pass lanes light
+          up as affordances; every ball is traced with its angle and velocity.
+          This is selection and training intelligence you can watch.
+        </p>
+      </div>
+      <div class="sim-stage" id="simStage"><!-- three.js scene mounts here --></div>
+    </section>
+
+    <!-- =========================== ATTRIBUTES ============================= -->
+    <section class="scene scene--dark" id="attributes">
+      <div class="scene-head">
+        <p class="kicker kicker--dark">07 · Instrumentation</p>
+        <h2>The camera read the game.<br />Now the lab reads the athlete.</h2>
+        <p class="scene-lede">
+          Beyond the single camera sits a menu of instruments — force plates, radar,
+          GPS, metabolic carts, and the perception–action lab that is the real
+          differentiator. Below, that hardware is simulated for two invented players
+          and rolled into a game-legible character sheet: eight attributes, each a
+          composite of the devices that measure it.
+        </p>
+      </div>
+      <div class="attributes-stage" id="attributesStage"><!-- scene module mounts here --></div>
+    </section>
+
+    <!-- ============================== REGIME ============================= -->
+    <section class="scene scene--dark" id="regime">
+      <div class="scene-head">
+        <p class="kicker kicker--dark">08 · Prescription</p>
+        <h2>The regimen<br />the data prescribes.</h2>
+        <p class="scene-lede">
+          A measurement earns its keep when it changes a decision. Rivas’ profile has
+          a clear, trainable bottleneck — the motor answer to an elite mind. The lab
+          spends its load exactly there, and every block names the device that both
+          prescribes and verifies it. The projected card is what those metrics buy.
+        </p>
+      </div>
+      <div class="regime-stage" id="regimeStage"><!-- scene module mounts here --></div>
+    </section>
+
+    <!-- ============================ AFFORDANCE =========================== -->
+    <section class="scene scene--dark" id="affordance">
+      <div class="scene-head">
+        <p class="kicker kicker--dark">09 · Projection II</p>
+        <h2>What the training buys,<br />played twice.</h2>
+        <p class="scene-lede">
+          One broken play, run side by side. A through-ball is slid into the channel;
+          the covering defender shuts the shooting lane at a fixed instant. Nothing
+          differs between the two panels but Rivas’ own envelope — today’s, and the
+          one the regimen projects. Whether the affordance survives is decided by the
+          physics, not the storyboard.
+        </p>
+      </div>
+      <div class="affordance-stage" id="affordanceStage"><!-- scene module mounts here --></div>
+    </section>
+
+    <!-- ============================== THEORY ============================== -->
+    <section class="scene" id="theory">
+      <div class="scene-head">
+        <p class="kicker">10 · Foundations</p>
+        <h2>Measured, not imagined.</h2>
+        <p class="scene-lede">
+          Every number in this study descends from a published line of research
+          in ecological dynamics and sport science.
+        </p>
+      </div>
+      <div class="theory-stage" id="theoryStage"><!-- scene module mounts here --></div>
+    </section>
+
+    <!-- ============================== CLOSE =============================== -->
+    <section class="scene scene--close" id="close">
+      <div class="close-inner">
+        <p class="kicker">KINESIS</p>
+        <h2 class="close-title">One camera.<br />The whole game, understood —<br />then played forward.</h2>
+        <p class="close-note">
+          Built end-to-end on open models — SAM&nbsp;3, RTMPose — running on a
+          single laptop.<br />Footage: Wikimedia Commons CC BY-SA 4.0 ·
+          full-match study: SoccerTrack v2, CC BY 4.0.
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="paper-grain" aria-hidden="true"></div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
