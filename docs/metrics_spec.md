@@ -189,6 +189,18 @@
 4. **Provenance:** Inter-limb asymmetry research in soccer: Bishop and colleagues, e.g., Bishop et al. (2019), "Jumping asymmetries are associated with speed, change of direction speed, and jump performance in elite academy soccer players," *Journal of Strength and Conditioning Research*; and Bishop et al. work showing asymmetries >~5-10% relate to slower sprint/COD performance. NB: from-video single-leg-kinetics estimates are approximate versus force-plate; label accordingly. `[force-based variables are proxies from kinematics -- mark [approximate].]`
 5. **Typical ranges:** Asymmetries commonly ~5-15% on jump/strength tasks in soccer players; differences as small as ~5% have been associated with reduced sprint/COD performance. Use for monitoring change over time rather than fixed pass/fail.
 
+### E4. Swing-Recovery Knee Flexion `[gait]`
+1. **What it is:** How deeply the knee folds during the swing phase to shorten the limb -- the mechanical lever on how fast the leg recovers, and therefore on stride frequency (cadence).
+2. **Formula:** Over a detected running gait cycle (per leg), take the peak swing-phase knee flexion `max(180deg - theta_knee)` where `theta_knee = angle(hip, knee, ankle)` is the interior angle from the normalised dot product; also report the phase at which it occurs (fraction of the cycle) and the peak swing knee-flexion angular velocity `max|dtheta/dt|`. Detect stance/swing from the ankle/foot vertical trajectory; compute per-leg for symmetry (E3).
+3. **Provenance:** Novacheck (1998), "The biomechanics of running," *Gait & Posture* 7(1):77-95 (swing-phase knee flexion shortens the limb's moment of inertia, enabling faster recovery); Dorn, Schache & Pandy (2012), "Muscular strategy shift in human running," *Journal of Experimental Biology* 215:1944-1956 (the shift from stance propulsion to swing-leg repositioning as speed rises). NB: single-camera sagittal estimate -- mark `[approximate]`.
+4. **Typical ranges:** Peak swing knee flexion ~90-130deg of flexion (interior angle ~50-90deg) in running, rising with speed; a deeper, faster fold accompanies higher cadence.
+
+### E5. Ankle Push-Off Angular Velocity `[gait]`
+1. **What it is:** How fast the ankle plantarflexes at toe-off -- a camera-side reactive-strength signal that tracks the force-plate Reactive Strength Index (RSI) without a plate.
+2. **Formula:** Over the stance-to-toe-off window, the peak plantarflexion angular velocity of the ankle joint `max|dtheta_ankle/dt|`, with `theta_ankle = angle(knee, ankle, big_toe)`; smooth position (Butterworth) before differentiating and derive velocity from the smoothed signal. Correlate against jump/hop RSI where force-plate data exist to calibrate the proxy.
+3. **Provenance:** Flanagan & Comyns (2008), "The use of contact time and the reactive strength index to optimize fast stretch-shortening cycle training," *Strength & Conditioning Journal* 30(5):32-38 (RSI as the fast stretch-shortening-cycle marker the ankle push-off proxies); Dorn, Schache & Pandy (2012) as above for the ankle plantarflexor role in propulsion. NB: kinematic proxy for a kinetic quantity -- mark `[approximate]`.
+4. **Typical ranges:** Interpretive; monitor change over a training block. Faster plantarflexion at toe-off co-varies with higher RSI and better sprint/jump reactive output.
+
 ---
 
 # F. Additional Compelling Metrics (recent ecological-dynamics soccer literature)

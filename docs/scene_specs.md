@@ -136,6 +136,35 @@ UnrealBloomPass/EffectComposer from `three/addons/...`.
   refined, not synthwave. Cap pixelRatio at 2. Pause render loop when
   section is off-screen (IntersectionObserver) to save GPU.
 
+### biomech.js  (dark — the biomechanics bridge)
+Chapter 07, opening the personalized-development back half. From the match
+footage: crop a player → lift the lower-body skeleton → read hip/knee/ankle/foot
+angles and their angular speed → distil trainable features → track them against a
+prescribed regimen. Four movements, all scoped `.bm-`, self-contained gait clock
+(space-bar aware), no shared-file edits beyond registration:
+- SPECIMEN (`.panel`): a `<video src="/match_reel.mp4">` cropped/panned with a
+  segmentation-style bbox + `segment · crop · lift · measure` flow badges that
+  track the gait sub-phase. Purely illustrative of the crop step.
+- GONIOMETER (`.panel`): a canvas plate — left band draws the sagittal lower-body
+  figure (both legs, pelvis→shoulder) with goniometer arcs at every joint; right
+  band draws live knee/hip/ankle interior-angle traces over the gait cycle with a
+  phase cursor. Side column renders the actual geometry: `θ = arccos(u·v/|u||v|)`
+  with live numbers, `ω = Δθ/Δt`, and a 6-cell live angle readout. The drawn arc,
+  the trace, and the number are the *same* dot-product angle (see
+  `scenes/gait/data.js`). Below: stance/swing phase strip (click-to-scrub) +
+  `.playbar` (Play toggles the master clock; scrub sets gait phase φ; cadence toggle).
+- FEATURES (`.panel`): one row per trainable feature (value, sparkline, meaning,
+  the attribute chips it feeds). Values come from the model unless
+  `public/gait.json` is present, in which case the pipeline's measured values
+  overlay them (loadMatch-style optional fetch) + a `measured` tag.
+- TREATMENT + PROGRESS (two `.panel`s): Mateo Rivas' regime blocks (imported from
+  `scenes/lab/data.js` so the joints we measure are the joints he trains) and a
+  canvas progress chart — measured sessions climbing toward a target band, dashed
+  projection, baseline/target guides, selectable tracked metric.
+Data + model: `web/src/scenes/gait/data.js`. Real back-end:
+`pipeline/11_gait_angles.py`. Degrades gracefully when the reel / gait.json are
+absent.
+
 ### theory.js  (paper)
 Static editorial layout, generated from a JS constant you author by reading
 `docs/metrics_spec.md` (distill: 6 categories, per metric: name, one-line

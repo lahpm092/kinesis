@@ -116,6 +116,12 @@ const CATS = [
       { id: 'E3', name: 'Limb Asymmetry', proxy: true,
         claim: 'Left–right differences across matched actions — a marker of imbalance and injury exposure.',
         cites: ['Bishop et al. (2019)'] },
+      { id: 'E4', name: 'Swing-Recovery Knee Flexion', proxy: true,
+        claim: 'How deeply the knee folds in swing to shorten the limb — the mechanical lever on leg-recovery speed and cadence.',
+        cites: ['Novacheck (1998)', 'Dorn, Schache & Pandy (2012)'] },
+      { id: 'E5', name: 'Ankle Push-Off Angular Velocity', proxy: true,
+        claim: 'Plantarflexion speed at toe-off — a camera-side reactive-strength proxy that tracks its force-plate RSI twin.',
+        cites: ['Flanagan & Comyns (2008)', 'Dorn, Schache & Pandy (2012)'] },
     ],
   },
   {

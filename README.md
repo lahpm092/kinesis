@@ -17,15 +17,26 @@ forward** by a metrics-driven simulation.
 - **Calibration** — hand-refined pitch homography (goal posts, penalty-D
   arc, line constraints; least-squares) + per-frame camera-pan compensation
   (phase correlation on the stands), giving positions in meters.
-- **Metrics** (see `docs/metrics_spec.md` — 28 measures, cited):
+- **Metrics** (see `docs/metrics_spec.md` — 30 measures, cited):
   kinematics (speed, accel/decel, sprints, HSR, accel load), perception-action
   proxies (reaction latency, COD sharpness), attention (scan rate), and the
   ecological-dynamics core (stretch index, effective playing space, centroid
   coupling, cluster-phase synchrony, dyadic relative phase, Voronoi regions).
+- **Biomechanics** — `web/src/scenes/biomech.js` (+ `gait/data.js`,
+  `pipeline/12_biomech_clip.py`): a NEW dataset video (the 1st-half panorama,
+  untouched by every other chapter) → the pipeline finds its most visible
+  sprint on its own (median-background blobs → greedy tracks → visibility
+  score) → a portrait crop rides the runner → **SAM 3** person masks →
+  **RTMPose-x** (halpe26) per frame → interior joint angles by the normalised
+  dot product, angular speed by central difference, joint velocity vectors in
+  m/s through the local homography Jacobian → a synchronized triptych
+  (segmentation | skeleton | geometry) + measured features in
+  `web/public/gait.json`. Stage 11 remains the 2nd-half/master variant.
 - **Experience** — `web/`: vite + three.js, sepia editorial design; scenes:
   Segment (mask overlay on footage) → Skeleton (glowing 3D articulated
   reconstruction with live joint-angle arcs) → Kinematics (trace plates) →
-  Field (3D ecology view) → Theory (cited index of measures).
+  Field (3D ecology view) → Biomechanics (joint goniometry → training) →
+  Athletes / Regime / Affordance → Theory (cited index of measures).
 
 ## Run the demo
 
@@ -66,6 +77,7 @@ master (3200/12.5fps) and reel base (1280/25fps).
 pipeline/fetch_half.sh 2nd            # stream the half via rangeproxy (never stores the 6.7 GB)
 pipeline/run_match_pipeline.sh 2nd    # cut → track → metrics → reel
 .venv/bin/python pipeline/10_match_sam3.py 2nd 60 6   # SAM3 showcase window (optional)
+.venv/bin/python pipeline/11_gait_angles.py 2nd       # lower-body gait angles → web/public/gait.json (optional)
 ```
 
 Google Drive throttles the panorama files aggressively; `rangeproxy.py`
