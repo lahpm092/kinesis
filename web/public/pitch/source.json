@@ -1,0 +1,23 @@
+{
+  "measured": true,
+  "generator": "pipeline/10_acquire.py",
+  "match": "Manchester City 0 – 1 Manchester United",
+  "competition": "Premier League 2015/2016",
+  "date": "2016-03-20",
+  "dataset": "SoccerNet v2",
+  "license": "SoccerNet NDA — research use",
+  "halves": [
+    {
+      "half": 1,
+      "file": "1_720p.mkv",
+      "duration_s": 2700.0,
+      "width": 1280,
+      "height": 720,
+      "fps": 25.0,
+      "codec": "h264",
+      "bitrate_kbps": 3342
+    }
+  ],
+  "video": "raw_excerpt.mp4",
+  "video_duration_s": 24.0
+}

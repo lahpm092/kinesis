@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>KINESIS — live search pool</title>
+<link rel="icon" href="data:," />
+<style>
+  :root {
+    --coal: #14100A; --coal-2: #1D1710; --coal-hair: #3A2F1F;
+    --bone: #EFE4CB; --bone-2: #B3A382; --amber: #FFB454; --amber-2: #E89B3E;
+    --gold: #8C6D2F; --fail: #C56B4A; --pos: #7FB98A;
+    --serif: "Iowan Old Style", "Palatino", "Book Antiqua", Georgia, serif;
+    --mono: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; background: var(--coal); color: var(--bone); }
+  main { max-width: 1000px; margin: 0 auto; padding: 44px 40px; }
+  .eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em;
+             text-transform: uppercase; color: var(--bone-2); }
+  h1 { font-family: var(--serif); font-weight: 400; font-size: 30px; margin: 8px 0 26px; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--coal-hair);
+          border: 1px solid var(--coal-hair); margin-bottom: 26px; }
+  .stat { background: var(--coal); padding: 16px 18px; }
+  .stat .k { font-family: var(--mono); font-size: 9px; letter-spacing: 0.18em;
+             text-transform: uppercase; color: var(--bone-2); }
+  .stat .v { font-family: var(--serif); font-size: 30px; color: var(--amber); margin-top: 6px; }
+  .stat .v.small { font-size: 20px; color: var(--bone); }
+  .stat .v.ok { color: var(--pos); }
+  .row { font-family: var(--mono); font-size: 11px; color: var(--bone-2); padding: 4px 0;
+         border-bottom: 1px solid var(--coal-2); }
+  .row b { color: var(--bone); font-weight: 500; }
+  .note { font-family: var(--mono); font-size: 10.5px; color: var(--bone-2); line-height: 1.7;
+          border-top: 1px solid var(--coal-hair); padding-top: 14px; margin-top: 22px; }
+  canvas { width: 100%; height: 190px; display: block; border: 1px solid var(--coal-hair); }
+</style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">X · massively parallel strategy search</div>
+  <h1>Live workers on top of the pre-rendered map</h1>
+  <div class="grid">
+    <div class="stat"><div class="k">workers</div><div class="v" id="workers">—</div></div>
+    <div class="stat"><div class="k">sims · s⁻¹</div><div class="v" id="rate">—</div></div>
+    <div class="stat"><div class="k">sims</div><div class="v small" id="sims">—</div></div>
+    <div class="stat"><div class="k">parity</div><div class="v small" id="parity">—</div></div>
+  </div>
+  <canvas id="chart"></canvas>
+  <div id="rows"></div>
+  <div class="note" id="note">…</div>
+</main>
+<script type="module">
+import { SearchPool, workerCount } from '/src/pitch/sim/pool.js';
+import { fitFromSimRun, assignRoles, Kernel, statsFromEvents } from '/src/pitch/sim/kernel.js';
+import { opponentModel, decodeStrategy, SEARCH_DEFAULTS } from '/src/pitch/sim/island.js';
+
+const sim = await (await fetch('/pitch/sim.json')).json();
+const search = await (await fetch('/pitch/search.json')).json().catch(() => null);
+
+const fit = fitFromSimRun(sim, 'before');
+assignRoles(fit.agents);
+const opp = search?.opponent?.strategy || opponentModel(fit, null, 'B').strategy;
+
+/* the parity contract: run the canonical seed here, hand the worker the
+   pre-rendered numbers, and let it re-derive them from its own event stream */
+const DUR = search?.duration_s ?? SEARCH_DEFAULTS.duration_s;
+const best = search?.best ? decodeStrategy([search.best.x, search.best.y]) : decodeStrategy([0.5, 0.5]);
+const canonical = new Kernel(fit, {
+  seed: search?.parity?.seed ?? 20160320, duration_s: DUR,
+  strategyA: best, strategyB: opp, record: false, light: true, focusTeam: 'A',
+}).run();
+
+/* Leave the main thread a core to answer on. Saturating every core makes the
+ * page stop repainting, which is exactly what a presenter must not see. */
+const N = Math.max(2, workerCount() - 2);
+const pool = new SearchPool({
+  fit, opp, workers: N,
+  cfg: { duration_s: DUR },
+  expect: {
+    seed: search?.parity?.seed ?? 20160320, duration_s: DUR,
+    strategyA: best, strategyB: opp, team: 'A',
+    stats: canonical.result,
+  },
+});
+
+const hist = [];
+pool.onUpdate = (s) => {
+  document.getElementById('workers').textContent = s.workers;
+  document.getElementById('rate').textContent = s.simsPerS ? Math.round(s.simsPerS).toLocaleString() : '—';
+  document.getElementById('sims').textContent = s.sims.toLocaleString();
+  if (s.parity) {
+    const el = document.getElementById('parity');
+    el.textContent = (s.parity.ok ? '✓ ' : '✗ ') + s.parity.maxAbsDiff.toExponential(1);
+    el.className = 'v small' + (s.parity.ok ? ' ok' : '');
+  }
+  if (s.best) {
+    document.getElementById('rows').innerHTML =
+      `<div class="row">best so far · <b>block ${s.best.strategy.block_height.toFixed(1)} m</b> · ` +
+      `<b>press ${s.best.strategy.press_trigger.toFixed(2)}</b> · gd <b>${s.best.gd.toFixed(4)}</b> ` +
+      `(island ${s.best.island}, gen ${s.best.gen})</div>` +
+      `<div class="row">pre-rendered best · <b>${search?.best?.label ?? '—'}</b> · gd <b>${search?.best?.gd ?? '—'}</b></div>`;
+    hist.push(s.best.gd);
+    draw();
+  }
+  window.__poolState = {
+    workers: s.workers, sims: s.sims, simsPerS: s.simsPerS,
+    parity: s.parity ? { ok: s.parity.ok, maxAbsDiff: s.parity.maxAbsDiff } : null,
+    best: s.best ? { gd: s.best.gd, strategy: s.best.strategy } : null,
+  };
+
+};
+
+/* convergence chart with the noise floor drawn as its own band */
+const cv = document.getElementById('chart');
+const ctx = cv.getContext('2d');
+function draw() {
+  const w = cv.width = cv.clientWidth * 2, h = cv.height = 380;
+  ctx.clearRect(0, 0, w, h);
+  const nf = search?.noise_floor?.band?.[1] ?? 0;
+  const vals = hist.length ? hist : [0];
+  const lo = Math.min(...vals, -nf) - 0.01, hi = Math.max(...vals, nf) + 0.01;
+  const Y = (v) => h - 24 - ((v - lo) / (hi - lo || 1)) * (h - 48);
+  // NOISE FLOOR band — anything inside it is not distinguishable from luck
+  ctx.fillStyle = 'rgba(179,163,130,0.14)';
+  ctx.fillRect(0, Y(nf), w, Math.max(1, Y(-nf) - Y(nf)));
+  ctx.strokeStyle = '#B3A382'; ctx.setLineDash([6, 5]); ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(0, Y(nf)); ctx.lineTo(w, Y(nf)); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0, Y(-nf)); ctx.lineTo(w, Y(-nf)); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = '#B3A382'; ctx.font = '18px ui-monospace, Menlo, monospace';
+  ctx.fillText(`noise floor ±${nf.toFixed(4)}`, 12, Y(nf) - 10);
+  // champion trace
+  ctx.strokeStyle = '#FFB454'; ctx.lineWidth = 3; ctx.beginPath();
+  vals.forEach((v, i) => {
+    const x = (i / Math.max(1, vals.length - 1)) * (w - 24) + 12;
+    i ? ctx.lineTo(x, Y(v)) : ctx.moveTo(x, Y(v));
+  });
+  ctx.stroke();
+}
+draw();
+
+document.getElementById('note').textContent =
+  `pre-rendered ${search ? search.total_sims.toLocaleString() + ' sims at ' + search.sims_per_s + ' sims/s across ' + search.workers + ' node worker_threads' : 'search.json missing'}` +
+  ` · live pool runs the identical island module in ${workerCount()} Web Workers` +
+  ` · opponent from ${search?.opponent?.from ?? 'metrics.json'}`;
+
+await pool.start({ timeoutMs: 25000 });
+if (pool.errors?.length) {
+  document.getElementById('rows').innerHTML =
+    pool.errors.map((e) => `<div class="row" style="color:#C56B4A">${e}</div>`).join('');
+  window.__poolErrors = pool.errors;
+}
+/* Let the pool saturate the machine for a fixed window, then PAUSE. Eight
+ * workers on eight cores otherwise starve the main thread and the page stops
+ * answering — which also means the deck must not leave this running forever. */
+const RUN_MS = Number(new URLSearchParams(location.search).get('ms') || 9000);
+setTimeout(() => {
+  pool.pause();
+  window.__measured = { ...window.__poolState, run_ms: RUN_MS };
+  window.__ready = true;
+}, RUN_MS);
+</script>
+</body>
+</html>

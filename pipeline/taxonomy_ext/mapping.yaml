@@ -1,0 +1,1304 @@
+# =============================================================================
+# Soccer Prescription Mapping — metric -> threshold -> flag -> prescription
+# =============================================================================
+# THE audit surface. Everything pipeline/80_prescribe.py emits is derived from
+# this file plus the upstream taxonomy. There is no prescription logic hidden in
+# the Python: the Python resolves ids, evaluates thresholds, and assembles.
+#
+# RESOLUTION CONTRACT (enforced by taxonomy_ext/validate_ext.py, exit != 0):
+#   every exercise id      -> catalog_seed_part1/2.yaml OR soccer_catalog.yaml
+#   every variation id     -> a `variations[].id` of ITS OWN base exercise
+#   every method id        -> taxonomy_v2.yaml / taxonomy_v2_methods_part2.yaml
+#   every variant id       -> a variant of THAT method
+#   every complex family   -> single_load_chain | independent_load_chain | circuit
+#   every zone             -> Z1..Z6          every fv_modifier -> FV1..FV6
+#   every parallel_type    -> ballistic | plyometric | olympic | dynamic_effort
+#   every energy_system    -> alactic | lactic | aerobic_power | mixed
+#   every flag id          -> flag_catalog.yaml OR soccer_flags.yaml
+#   every intent_declared  -> allowed by rules/prescriptor_rules.yaml::intent_affinity
+#   every muscle / pattern / implement -> the closed Layer B enums
+#
+# BLOCK INVARIANTS (taxonomy_v2.yaml::exercise_block.invariants), re-checked:
+#   main         => zone required, parallel_type null
+#   parallel     => parallel_type required, zone null
+#   conditioning => zone null, parallel_type null, method == complex,
+#                   family == circuit, energy_system_tag required
+# =============================================================================
+
+version: "1.0"
+generator: "pipeline/80_prescribe.py"
+upstream:
+  root: "/Users/lahpmx/Downloads/taxonomy-v2"
+  files:
+    - methods/taxonomy_v2.yaml
+    - methods/taxonomy_v2_methods_part2.yaml
+    - catalog/catalog_schema.yaml
+    - catalog/catalog_seed_part1.yaml
+    - catalog/catalog_seed_part2.yaml
+    - flag_catalog.yaml
+    - rules/prescriptor_rules.yaml
+    - periodization/periodization_models.yaml
+    - periodization/periodization_schema.yaml
+    - autoregulation/autoregulation_schema.yaml
+    - athlete/athlete_profile_schema.yaml
+extension:
+  - taxonomy_ext/soccer_catalog.yaml
+  - taxonomy_ext/soccer_flags.yaml
+  - taxonomy_ext/profile_ext.yaml
+
+# =============================================================================
+# SECTION 0 — PROFILE DERIVATION (how metrics.json becomes an athlete_profile)
+# =============================================================================
+
+profile_derivation:
+
+  discipline: soccer                # profile_ext widened value
+  level: advanced                   # DECLARED, not measured: senior professional squad
+  level_note: "level is not derivable from video. It is declared for the whole
+               squad and drives deload_overdue_threshold (advanced = 4 weeks)."
+
+  availability:
+    days_per_week: 5
+    session_minutes: 75
+    equipment: [barbell, dumbbell, kettlebell, bodyweight, machine, cable,
+                band, sled, box, pull_up_bar, medicine_ball, wall_ball]
+    note: "WHITELIST semantics, exactly as generator.js V3.2: any exercise whose
+           implement is outside this list is blocked from selection."
+
+  injuries:
+    value: []
+    derivation: >
+      EMPTY BY CONSTRUCTION. metrics.json carries no injury history and no
+      medical record, and computer vision cannot observe one. The upstream
+      `injuries` field blocks whole movement patterns from selection; populating
+      it from a screening signal would remove the exact remedial work the signal
+      asks for (a hamstring flag would block `hinge`, deleting the RDL). Risk is
+      expressed through profile_ext `risk_gates` instead, which caps specific
+      nodes. The mechanism is implemented and honoured in 80_prescribe.py; the
+      list is empty because there is no honest input for it.
+
+  body_mass_kg:
+    basis: positional_reference_means
+    measured: false
+    by_position: { GK: 85, CB: 84, FB: 75, DM: 78, CM: 75, AM: 73, W: 73, ST: 79 }
+    default: 77
+    derivation: "ASSUMED from published positional anthropometric means for
+                 senior professional squads. Monocular broadcast video cannot
+                 measure mass. Used only to turn %1RM into kg."
+
+  strength:
+    estimator: "profile_ext.yaml::e1rm_estimator"
+    hub: back_squat                 # catalog strength_hubs.global_hub
+    relative_squat: "1.30 + 0.80 * (scores.explosiveness / 100)"
+    composed_from_real_inter_hub_ratios:
+      deadlift_conventional: { ref: back_squat, ratio: 1.20, confidence: high }
+      bench_press_barbell:   { ref: back_squat, ratio: 0.75, confidence: medium }
+      power_clean:           { ref: back_squat, ratio: 0.68, confidence: medium }
+    bar_increment_kg: 2.5
+    derivation: "INFERRED FROM VIDEO. Not a tested 1RM. Every load is emitted as
+                 %1RM first and kg second so the plan survives a wrong kg."
+    signal_confidence: low          # forced; upstream calibration enum value
+    scheduled_correction: "week 9 test week materialises AMRAP blocks on the hub
+                           lifts; executed AMRAPs replace the inference with a
+                           measurement (periodization_schema::week_entry.test_week)."
+
+  weak_stations:
+    semantics: "Upstream V3.2: a token matching an exercise's movement_pattern or
+                body_segment DOUBLES that exercise in the selection urn."
+    vocabulary: "movement_pattern_enum | body_segment values only"
+    source: "union of `profile_effects.weak_stations` over all fired rules"
+
+  quality_gate:
+    min_tracking_quality: 0.55
+    effect: "below this, the profile is still emitted but no flag may reach
+             hard_fail and every projection confidence is forced to low."
+
+# =============================================================================
+# SECTION 1 — DERIVED METRICS (what the thresholds are actually evaluated on)
+# =============================================================================
+# Keys that exist directly in metrics.json measured{} are passed through.
+# Anything computed is declared here with its formula, so a reader never has to
+# guess what a threshold is comparing against.
+
+derived_metrics:
+  accelLoadPerMin:
+    formula: "measured.accelLoad / minutes"
+    unit: "au/min"
+    higher_is_better: true
+    note: "vision PlayerLoad is device/formula specific -> cohort z only."
+  hsrPerMin:
+    formula: "measured.hsr_m / minutes"
+    unit: "m/min"
+    higher_is_better: true
+  sprintsPerMin:
+    formula: "measured.sprints / minutes"
+    unit: "1/min"
+    higher_is_better: true
+
+metric_aliases:
+  hipExtROM: [hipROM]
+  note: >
+    pipeline/60_metrics.py emits the peak-hip-extension construct under the key
+    `hipROM`, declared in its own metricDefs as "Hip-extension range" from
+    `hipRange`. It is the same quantity this table calls hipExtROM. The alias is
+    declared here rather than assumed, and it is one-way: hipExtROM may be read
+    from hipROM, never the reverse.
+
+# -----------------------------------------------------------------------------
+# DEGENERATE-INPUT GUARD
+# -----------------------------------------------------------------------------
+# pipeline/60_metrics.py audits its own output and can declare `degenerate: true`
+# with a `guard.clamps` table naming metrics that hit a tracking guard rather
+# than a physiological limit (e.g. 15/23 tracks pinned to MAX_PLAUSIBLE_SPEED).
+# A clamped value is an artifact of the homography, not a measurement.
+
+degenerate_guard:
+  honour: true
+  rule: >
+    For each metric named in guard.clamps, any player whose value equals the
+    clamp limit has that metric treated as MISSING — removed before cohort
+    statistics and before threshold evaluation. This is the Layer C golden rule
+    extended one step: a clamped signal is not a signal, and a deficit derived
+    from a clamp would be a claim about the camera, not the athlete.
+  consequences:
+    - "the rule that reads that metric does not fire for that player"
+    - "the metric is excluded from the cohort mean and sd for everyone"
+    - "the suppression is recorded in profile.team_context.suppressed_metrics"
+    - "when metrics.json declares degenerate:true, EVERY projection confidence
+       is forced to low and regimes.json carries the guard reasons verbatim"
+
+cohort_z:
+  formula: "(x - mean(cohort)) / stdev(cohort)"
+  cohort: "players in this metrics.json with quality >= 0.55"
+  sign: "z is computed so that NEGATIVE always means worse, for every metric"
+  min_cohort_n: 6
+  fallback: "cohort_z rules do not fire below min_cohort_n (Layer C golden rule:
+             missing signal = rule does not fire)"
+
+# =============================================================================
+# SECTION 2 — BLOCK LIBRARY
+# =============================================================================
+# Every block a rule can request. Referenced by id. `slot` says which typed
+# session slot of the microcycle skeleton it belongs to.
+
+blocks:
+
+  # --- speed / power -------------------------------------------------------
+
+  blk_accel_contrast:
+    slot: speed_power
+    priority: 90
+    conflicts_with: [blk_rsi_french]
+    conflicts_reason: "Both are a heavy back-squat contrast block; one per session."
+    category: main
+    method: contrast
+    variant: heavy_light
+    family: null
+    zone: Z2
+    zone_basis: heavy_component          # taxonomy_v2 zone_classification_rule
+    parallel_type: null
+    energy_system_tag: null
+    fv_modifier: FV2
+    intent_declared: power               # intent_affinity.contrast contains power
+    params: { total_pairs: 4, transition_rest_sec: 45, rest_inter_pair_sec: 240 }
+    work_units:
+      - { role: heavy, exercise: back_squat, variation: null, reps: 3,
+          load_metric: percent_1rm, load_pct_1rm: 85, rir_target: 2, intent: max }
+      - { role: explosive, exercise: sprint_acceleration, variation: null,
+          distance_m: 20, load_metric: none, intent: max }
+    rationale: "Post-activation potentiation of the heavy squat into a 20 m
+                acceleration; the explosive component IS the target skill."
+
+  blk_accel_circuit:
+    slot: speed_power
+    priority: 80
+    conflicts_with: [blk_baseline_speed]
+    category: conditioning
+    method: complex
+    variant: fixed_round_circuit
+    family: circuit
+    zone: null
+    parallel_type: null
+    energy_system_tag: alactic
+    fv_modifier: FV4
+    intent_declared: conditioning        # intent_affinity.complex.fixed_round_circuit
+    params: { total_rounds: 2, rest_inter_round_sec: 180 }
+    work_units:
+      - { exercise: sprint_acceleration, variation: null, distance_m: 20,
+          load_metric: distance, intent: max }
+      - { exercise: sprint_acceleration, variation: resisted_band, distance_m: 15,
+          load_metric: distance, intent: max }
+    rationale: "Alactic: long rests, quality-capped. The circuit family is the
+                only block category the taxonomy allows for zone-less work."
+
+  blk_maxv_flying:
+    slot: speed_power
+    priority: 88
+    conflicts_with: [blk_baseline_speed]
+    category: conditioning
+    method: complex
+    variant: fixed_round_circuit
+    family: circuit
+    zone: null
+    parallel_type: null
+    energy_system_tag: alactic
+    fv_modifier: FV4
+    intent_declared: conditioning
+    params: { total_rounds: 4, rest_inter_round_sec: 240 }
+    work_units:
+      - { exercise: sprint_flying, variation: null, distance_m: 20,
+          load_metric: distance, intent: max,
+          notes: "30 m run-in, 20 m timed fly, walk-back recovery" }
+    gated_by: max_velocity_exposure_withheld
+    rationale: "The only true maximal-velocity stimulus in the catalog. Withheld
+                entirely when the hamstring screening composite is hard_fail."
+
+  blk_maxv_olympic:
+    slot: speed_power
+    priority: 70
+    category: parallel
+    method: straight
+    variant: default
+    family: null
+    zone: null
+    parallel_type: olympic
+    energy_system_tag: null
+    fv_modifier: FV2
+    intent_declared: power               # straight is universal in intent_affinity
+    params: { sets: 5, rest_inter_set_sec: 180 }
+    work_units:
+      - { exercise: power_clean, variation: null, reps: 3, load_metric: percent_1rm,
+          load_pct_1rm: 80, rir_target: 2, intent: max }
+    rationale: "Vertical/triple-extension rate of force development. parallel
+                category with parallel_type olympic, so no zone is asserted."
+
+  blk_rsi_plyo:
+    slot: speed_power
+    priority: 86
+    conflicts_with: [blk_rsi_french]
+    conflicts_reason: "french_contrast already carries this exact hop as its unloaded_plyo component."
+    category: parallel
+    method: straight
+    variant: default
+    family: null
+    zone: null
+    parallel_type: plyometric
+    energy_system_tag: null
+    fv_modifier: FV4                     # contact time < 250 ms
+    intent_declared: power
+    params: { sets: 4, rest_inter_set_sec: 120 }
+    work_units:
+      - { exercise: hop_single_leg, variation: repeat_vertical, reps: 6,
+          side: unilateral_alt, load_metric: bodyweight, intent: max_reactive_speed }
+    stopping_rule: "parallel_categories.plyometric.quality_rule —
+                    stop if jump height drops more than 10%"
+
+  blk_rsi_french:
+    slot: speed_power
+    priority: 92
+    category: main
+    method: contrast
+    variant: french_contrast
+    family: null
+    zone: Z2
+    zone_basis: heavy_component
+    parallel_type: null
+    energy_system_tag: null
+    fv_modifier: FV3
+    intent_declared: potentiation        # intent_affinity.contrast contains potentiation
+    params: { total_pairs: 3, transition_rest_sec: 30, rest_inter_chain_sec: 60,
+              rest_inter_pair_sec: 300 }
+    work_units:                          # roles are the 4 declared by the variant
+      - { role: heavy_strength, exercise: back_squat, variation: null, reps: 3,
+          load_metric: percent_1rm, load_pct_1rm: 85, rir_target: 2, intent: max }
+      - { role: heavy_plyo, exercise: box_jump, variation: rebound, reps: 4,
+          load_metric: bodyweight, intent: max_reactive_speed }
+      - { role: loaded_explosive, exercise: kb_swing_two_hand, variation: null,
+          reps: 6, load_metric: absolute_load, intent: max }
+      - { role: unloaded_plyo, exercise: hop_single_leg, variation: repeat_vertical,
+          reps: 6, side: unilateral_alt, load_metric: bodyweight,
+          intent: max_reactive_speed }
+
+  blk_cod_circuit:
+    slot: speed_power
+    priority: 84
+    category: conditioning
+    method: complex
+    variant: fixed_round_circuit
+    family: circuit
+    zone: null
+    parallel_type: null
+    energy_system_tag: alactic
+    fv_modifier: FV4
+    intent_declared: conditioning
+    params: { total_rounds: 3, rest_inter_round_sec: 150 }
+    work_units:
+      - { exercise: cod_505, variation: null, reps: 4, side: unilateral_alt,
+          load_metric: none, intent: max_reactive_speed,
+          notes: "stimulus-cued: the turn direction is called, not pre-planned" }
+      - { exercise: cod_505, variation: cut_90, reps: 4, side: unilateral_alt,
+          load_metric: none, intent: max }
+      - { exercise: lateral_shuffle, variation: banded, distance_m: 10,
+          load_metric: distance, intent: max }
+    rationale: "energy_system_tag alactic + 150 s rounds is how a quality COD
+                block is expressed inside the only zone-less category available."
+
+  blk_baseline_speed:
+    slot: speed_power
+    priority: 20
+    baseline: true
+    category: conditioning
+    method: complex
+    variant: fixed_round_circuit
+    family: circuit
+    zone: null
+    parallel_type: null
+    energy_system_tag: alactic
+    fv_modifier: FV4
+    intent_declared: conditioning
+    params: { total_rounds: 2, rest_inter_round_sec: 180 }
+    work_units:
+      - { exercise: sprint_acceleration, variation: null, distance_m: 20,
+          load_metric: distance, intent: max }
+    rationale: "Speed maintenance is a soccer non-negotiable; every athlete gets
+                it whether or not a locomotor flag fired."
+
+  # --- lower strength (hinge / unilateral day) ------------------------------
+
+  blk_decel_rdl:
+    slot: lower_strength
+    priority: 90
+    category: main
+    method: straight
+    variant: default
+    family: null
+    zone: Z3
+    zone_basis: reps_and_load
+    parallel_type: null
+    energy_system_tag: null
+    fv_modifier: FV5
+    intent_declared: strength
+    params: { sets: 4, rest_inter_set_sec: 180 }
+    work_units:
+      - { exercise: rdl_barbell, variation: tempo_eccentric, reps: 6,
+          load_metric: percent_1rm, load_pct_1rm: 78, rir_target: 2,
+          tempo: "4-0-1-0", intent: controlled }
+    rationale: "Slow eccentric hinge: the load-tolerance side of braking."
+
+  blk_ham_nordic:
+    slot: lower_strength
+    priority: 95
+    category: main
+    method: straight
+    variant: default
+    family: null
+    zone: Z2
+    zone_basis: reps_only
+    parallel_type: null
+    energy_system_tag: null
+    fv_modifier: FV5
+    intent_declared: prehab
+    params: { sets: 3, rest_inter_set_sec: 150 }
+    work_units:
+      - { exercise: nordic_hamstring_curl, variation: band_assisted, reps: 5,
+          load_metric: bodyweight, rir_target: 2, tempo: "5-0-X-0",
+          intent: controlled }
+    progression_note: "band_assisted -> razor_curl -> full across the 9 weeks,
+                       following the implicit intra-base ladder."
+
+  blk_ham_legcurl:
+    slot: lower_strength
+    priority: 74
+    category: main
+    method: straight
+    variant: default
+    family: null
+    zone: Z4
+    zone_basis: reps_only
+    parallel_type: null
+    energy_system_tag: null
+    fv_modifier: FV5
+    intent_declared: hypertrophy
+    params: { sets: 3, rest_inter_set_sec: 120 }
+    work_units:
+      - { exercise: leg_curl_lying, variation: single_leg, reps: 10,
+          side: unilateral_alt, load_metric: absolute_load, rir_target: 2,
+          intent: controlled }
+
+  blk_asym_split:
+    slot: lower_strength
+    priority: 88
+    baseline: true
+    baseline_priority: 60
+    baseline_reason: "A unilateral knee-dominant exposure is a soccer
+                      non-negotiable: every athlete gets it, and the asymmetry
+                      flag only raises its priority and changes how it is loaded."
+    category: main
+    method: straight
+    variant: default
+    family: null
+    zone: Z4
+    zone_basis: reps_only
+    parallel_type: null
+    energy_system_tag: null
+    fv_modifier: FV5
+    intent_declared: strength
+    params: { sets: 4, rest_inter_set_sec: 150 }
+    work_units:
+      - { exercise: split_squat_barbell, variation: bulgarian, reps: 8,
+          side: unilateral_alt, load_metric: absolute_load, rir_target: 2,
+          intent: controlled,
+          notes: "weaker side leads every set; the stronger side matches its reps" }
+
+  blk_decel_landing:
+    slot: lower_strength
+    priority: 82
+    category: parallel
+    method: straight
+    variant: default
+    family: null
+    zone: null
+    parallel_type: plyometric
+    energy_system_tag: null
+    fv_modifier: FV3                     # long contact: absorption, not rebound
+    intent_declared: power
+    params: { sets: 4, rest_inter_set_sec: 120 }
+    work_units:
+      - { exercise: box_jump, variation: step_down, reps: 5,
+          load_metric: bodyweight, intent: controlled,
+          notes: "landing quality is the target: stick, hold, no valgus" }
+
+  blk_baseline_hinge:
+    slot: lower_strength
+    priority: 20
+    baseline: true
+    category: main
+    method: straight
+    variant: default
+    family: null
+    zone: Z2
+    zone_basis: reps_and_load
+    parallel_type: null
+    energy_system_tag: null
+    fv_modifier: FV1
+    intent_declared: max_strength
+    params: { sets: 4, rest_inter_set_sec: 240 }
+    work_units:
+      - { exercise: deadlift_conventional, variation: trap_bar, reps: 4,
+          load_metric: percent_1rm, load_pct_1rm: 85, rir_target: 2, intent: max }
+
+  # --- upper / core / prehab ------------------------------------------------
+
+  blk_ankle_accessory:
+    slot: upper_core_prehab
+    priority: 90
+    category: main
+    method: complex
+    variant: accessory_complex
+    family: independent_load_chain
+    zone: Z5
+    zone_basis: dominant_component
+    parallel_type: null
+    energy_system_tag: null
+    fv_modifier: FV5
+    intent_declared: prehab              # intent_affinity.complex.accessory_complex
+    params: { total_rounds: 3, rest_intra_pair_sec: 30, rest_inter_round_sec: 90 }
+    work_units:
+      - { exercise: ankle_dorsiflexion_rocker, variation: weighted, reps: 12,
+          side: unilateral_alt, load_metric: absolute_load, rir_target: 3,
+          intent: controlled }
+      - { exercise: calf_raise_machine, variation: pause_stretch, reps: 15,
+          load_metric: absolute_load, rir_target: 2, intent: controlled }
+
+  blk_hipext_accessory:
+    slot: upper_core_prehab
+    priority: 88
+    category: main
+    method: complex
+    variant: accessory_complex
+    family: independent_load_chain
+    zone: Z4
+    zone_basis: dominant_component
+    parallel_type: null
+    energy_system_tag: null
+    fv_modifier: FV5
+    intent_declared: prehab
+    params: { total_rounds: 3, rest_intra_pair_sec: 30, rest_inter_round_sec: 90 }
+    work_units:
+      - { exercise: hip_thrust_barbell, variation: single_leg, reps: 10,
+          side: unilateral_alt, load_metric: absolute_load, rir_target: 2,
+          intent: controlled }
+      - { exercise: pallof_press, variation: half_kneeling, reps: 10,
+          side: unilateral_alt, load_metric: absolute_load, rir_target: 3,
+          intent: controlled,
+          notes: "half-kneeling puts the rear hip in extension while the trunk
+                  resists rotation: the position IS the intervention" }
+
+  blk_baseline_core:
+    slot: upper_core_prehab
+    priority: 25
+    baseline: true
+    category: main
+    method: complex
+    variant: accessory_complex
+    family: independent_load_chain
+    zone: Z4
+    zone_basis: dominant_component
+    parallel_type: null
+    energy_system_tag: null
+    fv_modifier: FV5
+    intent_declared: prehab
+    params: { total_rounds: 3, rest_intra_pair_sec: 30, rest_inter_round_sec: 90 }
+    work_units:
+      - { exercise: copenhagen_adduction, variation: short_lever, reps: 8,
+          side: unilateral_alt, load_metric: bodyweight, rir_target: 2,
+          intent: controlled }
+      - { exercise: hanging_leg_raise, variation: knee_raise, reps: 12,
+          load_metric: bodyweight, rir_target: 2, intent: controlled }
+
+  blk_baseline_push:
+    slot: upper_core_prehab
+    priority: 22
+    baseline: true
+    category: main
+    method: straight
+    variant: default
+    family: null
+    zone: Z3
+    zone_basis: reps_and_load
+    parallel_type: null
+    energy_system_tag: null
+    fv_modifier: FV5
+    intent_declared: strength
+    params: { sets: 4, rest_inter_set_sec: 150 }
+    work_units:
+      - { exercise: bench_press_barbell, variation: null, reps: 6,
+          load_metric: percent_1rm, load_pct_1rm: 78, rir_target: 2,
+          intent: controlled }
+
+  blk_baseline_pull:
+    slot: upper_core_prehab
+    priority: 21
+    baseline: true
+    category: main
+    method: straight
+    variant: default
+    family: null
+    zone: Z3
+    zone_basis: reps_only
+    parallel_type: null
+    energy_system_tag: null
+    fv_modifier: FV5
+    intent_declared: strength
+    params: { sets: 4, rest_inter_set_sec: 150 }
+    work_units:
+      - { exercise: pull_up, variation: null, reps: 6, load_metric: bodyweight,
+          rir_target: 2, intent: controlled }
+
+  # --- conditioning ---------------------------------------------------------
+
+  blk_rsa_circuit:
+    slot: conditioning_rsa
+    priority: 92
+    category: conditioning
+    method: complex
+    variant: fixed_round_circuit
+    family: circuit
+    zone: null
+    parallel_type: null
+    energy_system_tag: lactic
+    fv_modifier: FV6
+    intent_declared: conditioning
+    params: { total_rounds: 3, rest_inter_round_sec: 240 }
+    work_units:
+      - { exercise: sprint_acceleration, variation: null, distance_m: 30,
+          load_metric: distance, intent: max,
+          notes: "6 x 30 m on 30 s, then 4 min between rounds" }
+    rationale: "Repeated-sprint ability: short recoveries inside the round,
+                long recovery between rounds. energy_system_tag lactic."
+
+  blk_rsa_mixed:
+    slot: conditioning_rsa
+    priority: 78
+    category: conditioning
+    method: complex
+    variant: time_capped_circuit
+    family: circuit
+    zone: null
+    parallel_type: null
+    energy_system_tag: mixed
+    fv_modifier: FV6
+    intent_declared: conditioning
+    params: { time_cap_sec: 720, target_rounds: 5 }
+    work_units:
+      - { exercise: run, variation: null, distance_m: 400, load_metric: distance,
+          intent: submax }
+      - { exercise: sled_push, variation: null, distance_m: 20,
+          load_metric: absolute_load, intent: max }
+
+  blk_baseline_conditioning:
+    slot: conditioning_rsa
+    priority: 20
+    conflicts_with: [blk_rsa_mixed]
+    conflicts_reason: "Identical work; the flag-driven version supersedes the baseline."
+    baseline: true
+    category: conditioning
+    method: complex
+    variant: fixed_round_circuit
+    family: circuit
+    zone: null
+    parallel_type: null
+    energy_system_tag: mixed
+    fv_modifier: FV6
+    intent_declared: conditioning
+    params: { total_rounds: 4, rest_inter_round_sec: 120 }
+    work_units:
+      - { exercise: run, variation: null, distance_m: 400, load_metric: distance,
+          intent: submax }
+      - { exercise: sled_push, variation: null, distance_m: 20,
+          load_metric: absolute_load, intent: max }
+
+  # --- second lower day (squat / unilateral reactive) -----------------------
+
+  blk_asym_hipthrust:
+    slot: lower_strength_2
+    priority: 88
+    category: main
+    method: straight
+    variant: default
+    family: null
+    zone: Z4
+    zone_basis: reps_only
+    parallel_type: null
+    energy_system_tag: null
+    fv_modifier: FV5
+    intent_declared: hypertrophy
+    params: { sets: 3, rest_inter_set_sec: 120 }
+    work_units:
+      - { exercise: hip_thrust_barbell, variation: single_leg, reps: 10,
+          side: unilateral_alt, load_metric: absolute_load, rir_target: 2,
+          intent: controlled }
+
+  blk_asym_hop_lateral:
+    slot: lower_strength_2
+    priority: 86
+    baseline: true
+    baseline_priority: 23
+    baseline_reason: "Unilateral reactive contact is the other soccer
+                      non-negotiable; it is also the only `jump` exposure a
+                      completely unflagged athlete would otherwise receive."
+    category: parallel
+    method: straight
+    variant: default
+    family: null
+    zone: null
+    parallel_type: plyometric
+    energy_system_tag: null
+    fv_modifier: FV4
+    intent_declared: power
+    params: { sets: 3, rest_inter_set_sec: 120 }
+    work_units:
+      - { exercise: hop_single_leg, variation: lateral, reps: 6,
+          side: unilateral_alt, load_metric: bodyweight,
+          intent: max_reactive_speed }
+
+  blk_rsi_calf:
+    slot: lower_strength_2
+    priority: 76
+    category: main
+    method: straight
+    variant: default
+    family: null
+    zone: Z4
+    zone_basis: reps_only
+    parallel_type: null
+    energy_system_tag: null
+    fv_modifier: FV5
+    intent_declared: hypertrophy
+    params: { sets: 3, rest_inter_set_sec: 120 }
+    work_units:
+      - { exercise: calf_raise_machine, variation: pause_stretch, reps: 10,
+          load_metric: absolute_load, rir_target: 1, intent: controlled }
+
+  blk_baseline_squat:
+    slot: lower_strength_2
+    priority: 20
+    baseline: true
+    category: main
+    method: straight
+    variant: default
+    family: null
+    zone: Z2
+    zone_basis: reps_and_load
+    parallel_type: null
+    energy_system_tag: null
+    fv_modifier: FV1
+    intent_declared: max_strength
+    params: { sets: 4, rest_inter_set_sec: 240 }
+    work_units:
+      - { exercise: back_squat, variation: null, reps: 4, load_metric: percent_1rm,
+          load_pct_1rm: 85, rir_target: 2, intent: max }
+
+  # --- week 9 test block (replaces the inferred e1RM with a measurement) -----
+
+  blk_test_amrap_squat:
+    slot: lower_strength_2
+    priority: 99
+    test_week_only: true
+    category: main
+    method: amrap
+    variant: to_failure
+    family: null
+    zone: Z3
+    zone_basis: reps_and_load
+    parallel_type: null
+    energy_system_tag: null
+    fv_modifier: FV5
+    intent_declared: strength            # intent_affinity.amrap contains strength
+    params: { sets: 1, rest_inter_set_sec: 300 }
+    work_units:
+      - { exercise: back_squat, variation: null, reps: 6, load_metric: percent_1rm,
+          load_pct_1rm: 80, rir_target: 0, intent: max }
+    rationale: "periodization_schema::week_entry.test_week — executed AMRAPs feed
+                e1RM calibration (C.4). This is where the video-inferred e1RM is
+                replaced by a measured one."
+
+# =============================================================================
+# SECTION 3 — RULES: metric -> threshold -> flag -> prescription
+# =============================================================================
+
+rules:
+
+  - id: r_acceleration_deficit
+    metric: accelLoadPerMin
+    reads: "Acceleration output density below the tracked cohort"
+    threshold_basis: cohort_z
+    thresholds:
+      warning_mild:   { z_lte: -0.8 }
+      warning_strong: { z_lte: -1.3 }
+    emits: acceleration_deficit
+    targets: [accelLoad, topSpeed]
+    profile_effects: { weak_stations: [locomotion, hinge] }
+    prescribes: [blk_accel_contrast, blk_accel_circuit]
+    projection:
+      - { metric: topSpeed,  mode: pct, warning_mild: 0.8, warning_strong: 1.2,
+          confidence: low,
+          basis: "Combined heavy resistance + short-sprint exposure improves
+                  sprint performance by roughly 1-3% over 8-12 weeks in trained
+                  team-sport athletes (plyometric/sprint training meta-analyses,
+                  e.g. Saez de Villarreal, Requena & Cronin 2012, JSCR 26(2)).
+                  We take the LOW end, and only when both the heavy contrast and
+                  the acceleration circuit are actually prescribed." }
+      - { metric: accelLoad, mode: pct, warning_mild: 1.5, warning_strong: 2.5,
+          confidence: low,
+          basis: "Vision PlayerLoad is arbitrary units (Boyd, Ball & Aughey 2011,
+                  IJSPP 6(3)); only the within-system trend is meaningful. Small
+                  positive delta declared, explicitly low confidence." }
+
+  - id: r_max_velocity_deficit
+    metric: topSpeed
+    reads: "Observed peak speed below the elite outfield reference band"
+    threshold_basis: literature_absolute
+    threshold_source: "Elite outfield peak match speed 8.6-9.4 m/s; fastest
+                       9.7-10.3 m/s (docs/metrics_spec.md A4, sourced)."
+    thresholds:
+      warning_mild:   { lte: 8.4 }
+      warning_strong: { lte: 7.9 }
+    caveat: "Observed peak within a short tracked window underestimates true
+             vmax. The flag reads as 'not shown', never as 'cannot'."
+    emits: max_velocity_deficit
+    targets: [topSpeed]
+    profile_effects: { weak_stations: [locomotion, hinge] }
+    prescribes: [blk_maxv_flying, blk_maxv_olympic]
+    projection:
+      - { metric: topSpeed, mode: pct, warning_mild: 1.0, warning_strong: 1.6,
+          ceiling_metric_value: 8.8, ceiling_scale: 0.5, confidence: low,
+          basis: "Maximal-velocity exposure plus olympic-pull RFD work. Same
+                  1-3% literature band as r_acceleration_deficit, low end taken.
+                  Halved above 8.8 m/s: the closer to the ceiling, the smaller
+                  the return." }
+
+  - id: r_deceleration_capacity_deficit
+    metric: kneeROM
+    reads: "Braking knee range short: stiff-legged deceleration"
+    threshold_basis: literature_absolute
+    threshold_source: "Deceleration with the knee closer to extension is the
+                       high-load, high-risk braking pattern (Harper, Carling &
+                       Kiely 2019, Sports Med 49; Hewett et al. 2005, AJSM 33(4))."
+    thresholds:
+      warning_mild:   { lte: 112 }
+      warning_strong: { lte: 104 }
+    emits: deceleration_capacity_deficit
+    targets: [kneeROM, codPeak]
+    profile_effects: { weak_stations: [lunge, knee_flexion] }
+    prescribes: [blk_decel_rdl, blk_decel_landing, blk_cod_circuit]
+    projection:
+      - { metric: kneeROM, mode: abs, warning_mild: 2.5, warning_strong: 4.0,
+          unit: deg, confidence: low,
+          basis: "Eccentric hinge + landing work changes braking strategy before
+                  it changes anatomy; a few degrees of extra knee flexion over 9
+                  weeks is the conservative claim. Not a ROM measurement." }
+
+  - id: r_rsa_decrement_high
+    metric: hsrPerMin
+    reads: "High-speed output density low: repeated-sprint output does not hold"
+    threshold_basis: cohort_z
+    thresholds:
+      warning_mild:   { z_lte: -0.8 }
+      warning_strong: { z_lte: -1.3 }
+    caveat: "PROXY. A true RSA decrement needs a within-match time series of
+             sprint speeds; metrics.json carries totals. Declared as density."
+    emits: rsa_decrement_high
+    targets: [hsr_m]
+    profile_effects: { weak_stations: [locomotion] }
+    prescribes: [blk_rsa_circuit, blk_rsa_mixed]
+    projection:
+      - { metric: hsr_m, mode: pct, warning_mild: 3.0, warning_strong: 4.5,
+          confidence: low,
+          basis: "Repeated-sprint training improves repeated-sprint output; the
+                  match-total metric it is projected onto is also driven by
+                  tactical context, so the delta is deliberately small." }
+
+  - id: r_reactive_strength_low
+    metric: anklePush
+    reads: "Ankle push-off velocity low: weak fast stretch-shortening output"
+    threshold_basis: cohort_z
+    threshold_source: "Ankle plantarflexion velocity at toe-off as an RSI proxy
+                       (Flanagan & Comyns 2008, Strength Cond J 30(5))."
+    thresholds:
+      warning_mild:   { z_lte: -0.8 }
+      warning_strong: { z_lte: -1.3 }
+    emits: reactive_strength_low
+    targets: [anklePush, topSpeed]
+    profile_effects: { weak_stations: [jump, calf_raise] }
+    prescribes: [blk_rsi_plyo, blk_rsi_french, blk_rsi_calf]
+    projection:
+      - { metric: anklePush, mode: pct, warning_mild: 2.0, warning_strong: 3.5,
+          confidence: low,
+          basis: "Short-contact plyometrics improve reactive strength index;
+                  the ankle-velocity proxy is expected to move less than the
+                  underlying RSI, so the projection is smaller than the
+                  literature effect on RSI itself." }
+
+  - id: r_cod_reorientation_slow
+    metric: codPeak
+    cofactor: reactionMs
+    reads: "Peak reorientation rate low"
+    threshold_basis: literature_absolute
+    threshold_source: "COD sharpness / COD deficit framing (Sheppard & Young
+                       2006, J Sports Sci 24(9); Nimphius et al. 2016)."
+    thresholds:
+      warning_mild:   { lte: 130 }
+      warning_strong: { lte: 115 }
+    emits: cod_reorientation_slow
+    targets: [codPeak]
+    profile_effects: { weak_stations: [locomotion, lunge] }
+    prescribes: [blk_cod_circuit, blk_asym_hop_lateral, blk_asym_split]
+    projection:
+      - { metric: codPeak, mode: pct, warning_mild: 2.5, warning_strong: 4.0,
+          confidence: low,
+          basis: "COD-specific drilling plus unilateral strength improves 505
+                  performance by a few percent over a block; we project the
+                  reorientation-rate proxy, not a 505 time." }
+
+  - id: r_limb_asymmetry_detected
+    metric: strideAsym
+    reads: "Inter-limb asymmetry above the Bishop band"
+    threshold_basis: literature_absolute
+    threshold_source: "Bishop et al. (2019), JSCR — jump asymmetries associate
+                       with slower sprint and COD; ~5-10% is the practical band,
+                       >15% is large. Kinematic index, not force-plate."
+    thresholds:
+      warning_mild:   { gte: 5.0 }
+      warning_strong: { gte: 10.0 }
+    emits: limb_asymmetry_detected
+    targets: [strideAsym]
+    profile_effects: { weak_stations: [lunge, knee_flexion] }
+    prescribes: [blk_asym_split, blk_asym_hipthrust, blk_ham_legcurl,
+                 blk_asym_hop_lateral]
+    projection:
+      - { metric: strideAsym, mode: abs, warning_mild: -1.5, warning_strong: -2.5,
+          unit: pct_points, floor: 3.0, confidence: medium,
+          basis: "Unilateral loading with the weaker side leading is the standard
+                  intervention and asymmetry is modifiable within a block. Floored
+                  at 3%: below that the CV symmetry index is measuring its own
+                  noise, so no projection may claim it." }
+
+  - id: r_ankle_dorsiflexion_restricted
+    metric: ankleROM
+    reads: "Sagittal ankle excursion restricted through stance"
+    threshold_basis: literature_absolute
+    thresholds:
+      warning_mild:   { lte: 38 }
+      warning_strong: { lte: 32 }
+    caveat: "PROXY for weight-bearing dorsiflexion, from a sagittal camera view."
+    emits: ankle_dorsiflexion_restricted
+    targets: [ankleROM]
+    profile_effects: { weak_stations: [calf_raise] }
+    prescribes: [blk_ankle_accessory]
+    projection:
+      - { metric: ankleROM, mode: abs, warning_mild: 2.0, warning_strong: 3.5,
+          unit: deg, confidence: low,
+          basis: "Loaded end-range ankle work produces small ROM gains over
+                  weeks. Low confidence: the input is a video proxy and the
+                  intervention literature uses goniometry." }
+
+  - id: r_hip_extension_restricted
+    metric: hipExtROM
+    reads: "Peak hip extension at toe-off restricted"
+    threshold_basis: literature_absolute
+    thresholds:
+      warning_mild:   { lte: 10 }
+    emits: hip_extension_restricted
+    targets: [hipExtROM]
+    profile_effects: { weak_stations: [hinge, lunge] }
+    prescribes: [blk_hipext_accessory, blk_asym_split]
+    projection:
+      - { metric: hipExtROM, mode: abs, warning_mild: 1.5, unit: deg,
+          confidence: low,
+          basis: "Rear-foot-elevated and half-kneeling positions load the hip in
+                  extension; a degree or two at toe-off is the honest claim." }
+
+  - id: r_hamstring_strain_risk_elevated
+    metric: composite
+    reads: "Screening composite: asymmetry, braking knee range, high-speed density"
+    threshold_basis: composite
+    composite:
+      conditions:
+        - { id: c_asym,  expr: "strideAsym >= 8.0",
+            reads: "inter-limb asymmetry in the band Bishop associates with
+                    slower sprint and COD" }
+        - { id: c_knee,  expr: "kneeROM <= 108",
+            reads: "stiff-legged braking: the high-eccentric-cost pattern" }
+        - { id: c_load,  expr: "hsrPerMin_z >= 0.5",
+            reads: "high high-speed exposure — an amplifier, never a cause" }
+      necessary: "c_asym OR c_knee"
+      necessary_rationale: >
+        Exposure alone does not make a flag. A fast winger who covers a lot of
+        high-speed ground is doing his job; without an asymmetry or a braking
+        deficit there is nothing here to act on, and firing on exposure alone
+        would flag every good athlete in the squad.
+      warning_mild:   "exactly one of {c_asym, c_knee} AND NOT c_load"
+      warning_strong: "(c_asym AND c_knee) OR (one of them AND c_load)"
+      hard_fail:      "strideAsym >= 15.0 AND kneeROM <= 104"
+    caveat: "SCREENING ONLY. Not a clinical prediction, not a diagnosis, and not
+             validated against injury outcomes in this cohort."
+    emits: hamstring_strain_risk_elevated
+    targets: [strideAsym]
+    profile_effects:
+      weak_stations: [knee_flexion, hinge]
+      risk_gates_at_hard_fail: [max_velocity_exposure_withheld]
+    prescribes: [blk_ham_nordic, blk_decel_rdl, blk_ham_legcurl]
+    projection: []
+    projection_note: >
+      NO metric projection. The intervention targets injury risk, and this
+      pipeline has no injury outcome to project onto. Claiming a strideAsym
+      improvement here would double-count r_limb_asymmetry_detected.
+
+  - id: r_scan_rate_low
+    metric: scanRate
+    reads: "Visual exploration below the professional band"
+    threshold_basis: literature_absolute
+    threshold_source: "Jordet et al. (2020), Front Psychol 11:553813 — ~0.3-0.6
+                       scans/s for professionals; elite exemplars 0.62-0.83."
+    thresholds:
+      warning_mild:   { lte: 0.35 }
+    emits: scan_rate_low
+    targets: []
+    profile_effects: {}
+    prescribes: []
+    out_of_scope: true
+    out_of_scope_reason: >
+      taxonomy-v2 is a resistance and conditioning taxonomy. It contains no
+      perceptual-cognitive node, and inventing one would be inventing a science
+      this system does not have. The flag is emitted and surfaced to the coach
+      with the honest instruction that scanning is trained by pitch-based
+      constraint design. No work units, no projection.
+    projection: []
+
+# =============================================================================
+# SECTION 4 — MICROCYCLE SKELETON (typed session slots)
+# =============================================================================
+# Fixed 7-day shape. Flags choose the CONTENT of the slots; they never move the
+# slots, because the shape is what keeps the ten interference rules satisfied.
+
+microcycle:
+  id: mc_soccer_5d
+  name: "Soccer off-season concurrent 5 days"
+  days_span: 7
+  conditioning_budget: { high_max: 2, moderate_max: 2 }
+
+  frequency_targets:                     # map<movement_pattern, {min,max}> in DAYS
+    squat:        { min: 1, max: 3 }
+    hinge:        { min: 1, max: 4 }
+    lunge:        { min: 1, max: 3 }
+    locomotion:   { min: 2, max: 4 }
+    jump:         { min: 1, max: 3 }
+    knee_flexion: { min: 0, max: 3 }
+    push_h:       { min: 1, max: 2 }
+    pull_v:       { min: 1, max: 2 }
+    anti_rotation: { min: 0, max: 2 }
+    calf_raise:   { min: 0, max: 3 }
+    hip_adduction: { min: 0, max: 2 }
+  frequency_note: >
+    hinge tolerates 4 days because only one of them is a heavy bilateral pull:
+    the others are a slow-eccentric RDL, a single-leg hip thrust, and a kettlebell
+    swing inside a contrast chain. The band counts EXPOSURES, not equivalent doses.
+
+  slots:
+    - slot_id: speed_power
+      day: 1
+      day_label: Mon
+      intent: power
+      primary_patterns: [squat, locomotion, jump]
+      target_zones: [Z2]
+      conditioning_load_target: low
+      max_blocks: 4
+      session_name: "Speed and power"
+    - slot_id: lower_strength
+      day: 2
+      day_label: Tue
+      intent: strength
+      primary_patterns: [hinge, lunge, knee_flexion]
+      target_zones: [Z2, Z3, Z4]
+      conditioning_load_target: low
+      max_blocks: 5
+      session_name: "Lower strength — posterior chain"
+    - slot_id: upper_core_prehab
+      day: 3
+      day_label: Wed
+      intent: mixed
+      primary_patterns: [push_h, pull_v, anti_rotation, calf_raise, hip_adduction]
+      target_zones: [Z3, Z4, Z5]
+      conditioning_load_target: moderate
+      max_blocks: 5
+      session_name: "Upper, trunk and prehab"
+    - slot_id: conditioning_rsa
+      day: 5
+      day_label: Fri
+      intent: conditioning
+      primary_patterns: [locomotion]
+      target_zones: null
+      conditioning_load_target: high
+      max_blocks: 3
+      session_name: "Repeated-sprint and mixed conditioning"
+    - slot_id: lower_strength_2
+      day: 6
+      day_label: Sat
+      intent: strength
+      primary_patterns: [squat, hinge, jump]
+      target_zones: [Z2, Z4]
+      conditioning_load_target: low
+      max_blocks: 4
+      session_name: "Lower strength — squat and unilateral reactive"
+  rest_days: [4, 7]
+
+  max_blocks_rationale: >
+    max_blocks IS the time budget. availability.session_minutes is 75, and a
+    block of 3-5 sets with its prescribed rests runs 12-18 minutes, so 4-5
+    blocks fill a session. When more blocks than the cap are requested, the
+    lowest-priority ones are DROPPED AND RECORDED in prescription.dropped_blocks
+    with the reason — the plan never silently omits work a flag asked for.
+
+  block_order_within_day: [parallel, main, conditioning]
+  block_order_rationale: "same_day_order_strength_first is satisfied (no
+                          conditioning block precedes a main block); plyometric
+                          and olympic parallel work leads because it is the most
+                          fatigue-sensitive quality in the session."
+
+  interference_compliance:
+    checked_against: "periodization_schema.yaml::interference_rules.seed_catalog
+                      (all 10 rules)"
+    reasoning:
+      quality_locomotion_after_lower_heavy:
+        "high conditioning is day 5; the nearest preceding lower-strength slot is
+         day 2 (72 h). Day 6 lower strength is followed by two rest-or-power days."
+      no_adjacent_lactic_high:
+        "exactly one high-conditioning day in the week."
+      power_requires_freshness:
+        "the power slot is day 1; day 7 is a rest day, so no power slot ever
+         follows a high-conditioning day."
+      same_pattern_heavy_spacing:
+        "the two strength slots (day 2, day 6) are 96 h apart."
+      axial_loading_adjacent:
+        "INTERPRETATION: the rule is written over SLOTS ('heavy squat and hinge
+         slots'), so it is evaluated on slots whose intent is strength or
+         hypertrophy. Day 1 is a power slot whose heavy squat is a potentiation
+         dose inside a contrast pair; days 2 and 6 are not adjacent. Stated
+         explicitly because it is the one rule where the reading matters."
+      same_day_order_strength_first: "see block_order_within_day."
+      conditioning_budget_exceeded: "1 high + 1 moderate against a 2/2 budget."
+      recovery_slot_after_peak_day: "day 7 rest follows the day-5/6 load peak."
+      minimum_rest_density: "2 rest days against floor(7/7) = 1."
+      technique_requires_freshness: "no technique slot is declared."
+
+# =============================================================================
+# SECTION 5 — MESOCYCLE / MACROCYCLE PLAN
+# =============================================================================
+
+periodization:
+  model: concurrent_hybrid              # periodization_models.yaml
+  model_variant: balanced               # concurrent_hybrid.variants.balanced
+  model_justification: >
+    concurrent_hybrid is the only upstream model tagged team_sport_offseason,
+    and interference_rules are MANDATORY for it — which is exactly the problem
+    a soccer athlete presents: speed, strength and conditioning in parallel.
+  total_weeks: 9
+  deload_cadence_weeks: 4
+  deload_cadence_check: "concurrent_hybrid.deload_positioning expects every 3-4
+                         weeks (the tightest of the five models); level=advanced
+                         gives deload_overdue_threshold 4. 4 satisfies both."
+  mesocycles:
+    - id: ms_soccer_gpp
+      name: "General preparation"
+      periodization_model: concurrent_hybrid
+      model_variant: balanced
+      duration_weeks: 4
+      weeks:
+        - { week: 1, type: intro,
+            modifiers: [ { dimension: load_pct, delta: -10, scope: { type: all } } ] }
+        - { week: 2, type: standard, modifiers: [] }
+        - { week: 3, type: standard,
+            modifiers: [ { dimension: load_pct, delta: 2.5,
+                           scope: { type: by_intent, value: max_strength } },
+                         { dimension: conditioning_volume_pct, delta: 10,
+                           scope: { type: by_intent, value: conditioning } } ] }
+        - { week: 4, type: planned_deload,
+            deload_recipe: { sets_pct: -40, load_pct: 0,
+                             conditioning_load_cap: "0.5 x chronic" } }
+    - id: ms_soccer_spp
+      name: "Specific preparation"
+      periodization_model: concurrent_hybrid
+      model_variant: balanced
+      duration_weeks: 4
+      weeks:
+        - { week: 5, type: standard, modifiers: [] }
+        - { week: 6, type: standard,
+            modifiers: [ { dimension: load_pct, delta: 2.5,
+                           scope: { type: by_intent, value: max_strength } } ] }
+        - { week: 7, type: standard,
+            modifiers: [ { dimension: load_pct, delta: 5.0,
+                           scope: { type: by_intent, value: max_strength } },
+                         { dimension: conditioning_volume_pct, delta: 15,
+                           scope: { type: by_intent, value: conditioning } } ] }
+        - { week: 8, type: planned_deload,
+            deload_recipe: { sets_pct: -40, load_pct: 0,
+                             conditioning_load_cap: "0.5 x chronic" } }
+    - id: ms_soccer_test
+      name: "Test and recalibration"
+      periodization_model: concurrent_hybrid
+      model_variant: balanced
+      duration_weeks: 1
+      weeks:
+        - { week: 9, type: test,
+            note: "AMRAP on the hub lift replaces the video-inferred e1RM with a
+                   measured one (C.4 e1RM calibration)." }
+  progression_scheme:
+    axis: mixed
+    ramp:
+      - { weeks: [3, 6, 7], dimension: load_pct, per_week: 2.5,
+          scope: { type: by_intent, value: max_strength } }
+      - { weeks: [3, 7], dimension: conditioning_volume_pct, per_week: 10,
+          scope: { type: by_intent, value: conditioning } }
+    description: "concurrent_hybrid/balanced: emphasis alternates between
+                  microcycles; neither axis is allowed to run away."
+
+# =============================================================================
+# SECTION 6 — VOLUME AUDIT CONFIG (Layer C.3, verbatim)
+# =============================================================================
+
+volume_audit:
+  window_days: 7
+  fractional_counting: { primary: 1.0, secondary: 0.5,
+                         override: muscle_contribution_override }
+  effective_set_threshold: { rir_max: 4, source: "rir_reported ?? rir_target" }
+  method_set_counting:                   # autoregulation_schema.yaml::method_set_counting
+    straight: "1 per set"
+    cluster: "1 per complete cluster set"
+    contrast: "1 per pair (explosive adds no hypertrophic volume)"
+    complex_ilc: "1 per component per round"
+    complex_slc: "1 per round, distributed per component contribution"
+    amrap: "1"
+    conditioning: "0 -> separate bucket"
+  parallel_category_counting:
+    value: 0
+    justification: "The upstream table has no entry for a standalone plyometric
+                    or olympic block. It DOES rule that in a contrast block the
+                    explosive component adds no hypertrophic volume. We extend
+                    that same ruling to standalone parallel blocks rather than
+                    inventing a number: a hop is neurally expensive and
+                    hypertrophically cheap."
+  landmarks: "autoregulation_schema.yaml::volume_landmarks (population defaults)"
+  emits: [muscle_volume_below_mev, muscle_volume_approaching_mrv,
+          muscle_volume_exceeded_mrv]
+  below_mev_gate:
+    rule: goal_groups_only
+    goal_groups: "primary_muscles of every exercise in a FLAG-DRIVEN (non-baseline)
+                  block — i.e. the muscles this athlete's prescription is actually
+                  trying to develop"
+    source: >
+      periodization_schema.yaml::integration.volume_status_feeds_scaling declares
+      the below-MEV consequence as `below_mev_and_goal_includes`. The upstream
+      engine itself gates the flag on the goal containing the group, so a soccer
+      plan does not emit fourteen 'your rotator cuff is below MEV' flags. The
+      full table is still reported in volume_audit.groups; only the FLAG is gated.
+    over_mev_flags: "muscle_volume_approaching_mrv and muscle_volume_exceeded_mrv
+                     are NOT gated: too much volume matters wherever it happens."
+
+# =============================================================================
+# SECTION 7 — PROJECTION CONFIG
+# =============================================================================
+# Everything here produces numbers labelled `projected: true`. None of it is a
+# measurement, and none of it may be rendered in the same register as one.
+
+projection:
+  horizon_weeks: 9
+  requires: "the rule's blocks must actually survive into the assembled
+             microcycle; a block dropped by the slot cap does not project"
+  global_confidence_note: >
+    Every projection is a conservative point estimate with no interval. The
+    literature ranges they are drawn from are group means from other cohorts
+    under other conditions. They are a planning aid, not a forecast.
+
+  score_sensitivity:
+    basis: declared_heuristic
+    confidence: low
+    disclosure: >
+      These weights are NOT empirical. They are a declared, monotone, deliberately
+      shallow map from projected metric deltas to the 0-100 scores, so the pitch
+      can show a coherent before/after without inventing a second model. Score
+      deltas are capped hard.
+    unit: "score points per 1% relative metric improvement, or per unit for `abs` metrics"
+    explosiveness:
+      topSpeed:  { per_pct: 2.5 }
+      anklePush: { per_pct: 0.6 }
+      accelLoad: { per_pct: 0.3 }
+    durability:
+      strideAsym: { per_unit: -1.2 }     # negative delta in % points -> positive score
+      ankleROM:   { per_unit: 0.35 }
+      kneeROM:    { per_unit: 0.25 }
+    reactivity:
+      anklePush: { per_pct: 0.5 }
+      codPeak:   { per_pct: 0.8 }
+    coordination:
+      strideAsym: { per_unit: -0.8 }
+      kneeROM:    { per_unit: 0.2 }
+      hipExtROM:  { per_unit: 0.4 }
+    spatialAwareness: {}                 # deliberately empty — see unprojectable
+    caps: { per_score: 6, overall: 5 }
+    overall_rule: "overall = round(mean(durability, explosiveness, reactivity,
+                   coordination, spatialAwareness)) recomputed from the projected
+                   sub-scores"
+
+  unprojectable:
+    - { metric: scanRate, reason: "no node in taxonomy-v2 trains it; the flag is
+        emitted with an out-of-scope suggestion and nothing is claimed" }
+    - { metric: spatialAwareness, reason: "driven by scanRate, which is
+        unprojectable; the score is carried through unchanged" }
+    - { metric: sprints, reason: "a count driven by match context and tactical
+        role, not a capacity" }
+    - { metric: reactionMs, reason: "at 25 fps one frame is 40 ms; the metric is
+        for ranking, not for grading a delta" }
+    - { metric: losReactivity, reason: "a relational measure of this match's
+        opponents; not an athlete property that a training block moves" }
+    - { metric: minutes, reason: "not a performance metric" }

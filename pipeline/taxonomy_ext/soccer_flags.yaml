@@ -1,0 +1,252 @@
+# =============================================================================
+# Soccer Flag Extension — ADDITIVE layer over taxonomy-v2 flag_catalog.yaml
+# =============================================================================
+# Upstream (READ-ONLY, never edited here):
+#   /Users/lahpmx/Downloads/taxonomy-v2/flag_catalog.yaml  (177 flags, v2.0)
+#
+# This file follows the EXACT upstream flag record schema:
+#   id · applies_at · severity · level | (level_computation + level_thresholds)
+#   · message_template · detail_schema (+ detail_fields when custom)
+#   · suggestion_template · related_methods
+#
+# Everything below is NEW. Nothing upstream is redefined; validate_ext.py
+# hard-fails if any id here collides with an upstream flag id.
+#
+# -----------------------------------------------------------------------------
+# DECLARED EXTENSIONS TO UPSTREAM VOCABULARIES (audited, additive)
+# -----------------------------------------------------------------------------
+# 1. applies_at: upstream uses {block, session, microcycle_plus, execution,
+#    catalog_load} — all of which describe a *prescription* object. These flags
+#    describe an *athlete*, evaluated once per assessment from computer-vision
+#    metrics. We therefore add ONE new value:
+#        athlete_assessment
+#    It is declared here rather than assumed, so a reader can see exactly what
+#    the extension widened.
+#
+# 2. severity: NOT widened. Upstream {informational, structural_hard,
+#    viability} is used verbatim. `viability` is the only severity in the
+#    upstream schema that carries graduated levels, so graduated athlete
+#    deficits use it. Level semantics are restated per flag:
+#        warning_mild   — deficit present, train it
+#        warning_strong — deficit is a limiting factor for match output
+#        hard_fail      — deficit gates prescription: the listed work is
+#                         withheld or capped until it resolves
+#    hard_fail is used by exactly one flag (hamstring_strain_risk_elevated),
+#    where withholding maximal-velocity exposure is the defensible action.
+#
+# 3. detail_schema: NOT widened. viability_pattern / consistency_pattern /
+#    custom are upstream values. `custom` carries detail_fields, exactly as
+#    upstream `no_coherent_zone` does.
+#
+# 4. related_methods: only real taxonomy-v2 method ids
+#    {straight, cluster, drop, rest_pause, amrap, pyramid, emom, contrast,
+#     complex}.
+#
+# -----------------------------------------------------------------------------
+# HONESTY NOTE ON THE INPUTS
+# -----------------------------------------------------------------------------
+# Every input below is a computer-vision estimate from broadcast footage, not a
+# laboratory measurement. Where the underlying construct normally requires a
+# force plate, a goniometer, or an isokinetic dynamometer, the flag text says
+# "proxy" and the mapping declares confidence. Thresholds sourced from the
+# literature are marked `literature_absolute` in mapping.yaml; thresholds that
+# only make sense within one camera/pipeline are marked `cohort_z` and are
+# computed against the tracked cohort of this match, never across systems.
+# =============================================================================
+
+version: "1.0-ext"
+extends: "flag_catalog.yaml@2.0"
+layer: "ext/soccer"
+total_flags_catalogued: 11
+
+extends_vocabularies:
+  applies_at:
+    added: [athlete_assessment]
+    upstream: [block, session, microcycle_plus, execution, catalog_load]
+    rationale: >
+      These flags are properties of an athlete derived from an assessment
+      window, not of a prescribed block, session, or rolling training window.
+
+flags:
+
+  # ---------------------------------------------------------------------------
+  # SECTION S1 — Locomotor capacity
+  # ---------------------------------------------------------------------------
+
+  acceleration_deficit:
+    id: acceleration_deficit
+    applies_at: athlete_assessment
+    severity: viability
+    level_computation: "based on cohort z of accelLoad per tracked minute"
+    message_template: "{metric_name} {actual_value} (cohort z {delta}), below the cohort threshold {threshold_value}. Short-range force production is the limiter."
+    detail_schema: viability_pattern
+    level_thresholds:
+      warning_mild: "-1.3 < z <= -0.8"
+      warning_strong: "z <= -1.3"
+      hard_fail: "never — an acceleration deficit gates nothing"
+    suggestion_template: "Prescribe heavy hip/knee extension contrasted with 15-25 m accelerations (contrast/heavy_light) plus an alactic acceleration circuit."
+    related_methods: [contrast, complex, straight, cluster]
+
+  max_velocity_deficit:
+    id: max_velocity_deficit
+    applies_at: athlete_assessment
+    severity: viability
+    level_computation: "based on absolute topSpeed against elite outfield reference band"
+    message_template: "Observed peak speed {actual_value} m/s is below the {threshold_value} m/s elite outfield reference (shortfall {delta} m/s) over {tracked_minutes} tracked minutes."
+    detail_schema: viability_pattern
+    level_thresholds:
+      warning_mild: "7.9 < topSpeed <= 8.4 m/s"
+      warning_strong: "topSpeed <= 7.9 m/s"
+      hard_fail: "never"
+    suggestion_template: "Prescribe flying-sprint exposure at >=95% with full recovery, plus an olympic-pull parallel block; observed peak underestimates true vmax on short tracking windows."
+    related_methods: [complex, contrast, straight]
+
+  deceleration_capacity_deficit:
+    id: deceleration_capacity_deficit
+    applies_at: athlete_assessment
+    severity: viability
+    level_computation: "based on absolute knee flexion range available at braking"
+    message_template: "Braking knee range {actual_value} deg is below {threshold_value} deg: the athlete brakes stiff-legged and absorbs load through a short lever."
+    detail_schema: viability_pattern
+    level_thresholds:
+      warning_mild: "104 < kneeROM <= 112 deg"
+      warning_strong: "kneeROM <= 104 deg"
+      hard_fail: "never"
+    suggestion_template: "Prescribe slow-eccentric hinge, landing/step-down plyometrics, and a 5-0-5 reorientation circuit before adding max-velocity volume."
+    related_methods: [straight, complex, contrast]
+
+  rsa_decrement_high:
+    id: rsa_decrement_high
+    applies_at: athlete_assessment
+    severity: viability
+    level_computation: "based on cohort z of high-speed-running metres per tracked minute"
+    message_template: "High-speed output density {actual_value} m/min (cohort z {delta}) is below {threshold_value}: repeated-sprint output does not hold up. PROXY — this is output density, not a measured within-match decrement."
+    detail_schema: viability_pattern
+    level_thresholds:
+      warning_mild: "-1.3 < z <= -0.8"
+      warning_strong: "z <= -1.3"
+      hard_fail: "never"
+    suggestion_template: "Prescribe a lactic repeated-sprint circuit (fixed_round_circuit) and a mixed time-capped circuit; keep both away from lower-body heavy days."
+    related_methods: [complex, emom]
+
+  # ---------------------------------------------------------------------------
+  # SECTION S2 — Stretch-shortening cycle and reorientation
+  # ---------------------------------------------------------------------------
+
+  reactive_strength_low:
+    id: reactive_strength_low
+    applies_at: athlete_assessment
+    severity: viability
+    level_computation: "based on cohort z of peak ankle plantarflexion velocity at toe-off (RSI proxy)"
+    message_template: "Ankle push-off velocity {actual_value} deg/s (cohort z {delta}) is below {threshold_value}: fast stretch-shortening output is low. PROXY for force-plate RSI."
+    detail_schema: viability_pattern
+    level_thresholds:
+      warning_mild: "-1.3 < z <= -0.8"
+      warning_strong: "z <= -1.3"
+      hard_fail: "never"
+    suggestion_template: "Prescribe short-contact plyometrics (rebound and repeat hops, FV4) plus a french_contrast potentiation block; add loaded calf work with a paused stretch."
+    related_methods: [contrast, straight, complex]
+
+  cod_reorientation_slow:
+    id: cod_reorientation_slow
+    applies_at: athlete_assessment
+    severity: viability
+    level_computation: "based on absolute peak heading-change rate, co-factored by reaction latency"
+    message_template: "Peak reorientation rate {actual_value} deg/s is below {threshold_value} deg/s; median reaction latency {cofactor_value} ms."
+    detail_schema: viability_pattern
+    level_thresholds:
+      warning_mild: "115 < codPeak <= 130 deg/s"
+      warning_strong: "codPeak <= 115 deg/s"
+      hard_fail: "never"
+    suggestion_template: "Prescribe an alactic 5-0-5 and lateral-shuffle circuit at max_reactive_speed intent, plus lateral single-leg hops and unilateral knee-dominant strength."
+    related_methods: [complex, straight]
+
+  # ---------------------------------------------------------------------------
+  # SECTION S3 — Asymmetry, range of motion, tissue risk
+  # ---------------------------------------------------------------------------
+
+  limb_asymmetry_detected:
+    id: limb_asymmetry_detected
+    applies_at: athlete_assessment
+    severity: viability
+    level_computation: "based on absolute inter-limb symmetry index, Bishop bands"
+    message_template: "Inter-limb asymmetry {actual_value}% exceeds the {threshold_value}% band. Side of dominance: {dominant_side}."
+    detail_schema: custom
+    detail_fields:
+      metric_name: string
+      actual_value: number
+      threshold_value: number
+      dominant_side:
+        type: "enum [left, right, unknown]"
+        note: >
+          `unknown` is the honest default and the usual value: metrics.json
+          carries strideAsym as an UNSIGNED index, |L-R|/max(L,R). Until the
+          metrics stage emits the sign, the prescription loads both sides and
+          leads with whichever the coach identifies.
+      level_thresholds: "map<level, range>"
+    level_thresholds:
+      warning_mild: "5 <= strideAsym < 10 %"
+      warning_strong: "10 <= strideAsym < 15 %"
+      hard_fail: "never — asymmetry alone gates nothing; see hamstring_strain_risk_elevated"
+    suggestion_template: "Prescribe unilateral loading (rear-foot-elevated split squat, single-leg hip thrust, single-leg leg curl) starting each set with the weaker side and matching its reps."
+    related_methods: [straight, complex, contrast]
+
+  ankle_dorsiflexion_restricted:
+    id: ankle_dorsiflexion_restricted
+    applies_at: athlete_assessment
+    severity: viability
+    level_computation: "based on absolute sagittal ankle range through stance"
+    message_template: "Sagittal ankle range {actual_value} deg is below {threshold_value} deg. PROXY — this is stance ankle excursion from video, not a weight-bearing lunge dorsiflexion test."
+    detail_schema: viability_pattern
+    level_thresholds:
+      warning_mild: "32 < ankleROM <= 38 deg"
+      warning_strong: "ankleROM <= 32 deg"
+      hard_fail: "never"
+    suggestion_template: "Prescribe a loaded dorsiflexion rocker and paused-stretch calf raise as a prehab accessory complex; re-measure before increasing deceleration volume."
+    related_methods: [complex, straight]
+
+  hip_extension_restricted:
+    id: hip_extension_restricted
+    applies_at: athlete_assessment
+    severity: viability
+    level: warning_mild
+    message_template: "Peak hip extension {actual_value} deg is below {threshold_value} deg at toe-off; stride length is being bought with lumbar extension."
+    detail_schema: viability_pattern
+    suggestion_template: "Prescribe rear-foot-elevated split squats and single-leg hip thrusts with a half-kneeling anti-rotation press in the same accessory complex."
+    related_methods: [straight, complex]
+
+  hamstring_strain_risk_elevated:
+    id: hamstring_strain_risk_elevated
+    applies_at: athlete_assessment
+    severity: viability
+    level_computation: "composite of inter-limb asymmetry, braking knee range, and high-speed exposure density"
+    message_template: "Screening composite elevated: asymmetry {actual_value}%, braking knee range {expected_value} deg, high-speed density {computed_value} m/min. SCREENING ONLY — not a clinical prediction."
+    detail_schema: custom
+    detail_fields:
+      metric_name: string
+      actual_value: number
+      expected_value: number
+      computed_value: number
+      threshold_value: number
+      contributing_metrics: "[string]"
+      level_thresholds: "map<level, range>"
+    level_thresholds:
+      warning_mild: "one contributing condition met"
+      warning_strong: "two contributing conditions met"
+      hard_fail: "strideAsym >= 15% AND kneeROM <= 104 deg — maximal-velocity exposure is withheld"
+    suggestion_template: "Prescribe nordic hamstring curls and slow-eccentric RDL as non-negotiable weekly work; at hard_fail, withhold flying-sprint exposure until asymmetry falls below 10%."
+    related_methods: [straight, complex]
+
+  # ---------------------------------------------------------------------------
+  # SECTION S4 — Perception (declared, deliberately unprescribable here)
+  # ---------------------------------------------------------------------------
+
+  scan_rate_low:
+    id: scan_rate_low
+    applies_at: athlete_assessment
+    severity: informational
+    level: null
+    message_template: "Visual exploration {actual_value} scans/s is below the {threshold_value} scans/s professional band (Jordet et al.)."
+    detail_schema: viability_pattern
+    suggestion_template: "OUT OF SCOPE for taxonomy-v2: this is a perceptual-cognitive constraint trained by pitch-based constraint design, not by any node in a resistance-training catalog. Surfaced to the coach; no work units are emitted."
+    related_methods: []

@@ -1,0 +1,52 @@
+// Beat XI — Ranking and value. The last thing the room sees.
+//
+// Every tracked player is ranked on measured metrics, each rank opens into the
+// numbers underneath it, and the projected column extends the bars and moves
+// the rows to their new ranks. Stages 1–2 and 4 are measured and carry no chip;
+// stage 3 is the projected column and carries PROJECTED
+// (docs/PITCH_COPY.md, "Provenance chips").
+// Data: roster.json, metrics.json (+ /pitch/faces/*.jpg).
+// Copy: docs/PITCH_COPY.md — verbatim.
+import { createRankingView } from './ranking/view.js';
+
+export const meta = {
+  id: 'ranking',
+  numeral: 'XI',
+  title: 'Ranking',
+  long: 'Ranking and value',
+  polarity: 'light',
+  sources: ['roster'],
+  provenance: null,          // measurement is the default; stage 3 overrides
+  stages: [
+    {
+      eyebrow: 'The squad',
+      line: 'Every player who appeared, ranked on what was measured.',
+      stats: [{ v: null, u: '', k: 'players ranked' }],
+      settleMs: 1200,
+    },
+    {
+      eyebrow: 'The evidence',
+      line: 'Each rank opens into the numbers underneath it.',
+      settleMs: 900,
+    },
+    {
+      eyebrow: 'Projected',
+      line: 'Where personalized training would move them.',
+      provenance: 'projected',
+      stats: [
+        { v: null, u: 'pts', k: 'mean projected gain' },
+        { v: null, u: '', k: 'promoted' },
+      ],
+      settleMs: 1900,
+    },
+    {
+      // no eyebrow: the copy sheet marks this stage's eyebrow as none
+      line: 'One broadcast feed in. A ranked, coached, valued squad out.',
+      settleMs: 900,
+    },
+  ],
+};
+
+export function create(ctx) {
+  return createRankingView(ctx, meta);
+}

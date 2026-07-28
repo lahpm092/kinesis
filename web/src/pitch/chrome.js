@@ -1,0 +1,256 @@
+// ============================================================================
+// KINESIS pitch deck — persistent chrome.
+// Beat rail, wordmark, beat id, provenance chip, annotation, index overlay.
+// Owns no state beyond what it renders; the deck drives every method.
+// ============================================================================
+import { EASE } from './beat.js';
+
+const ANNOT_OUT = 180;
+const ANNOT_IN = 320;
+
+const el = (tag, cls, html) => {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (html != null) n.innerHTML = html;
+  return n;
+};
+
+// Values are serif tabular numerals; nulls are an em dash, never NaN, never 0.
+function statValue(v, d) {
+  if (v == null) return '—';
+  if (typeof v === 'number') {
+    if (!Number.isFinite(v)) return '—';
+    if (d != null) return v.toFixed(d);
+    if (Number.isInteger(v)) return String(v);
+    return String(Math.round(v * 100) / 100);
+  }
+  const s = String(v).trim();
+  return s === '' ? '—' : s;
+}
+
+/**
+ * @param {HTMLElement} root  .pitch-root
+ * @param {Array} metas       every beat's meta, in order
+ * @param {object} hooks      { onJump(beatIndex), onClose() }
+ */
+export function createChrome(root, metas, hooks = {}) {
+  // ---------------------------------------------------------------- chrome
+  const chrome = el('div', 'chrome');
+
+  // --- rail: one mark per beat, sub-ticks inside the active one -----------
+  const rail = el('div', 'rail');
+  const railBeats = metas.map((m, i) => {
+    const b = el('div', 'rail-beat');
+    b.title = `${m.numeral} · ${m.title}`;
+    b.addEventListener('click', () => hooks.onJump && hooks.onJump(i));
+    rail.appendChild(b);
+    return b;
+  });
+  chrome.appendChild(rail);
+
+  // --- wordmark (identical markup to index.html) --------------------------
+  const wordmark = el('span', 'wordmark deck-wordmark', 'KINESIS<span class="wordmark-dot">.</span>');
+  chrome.appendChild(wordmark);
+
+  // --- beat id + provenance ----------------------------------------------
+  const beatId = el('div', 'deck-beatid');
+  const idLine = el('div', 'deck-idline');
+  const provLine = el('div', 'deck-prov');
+  beatId.append(idLine, provLine);
+  chrome.appendChild(beatId);
+
+  // --- annotation ---------------------------------------------------------
+  const annot = el('div', 'annot');
+  const annotBody = el('div', 'annot-body');
+  annot.appendChild(annotBody);
+  chrome.appendChild(annot);
+
+  root.appendChild(chrome);
+
+  // --- index overlay ------------------------------------------------------
+  const overlay = el('div', 'deck-idx');
+  overlay.appendChild(el('div', 'idx-kicker', 'Contents'));
+  const grid = el('div', 'idx-grid');
+  const idxCells = metas.map((m, i) => {
+    const c = el('div', 'idx-cell');
+    c.append(
+      el('span', 'n', m.numeral),
+      el('span', 't', m.long || m.title),
+      el('span', 's', String(m.stages.length).padStart(2, '0')),
+    );
+    c.addEventListener('click', () => hooks.onJump && hooks.onJump(i));
+    grid.appendChild(c);
+    return c;
+  });
+  overlay.appendChild(grid);
+
+  const foot = el('div', 'idx-foot');
+  const keys = el('div', 'idx-keys',
+    '→ ← stage &nbsp;·&nbsp; ↓ ↑ beat &nbsp;·&nbsp; space replay &nbsp;·&nbsp; esc index<br>'
+    + '1–9 0 - jump &nbsp;·&nbsp; home first &nbsp;·&nbsp; f fullscreen');
+  const colophon = el('div', 'idx-colophon');
+  foot.append(keys, colophon);
+  overlay.appendChild(foot);
+  root.appendChild(overlay);
+
+  // --- the cross-dissolve hairline ---------------------------------------
+  const wipe = el('div', 'deck-wipe');
+  root.appendChild(wipe);
+
+  // ------------------------------------------------------------- state ---
+  let curBeat = -1;
+  let curStage = 0;
+  let annotAnim = null;
+
+  // ------------------------------------------------------------ methods --
+  function setPolarity(p) {
+    document.documentElement.dataset.polarity = p === 'dark' ? 'dark' : 'light';
+  }
+
+  function renderRail(bi, si) {
+    railBeats.forEach((b, i) => {
+      const active = i === bi;
+      b.classList.toggle('is-active', active);
+      b.classList.toggle('is-done', i < bi);
+      const want = active ? Math.max(1, metas[i].stages.length) : 1;
+      if (b.children.length !== want) {
+        b.replaceChildren(...Array.from({ length: want }, () => el('i', 'rail-cell')));
+      }
+      if (active) {
+        [...b.children].forEach((c, k) => c.classList.toggle('is-played', k <= si));
+      }
+    });
+  }
+
+  function renderBeatId(meta) {
+    idLine.replaceChildren();
+    idLine.append(
+      el('span', 'numeral', meta.numeral),
+      el('span', 'sep', '·'),
+      el('span', 'title', meta.title),
+    );
+  }
+
+  /** tag: null | 'simulated' | 'projected' | array of those */
+  function setProvenance(tag) {
+    const tags = (tag == null ? [] : Array.isArray(tag) ? tag : [tag]).filter(Boolean);
+    const have = [...provLine.children];
+    if (have.length !== tags.length
+        || tags.some((t, i) => have[i].dataset.tag !== String(t))) {
+      provLine.replaceChildren(...tags.map((t) => {
+        const c = el('span', 'prov-chip', String(t));
+        c.dataset.tag = String(t);
+        return c;
+      }));
+      // next frame so the opacity transition actually runs
+      requestAnimationFrame(() => {
+        [...provLine.children].forEach((c) => c.classList.add('is-on'));
+      });
+    }
+  }
+
+  function buildAnnot(stage) {
+    const frag = document.createDocumentFragment();
+    if (stage.eyebrow) frag.appendChild(el('div', 'annot-eyebrow', stage.eyebrow));
+    frag.appendChild(el('div', 'annot-line', stage.line || ''));
+    const stats = (stage.stats || []).slice(0, 3);
+    if (stats.length) {
+      const row = el('div', 'annot-stats');
+      for (const s of stats) {
+        const cell = el('div', 'annot-stat');
+        const v = el('div', 'v', statValue(s.v, s.d));
+        if (s.u) v.appendChild(el('span', 'u', s.u));
+        cell.append(v, el('div', 'k', s.k || ''));
+        row.appendChild(cell);
+      }
+      frag.appendChild(row);
+    }
+    return frag;
+  }
+
+  /**
+   * Cross-fade the annotation: out 180ms, swap, in 320ms with a 12px rise.
+   * `immediate` skips the fade (first paint / in-place value patch).
+   */
+  function setAnnotation(stage, immediate = false) {
+    const paint = () => annotBody.replaceChildren(buildAnnot(stage || {}));
+    if (annotAnim) { try { annotAnim.cancel(); } catch (_) {} annotAnim = null; }
+    if (immediate) { paint(); annotBody.style.opacity = '1'; annotBody.style.transform = 'none'; return; }
+    const out = annotBody.animate(
+      [{ opacity: 1 }, { opacity: 0 }],
+      { duration: ANNOT_OUT, easing: EASE, fill: 'forwards' },
+    );
+    annotAnim = out;
+    out.finished.then(() => {
+      paint();
+      const inA = annotBody.animate(
+        [{ opacity: 0, transform: 'translateY(12px)' }, { opacity: 1, transform: 'translateY(0)' }],
+        { duration: ANNOT_IN, easing: EASE, fill: 'forwards' },
+      );
+      annotAnim = inA;
+      return inA.finished;
+    }).then(() => {
+      annotBody.style.opacity = '1';
+      annotBody.style.transform = 'none';
+      annotAnim = null;
+    }).catch(() => { /* cancelled by a faster presenter */ });
+  }
+
+  /** the accent hairline that wipes across the viewport during a beat swap */
+  function runWipe(duration) {
+    wipe.animate(
+      [
+        { opacity: 1, transform: 'scaleX(0)', transformOrigin: 'left center' },
+        { opacity: 1, transform: 'scaleX(1)', transformOrigin: 'left center', offset: 0.46 },
+        { opacity: 1, transform: 'scaleX(1)', transformOrigin: 'right center', offset: 0.54 },
+        { opacity: 1, transform: 'scaleX(0)', transformOrigin: 'right center' },
+      ],
+      { duration, easing: EASE },
+    );
+  }
+
+  function setBeat(bi, si, meta) {
+    curBeat = bi; curStage = si;
+    renderRail(bi, si);
+    renderBeatId(meta);
+    idxCells.forEach((c, i) => c.classList.toggle('is-active', i === bi));
+  }
+
+  function setStage(bi, si) {
+    curStage = si;
+    renderRail(bi, si);
+  }
+
+  // --- index overlay ------------------------------------------------------
+  let open = false;
+  function toggleIndex(force) {
+    open = force == null ? !open : !!force;
+    overlay.classList.toggle('is-open', open);
+    if (!open && hooks.onClose) hooks.onClose();
+    return open;
+  }
+  const isIndexOpen = () => open;
+
+  /** honesty: the colophon lists what actually loaded */
+  function setColophon(data) {
+    if (!data) return;
+    const rows = (data.keys || []).map((k) => {
+      const d = data[k];
+      if (!d) return `<span class="absent">${k}.json — pending</span>`;
+      const gen = d.generator || '—';
+      const m = d.measured === true ? 'measured' : d.measured === false ? 'simulated' : '—';
+      return `<span class="ok">${k}.json · ${gen} · ${m}</span>`;
+    });
+    colophon.innerHTML = rows.join('<br>');
+  }
+
+  function dispose() {
+    chrome.remove(); overlay.remove(); wipe.remove();
+  }
+
+  return {
+    setPolarity, setBeat, setStage, setAnnotation, setProvenance,
+    runWipe, toggleIndex, isIndexOpen, setColophon, dispose,
+    get annotEl() { return annotBody; },
+  };
+}

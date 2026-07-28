@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>KINESIS — vector fan harness</title>
+<link rel="icon" href="data:," />
+<style>
+  :root {
+    --coal: #14100A; --coal-2: #1D1710; --coal-hair: #3A2F1F;
+    --bone: #EFE4CB; --bone-2: #B3A382; --amber: #FFB454; --amber-2: #E89B3E;
+    --sienna: #A34A24; --gold: #8C6D2F; --fail: #C56B4A;
+    --serif: "Iowan Old Style", "Palatino", "Book Antiqua", Georgia, serif;
+    --mono: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--coal); color: var(--bone); }
+  .wrap { display: grid; grid-template-columns: 1fr 320px; height: 100vh; }
+  .view { position: relative; }
+  canvas { display: block; width: 100%; height: 100%; }
+  .eyebrow {
+    position: absolute; top: 16px; left: 20px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--bone-2);
+  }
+  .eyebrow b { color: var(--amber); font-weight: 500; }
+  aside {
+    border-left: 1px solid var(--coal-hair); padding: 20px 20px 16px;
+    display: flex; flex-direction: column; gap: 16px; overflow: hidden;
+  }
+  h1 { font-family: var(--serif); font-size: 21px; font-weight: 400; margin: 0; line-height: 1.25; }
+  .sub { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
+         text-transform: uppercase; color: var(--bone-2); }
+  .identity { font-family: var(--mono); font-size: 11.5px; color: var(--amber-2);
+              border-top: 1px solid var(--coal-hair); border-bottom: 1px solid var(--coal-hair);
+              padding: 10px 0; letter-spacing: 0.02em; }
+  .legend { display: flex; flex-direction: column; gap: 7px; }
+  .legend .row { display: grid; grid-template-columns: 26px 1fr; gap: 9px; align-items: center; }
+  .legend .sw { height: 11px; border: 0; }
+  .legend .lbl { font-family: var(--mono); font-size: 10px; color: var(--bone); letter-spacing: 0.04em; }
+  .legend .gl { font-family: var(--mono); font-size: 9.5px; color: var(--bone-2); }
+  table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 10px; }
+  th { text-align: left; color: var(--bone-2); font-weight: 400; letter-spacing: 0.1em;
+       text-transform: uppercase; font-size: 9px; padding-bottom: 5px;
+       border-bottom: 1px solid var(--coal-hair); }
+  td { padding: 3px 0; color: var(--bone-2); }
+  td.k { color: var(--bone); }
+  tr.best td { color: var(--amber); }
+  tr.shut td { color: var(--fail); }
+  .tag { font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase;
+         color: var(--gold); border: 1px solid var(--coal-hair); padding: 4px 8px; align-self: flex-start; }
+  .err { position: absolute; inset: 0; display: grid; place-items: center;
+         font-family: var(--mono); font-size: 12px; color: var(--fail); padding: 40px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="view">
+    <canvas id="gl"></canvas>
+    <div class="eyebrow">VII · affordance fan — <b id="hdr">…</b></div>
+  </div>
+  <aside>
+    <div>
+      <div class="sub" id="runlabel">—</div>
+      <h1 id="title">The carrier's options</h1>
+    </div>
+    <div class="identity">p_real = p_complete · p_control · (1 − p_intercept)</div>
+    <div class="legend" id="legend"></div>
+    <table>
+      <thead><tr><th>lane</th><th>p_real</th><th>cmp</th><th>ctl</th><th>clr</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div class="tag" id="tag">simulated</div>
+  </aside>
+</div>
+<script type="importmap">
+{ "imports": {
+  "three": "/node_modules/three/build/three.module.js",
+  "three/addons/": "/node_modules/three/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { T } from '/src/core/theme.js';
+import { buildPitch } from '/src/scenes/field/pitch.js';
+import { TextSprite } from '/src/scenes/field/label.js';
+import { VectorFan, FAN_LEGEND } from '/src/pitch/sim/fan.js';
+import { Choreo } from '/src/pitch/sim/choreo.js';
+
+const L = 105, W = 68;
+const TEAM = { A: new THREE.Color('#E8B04B'), B: new THREE.Color('#8FA3B0') };
+const qs = new URLSearchParams(location.search);
+const RUN_ID = qs.get('run') || 'before';
+
+window.__error = null;
+addEventListener('error', (e) => { window.__error = String(e.message); });
+
+const sim = await (await fetch('/pitch/sim.json')).json();
+const run = sim.runs.find((r) => r.id === RUN_ID) || sim.runs[0];
+
+/* pick the decision with the most live options — that is the fan worth showing */
+let dIdx = qs.has('d') ? Number(qs.get('d')) : NaN;
+if (!Number.isFinite(dIdx) || dIdx < 0) {
+  let best = 0, bestN = -1;
+  run.decisions.forEach((d, i) => {
+    const n = d.options.filter((o) => o.exists).length;
+    if (n > bestN) { bestN = n; best = i; }
+  });
+  dIdx = best;
+}
+const dec = run.decisions[dIdx];
+const t = dec.t;
+const fi = Math.max(0, Math.min(run.frames - 1, Math.round(t * run.fps)));
+
+/* ------------------------------------------------------------ three */
+const canvas = document.getElementById('gl');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+renderer.setClearColor(T.coal, 1);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(T.coal);
+scene.fog = new THREE.Fog(T.coal, 190, 430);
+const camera = new THREE.PerspectiveCamera(42, 16 / 9, 4, 700);
+
+scene.add(new THREE.HemisphereLight('#4a3f2e', '#0a0703', 0.85));
+const key = new THREE.DirectionalLight('#e8c98f', 1.1);
+key.position.set(-40, 90, 70);
+scene.add(key);
+scene.add(buildPitch());
+
+/* pins */
+const pinGeo = new THREE.CylinderGeometry(0.8, 0.8, 0.1, 24);
+const stemGeo = new THREE.CylinderGeometry(0.11, 0.18, 2.0, 8);
+for (const a of run.agents) {
+  const c = TEAM[a.team] || TEAM.B;
+  const g = new THREE.Group();
+  const disc = new THREE.Mesh(pinGeo, new THREE.MeshStandardMaterial({
+    color: c, roughness: 0.5, emissive: c, emissiveIntensity: 0.2 }));
+  disc.position.y = 0.05;
+  const stem = new THREE.Mesh(stemGeo, new THREE.MeshStandardMaterial({
+    color: c, roughness: 0.6, emissive: c, emissiveIntensity: 0.16, transparent: true, opacity: 0.9 }));
+  stem.position.y = 1.05;
+  const lbl = new TextSprite({ color: a.team === 'A' ? '#E8B04B' : '#B9C6CF', height: 1.3, opacity: 0.92 });
+  lbl.set(String(a.label));
+  lbl.sprite.position.y = 3.0;
+  lbl.sprite.visible = true;
+  g.add(disc, stem, lbl.sprite);
+  const p = a.xy[fi];
+  g.position.set(p[0], 0, p[1]);
+  scene.add(g);
+}
+
+/* carrier halo */
+const carrier = run.agents.find((a) => a.id === dec.carrier);
+const cxy = carrier ? carrier.xy[fi] : [L / 2, W / 2];
+const halo = new THREE.Mesh(
+  new THREE.RingGeometry(0.95, 1.25, 44),
+  new THREE.MeshBasicMaterial({ color: T.amber, transparent: true, opacity: 0.85,
+    side: THREE.DoubleSide, depthWrite: false }));
+halo.rotation.x = -Math.PI / 2;
+halo.position.set(cxy[0], 0.07, cxy[1]);
+halo.renderOrder = 6;
+scene.add(halo);
+
+/* ball, from the choreographer so the harness exercises it too */
+const choreo = new Choreo({ fps: run.fps, agents: run.agents, ball: run.ball, events: run.events });
+const bs = choreo.ballAt(t);
+const ballXY = bs.mode === 'held' && carrier ? cxy : [bs.x, bs.y];
+const ball = new THREE.Mesh(
+  new THREE.SphereGeometry(0.34, 20, 16),
+  new THREE.MeshStandardMaterial({ color: T.amber, emissive: T.amber, emissiveIntensity: 0.9, roughness: 0.35 }));
+ball.position.set(ballXY[0], 0.34 + (bs.z || 0), ballXY[1]);
+scene.add(ball);
+
+/* ------------------------------------------------------------ THE FAN */
+const fan = new VectorFan({ maxLanes: 20, labels: true, scale: 1.0 });
+scene.add(fan.group);
+fan.set(cxy, dec.options, { chosen_i: dec.chosen_i });
+
+/* ------------------------------------------------------------ post */
+const rt = new THREE.WebGLRenderTarget(2, 2, { type: THREE.HalfFloatType, samples: 4 });
+const composer = new EffectComposer(renderer, rt);
+composer.addPass(new RenderPass(scene, camera));
+composer.addPass(new UnrealBloomPass(new THREE.Vector2(2, 2), 0.40, 0.65, 0.72));
+composer.addPass(new OutputPass());
+
+/* camera frames the carrier from behind, along the attack direction */
+const dir = carrier?.team === 'A' ? 1 : -1;
+const look = [Math.max(16, Math.min(L - 16, cxy[0] + dir * 11)), Math.max(17, Math.min(W - 17, cxy[1]))];
+camera.position.set(look[0] - dir * 34, 48, look[1] + 54);
+camera.lookAt(look[0], 0, look[1]);
+
+function resize() {
+  const v = canvas.parentElement;
+  const w = v.clientWidth, h = v.clientHeight;
+  const pr = Math.min(window.devicePixelRatio || 1, 2);
+  renderer.setPixelRatio(pr);
+  renderer.setSize(w, h, false);
+  composer.setPixelRatio(pr);
+  composer.setSize(w, h);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(canvas.parentElement);
+resize();
+
+/* ------------------------------------------------------------ HUD */
+document.getElementById('hdr').textContent =
+  `t ${dec.t.toFixed(1)} s · carrier ${carrier ? carrier.label : dec.carrier} · ${dec.options.filter((o) => o.exists).length} live lanes`;
+document.getElementById('runlabel').textContent = run.label;
+document.getElementById('tag').textContent =
+  sim.fitted_from.fixture ? 'simulated · fitted from a fixture' : 'simulated';
+
+document.getElementById('legend').innerHTML = FAN_LEGEND.map((r) =>
+  `<div class="row"><div class="sw" style="background:${r.color}"></div>
+   <div><div class="lbl">${r.label}</div><div class="gl">${r.gloss}</div></div></div>`).join('');
+
+const live = dec.options.filter((o) => o.exists);
+document.getElementById('rows').innerHTML = dec.options.slice(0, 10).map((o, i) => {
+  const shut = !o.exists || o.p_real < 0.12;
+  const cls = i === dec.chosen_i ? 'best' : shut ? 'shut' : '';
+  const short = o.kind.replace(/_/g, ' ').replace('timing run', '').trim();
+  return `<tr class="${cls}"><td class="k">${short}</td><td>${o.p_real.toFixed(2)}</td>
+    <td>${o.p_complete.toFixed(2)}</td><td>${o.p_control.toFixed(2)}</td>
+    <td>${(1 - o.p_intercept).toFixed(2)}</td></tr>`;
+}).join('');
+
+/* ------------------------------------------------------------ loop */
+let frames = 0;
+function tick() {
+  requestAnimationFrame(tick);
+  fan.update(performance.now());
+  composer.render();
+  frames++;
+  if (frames === 8) window.__ready = true;
+}
+tick();
+window.__info = { run: run.id, decision: dIdx, t: dec.t, carrier: dec.carrier,
+                  live: live.length, options: dec.options.length };
+</script>
+</body>
+</html>

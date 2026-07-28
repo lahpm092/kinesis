@@ -1,0 +1,295 @@
+/* ============================================================
+   KINESIS — investor deck shell
+   Full-viewport, keyboard-driven. Same ink, same paper, same
+   hairlines as the study site: this file only adds the deck
+   chrome. All colour comes from main.css tokens.
+   ============================================================ */
+
+/* ---- polarity: every chrome rule reads these four vars ---- */
+html[data-polarity="light"] {
+  --accent:   var(--sienna);
+  --fg:       var(--ink);
+  --fg-2:     var(--ink-2);
+  --fg-3:     var(--ink-3);
+  --rule:     var(--hair);
+  --rule-2:   var(--hair-2);
+  --bg:       var(--paper);
+}
+html[data-polarity="dark"] {
+  --accent:   var(--amber);
+  --fg:       var(--bone);
+  --fg-2:     var(--bone-2);
+  --fg-3:     var(--bone-2);
+  --rule:     var(--coal-hair);
+  --rule-2:   var(--coal-hair);
+  --bg:       var(--coal);
+}
+
+/* deltas + failure, per the design law */
+html { --pos: #7FB98A; --fail: #C56B4A; }
+
+html, body.pitch-body {
+  height: 100%;
+  overflow: hidden;
+  scroll-behavior: auto;
+}
+body.pitch-body {
+  background: var(--bg);
+  color: var(--fg);
+  transition: background 500ms var(--ease), color 500ms var(--ease);
+}
+
+.pitch-root {
+  position: fixed; inset: 0; overflow: hidden;
+  background: var(--bg);
+  transition: background 500ms var(--ease);
+}
+
+/* ---------------- beat stage ---------------- */
+.deck-stage { position: absolute; inset: 0; z-index: 1; }
+.beat {
+  position: absolute; inset: 0;
+  opacity: 0; pointer-events: none;
+  will-change: opacity, transform;
+}
+.beat.is-live { opacity: 1; pointer-events: auto; }
+
+/* the cross-dissolve hairline */
+.deck-wipe {
+  position: absolute; left: 0; right: 0; top: 50%;
+  height: 1px; z-index: 30;
+  background: var(--accent);
+  transform: scaleX(0); transform-origin: left center;
+  pointer-events: none; opacity: 0;
+}
+
+/* ---------------- chrome ---------------- */
+.chrome {
+  position: absolute; inset: 0; z-index: 50;
+  pointer-events: none;
+}
+
+/* --- beat rail: 11 marks along the top edge --- */
+.rail {
+  position: absolute; top: 0; left: 0; right: 0;
+  display: flex; gap: 3px;
+  padding: 0; height: 3px;
+  pointer-events: auto;
+}
+.rail-beat {
+  flex: 1 1 0; height: 3px; display: flex; gap: 2px;
+  cursor: pointer; align-items: flex-start;
+}
+.rail-cell {
+  flex: 1 1 0; height: 1px;
+  background: var(--rule);
+  transition: background 400ms var(--ease);
+}
+.rail-beat.is-done .rail-cell { background: var(--fg-3); }
+.rail-beat.is-active .rail-cell { background: color-mix(in srgb, var(--accent) 24%, transparent); }
+.rail-beat.is-active .rail-cell.is-played { background: var(--accent); }
+
+/* --- wordmark, top left --- */
+.deck-wordmark {
+  position: absolute;
+  top: clamp(17px, 2.2vh, 27px);
+  left: clamp(20px, 3.4vw, 56px);
+  color: var(--fg);
+  transition: color 500ms var(--ease);
+}
+
+/* --- beat id, top right --- */
+.deck-beatid {
+  position: absolute;
+  top: clamp(18px, 2.3vh, 28px);
+  right: clamp(20px, 3.4vw, 56px);
+  text-align: right;
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--fg-2);
+  line-height: 1.8;
+  transition: color 500ms var(--ease);
+}
+.deck-beatid .numeral { color: var(--accent); }
+.deck-beatid .sep { color: var(--fg-3); padding: 0 6px; }
+
+/* --- provenance chip --- */
+.deck-prov { display: block; margin-top: 12px; }
+.prov-chip {
+  display: inline-block; margin-left: 8px;
+  font-family: var(--mono);
+  font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+  padding: 4px 8px;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  opacity: 0;
+  transition: opacity 300ms var(--ease), color 500ms var(--ease), border-color 500ms var(--ease);
+}
+.prov-chip.is-on { opacity: 1; }
+
+/* --- annotation, bottom left --- */
+.annot {
+  position: absolute;
+  left: clamp(20px, 3.4vw, 56px);
+  bottom: clamp(22px, 3.6vh, 46px);
+  max-width: min(46vw, 40em);
+  pointer-events: none;
+}
+.annot-body { will-change: opacity, transform; }
+.annot-eyebrow {
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 13px;
+  transition: color 500ms var(--ease);
+}
+.annot-line {
+  font-family: var(--serif); font-weight: 400;
+  letter-spacing: -0.01em;
+  font-size: clamp(17px, 1.6vw, 23px);
+  line-height: 1.42;
+  max-width: 30em;
+  color: var(--fg);
+  transition: color 500ms var(--ease);
+}
+.annot-stats {
+  display: flex; flex-wrap: wrap;
+  gap: clamp(20px, 2.6vw, 46px);
+  margin-top: 22px;
+}
+.annot-stat { display: flex; flex-direction: column; gap: 5px; }
+.annot-stat .v {
+  font-family: var(--serif);
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(23px, 2.1vw, 31px);
+  line-height: 1.02;
+  color: var(--fg);
+  white-space: nowrap;
+}
+.annot-stat .u {
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: 0.06em;
+  color: var(--fg-3);
+  margin-left: 5px;
+}
+.annot-stat .k {
+  font-family: var(--mono);
+  font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+/* ---------------- beat index overlay ---------------- */
+.deck-idx {
+  position: fixed; inset: 0; z-index: 60;
+  background: var(--bg);
+  padding: clamp(40px, 6vh, 76px) clamp(20px, 3.4vw, 56px);
+  display: flex; flex-direction: column;
+  opacity: 0; visibility: hidden;
+  transition: opacity 320ms var(--ease), visibility 320ms var(--ease);
+  overflow: hidden;
+}
+.deck-idx.is-open { opacity: 1; visibility: visible; pointer-events: auto; }
+.deck-idx .idx-kicker {
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: clamp(20px, 3vh, 34px);
+}
+.idx-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 clamp(24px, 3vw, 54px);
+  border-top: 1px solid var(--rule);
+}
+.idx-cell {
+  display: flex; align-items: baseline; gap: 14px;
+  padding: clamp(11px, 1.5vh, 17px) 2px;
+  border-bottom: 1px solid var(--rule);
+  cursor: pointer;
+  transition: color 300ms var(--ease);
+  color: var(--fg-2);
+}
+.idx-cell .n {
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: 0.2em;
+  color: var(--fg-3);
+  min-width: 34px;
+}
+.idx-cell .t {
+  font-family: var(--serif); font-weight: 400;
+  letter-spacing: -0.01em;
+  font-size: clamp(16px, 1.35vw, 20px);
+  color: var(--fg);
+  flex: 1;
+}
+.idx-cell .s {
+  font-family: var(--mono);
+  font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--fg-3);
+  font-variant-numeric: tabular-nums;
+}
+.idx-cell:hover .t, .idx-cell:hover .n { color: var(--accent); }
+.idx-cell.is-active .n, .idx-cell.is-active .t { color: var(--accent); }
+
+.idx-foot {
+  margin-top: auto;
+  padding-top: clamp(18px, 2.6vh, 30px);
+  display: flex; justify-content: space-between; align-items: flex-end;
+  gap: 40px;
+  border-top: 1px solid var(--rule);
+}
+.idx-keys, .idx-colophon {
+  font-family: var(--mono);
+  font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--fg-3);
+  line-height: 2.1;
+}
+.idx-colophon { text-align: right; max-height: 26vh; overflow: hidden; }
+.idx-colophon .ok { color: var(--fg-2); }
+.idx-colophon .absent { color: var(--fg-3); opacity: 0.7; }
+
+/* ---------------- placeholder plate ---------------- */
+.plate-wrap {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.plate {
+  border: 1px solid var(--rule-2);
+  padding: clamp(26px, 3.6vh, 44px) clamp(40px, 5vw, 78px);
+  text-align: center;
+  will-change: opacity, transform;
+}
+.plate .p-id {
+  font-family: var(--mono);
+  font-size: 12px; letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+}
+.plate .p-rule {
+  height: 1px; background: var(--rule); margin: 18px auto; width: 100%;
+}
+.plate .p-stage {
+  font-family: var(--mono);
+  font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase;
+  color: var(--fg-3);
+  font-variant-numeric: tabular-nums;
+}
+.plate--fail { border-color: var(--fail); }
+.plate--fail .p-id { color: var(--fail); }
+
+/* ---------------- boot / failure ---------------- */
+.deck-boot {
+  position: absolute; inset: 0; z-index: 70;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg);
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--fg-3);
+  transition: opacity 400ms var(--ease);
+}
+.deck-boot.is-gone { opacity: 0; pointer-events: none; }
+
+/* headless-QA: ?flat=1 collapses deck motion to (near) nothing */
+html.no-anim .beat, html.no-anim .annot-body, html.no-anim .plate {
+  transition: none !important;
+}

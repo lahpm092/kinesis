@@ -1,0 +1,343 @@
+# =============================================================================
+# Soccer Catalog Extension — ADDITIVE layer over taxonomy-v2 Layer B
+# =============================================================================
+# Upstream (READ-ONLY, never edited here):
+#   catalog/catalog_schema.yaml     — the schema these entries must satisfy
+#   catalog/catalog_seed_part1.yaml — 60 loaded exercises
+#   catalog/catalog_seed_part2.yaml — 38 bodyweight / KB / HYROX exercises
+#   (98 exercises, 102 variations, 200 nodes)
+#
+# Every entry below carries the full required field set from catalog_schema.yaml
+# `exercise.fields`:
+#   id · name · movement_pattern · body_segment · primary_muscles ·
+#   kinetic_chain · laterality_default · implement · load_metric_primary ·
+#   load_metrics_supported · mechanical_demand_index · technical_complexity_index
+#   · typical_time_per_rep_sec
+# plus the optional fields we actually use: secondary_muscles ·
+# parallel_category · variations · progressions · equivalences · tags · notes.
+#
+# CLOSED ENUMS ARE NOT WIDENED. movement_pattern values are drawn only from the
+# 23-value upstream enum (here: locomotion, jump, knee_flexion, hip_adduction,
+# calf_raise). primary/secondary muscles only from the 22-value muscle enum.
+# implement only from the 22-value implement enum. variation `modifies` only
+# from the 10-value dimension list. validate_ext.py hard-fails otherwise.
+#
+# WHY THESE EIGHT: they are the soccer work that has no node anywhere in the
+# 98-exercise seed. The seed is a HYROX/resistance catalog: it has run, sled
+# push/pull, box jump, and burpee, but no maximal sprint, no change of
+# direction, no lateral locomotion, no eccentric knee-flexor node, no
+# unilateral reactive hop, no ankle mobility node, and no adductor node.
+# Everything the seed DOES cover (heavy squat/hinge, unilateral squat patterns,
+# hip thrust, leg curl, calf raise, anti-rotation, olympic pulls, box jumps,
+# sled work) is referenced from upstream and NOT duplicated here.
+#
+# INDEX CALIBRATION: mechanical_demand_index and technical_complexity_index are
+# ORDINAL and anchored against the upstream seed. Reference points used:
+#   back_squat 4.0/4.0 · deadlift_conventional 4.5/5.0 · power_clean (olympic)
+#   · box_jump (plyometric) · run (locomotion) · pistol_squat (unilateral BW).
+# No entry here is declared is_anchor: anchors are immutable upstream property.
+# =============================================================================
+
+catalog_version: "1.0-ext-soccer"
+extends: "catalog_seed_part1.yaml + catalog_seed_part2.yaml @ 1.0-seed"
+schema_ref: "taxonomy_v2 Layer B (B.0-B.5)"
+part: "ext"
+
+exercises:
+
+  # ---------------------------------------------------------------------------
+  # LOCOMOTION — maximal sprinting, change of direction, lateral travel
+  # ---------------------------------------------------------------------------
+
+  sprint_acceleration:
+    name: "Sprint acceleration"
+    name_es: "Aceleración"
+    aliases: [accel, short_sprint, 20m_accel]
+    movement_pattern: locomotion
+    body_segment: full
+    primary_muscles: [quadriceps, glutes, hamstrings]
+    secondary_muscles: [calves, hip_flexors, spinal_erectors, abdominals]
+    kinetic_chain: closed
+    laterality_default: unilateral_alt
+    implement: bodyweight
+    load_metric_primary: distance
+    load_metrics_supported: [distance, time, none]
+    is_loadable_external: false
+    mechanical_demand_index: 5.0
+    technical_complexity_index: 4.5
+    typical_time_per_rep_sec: 4.0
+    joint_actions: [hip_extension, knee_extension, ankle_plantarflexion]
+    parallel_category: null
+    zones_typical: null
+    variations:
+      - { id: rolling_start, name: "Rolling start", modifies: [stance],
+          mechanical_demand_delta: -0.4, technical_complexity_delta: -0.8,
+          notes: "Jog-in entry; removes the block/start position, lowers both indices." }
+      - { id: resisted_band, name: "Band-resisted", modifies: [assistance],
+          mechanical_demand_delta: 0.6, technical_complexity_delta: 0.3,
+          notes: "Horizontal band or partner resistance. Same precedent as pull_up@band_assisted: the added band is a variation dimension, not a new implement." }
+    progressions:
+      - { target: { exercise: sprint_flying, variation: null },
+          mechanism: complexity, magnitude: medium,
+          notes: "The run-in adds maximal-velocity mechanics on top of the acceleration pattern. P1 holds: 5.0 -> 6.5." }
+    equivalences:
+      - { target: { exercise: sled_push, variation: null }, similarity: medium,
+          load_translation: null,
+          notes: "Heavy sled push is the seed's nearest horizontal-force node; substitute when a running surface is unavailable." }
+    tags: [soccer, speed, alactic, horizontal_force]
+    notes: >
+      Prescribed by distance (15-30 m). Never zone-classifiable: it carries no
+      %1RM and no continuous rep structure, so blocks using it are category
+      `conditioning` (method complex, family circuit, energy_system_tag alactic)
+      or the explosive component of a contrast pair.
+
+  sprint_flying:
+    name: "Flying sprint"
+    name_es: "Sprint lanzado"
+    aliases: [flying_20, fly_sprint, max_velocity_run]
+    movement_pattern: locomotion
+    body_segment: full
+    primary_muscles: [hamstrings, glutes, quadriceps]
+    secondary_muscles: [calves, hip_flexors, abdominals, spinal_erectors]
+    kinetic_chain: closed
+    laterality_default: unilateral_alt
+    implement: bodyweight
+    load_metric_primary: distance
+    load_metrics_supported: [distance, time, none]
+    is_loadable_external: false
+    mechanical_demand_index: 6.5
+    technical_complexity_index: 5.5
+    typical_time_per_rep_sec: 6.5
+    joint_actions: [hip_extension, hip_flexion, knee_flexion, ankle_plantarflexion]
+    parallel_category: null
+    zones_typical: null
+    variations:
+      - { id: submax_95, name: "95% submaximal", modifies: [tempo],
+          mechanical_demand_delta: -0.8, technical_complexity_delta: -0.3,
+          notes: "Intensity-capped fly used as a return step; the only lever that lowers hamstring exposure without changing the pattern." }
+    tags: [soccer, speed, max_velocity, alactic, hamstring_exposure]
+    notes: >
+      The highest hamstring-strain exposure node in this extension. Gated by
+      hamstring_strain_risk_elevated@hard_fail in mapping.yaml.
+
+  cod_505:
+    name: "5-0-5 change of direction"
+    name_es: "Cambio de dirección 5-0-5"
+    aliases: [505, cod_drill, turn_drill]
+    movement_pattern: locomotion
+    body_segment: full
+    primary_muscles: [quadriceps, glutes, hamstrings]
+    secondary_muscles: [calves, adductors, abductors, obliques]
+    kinetic_chain: closed
+    laterality_default: unilateral_alt
+    implement: bodyweight
+    load_metric_primary: distance
+    load_metrics_supported: [distance, time, none]
+    is_loadable_external: false
+    mechanical_demand_index: 5.5
+    technical_complexity_index: 5.0
+    typical_time_per_rep_sec: 3.0
+    joint_actions: [knee_flexion, hip_abduction, ankle_dorsiflexion, hip_extension]
+    parallel_category: null
+    zones_typical: null
+    variations:
+      - { id: cut_90, name: "90 degree cut", modifies: [angle],
+          mechanical_demand_delta: -0.4, technical_complexity_delta: -0.3,
+          notes: "Open 90 deg cut instead of the 180 deg turn: lower braking impulse, closer to match cutting angles." }
+    tags: [soccer, cod, deceleration, alactic]
+    notes: >
+      The pre-planned / reactive distinction (Sheppard & Young 2006) is carried
+      at the work_unit level by `intent`: `max_reactive_speed` for stimulus-cued
+      repetitions, `max` for pre-planned. It is NOT a variation, because none of
+      the ten variation dimensions describes an external information source.
+
+  lateral_shuffle:
+    name: "Lateral shuffle"
+    name_es: "Desplazamiento lateral"
+    aliases: [side_shuffle, defensive_slide]
+    movement_pattern: locomotion
+    body_segment: lower
+    primary_muscles: [abductors, adductors, quadriceps]
+    secondary_muscles: [glutes, calves, obliques]
+    kinetic_chain: closed
+    laterality_default: unilateral_alt
+    implement: bodyweight
+    load_metric_primary: distance
+    load_metrics_supported: [distance, time, none]
+    is_loadable_external: false
+    mechanical_demand_index: 3.0
+    technical_complexity_index: 3.0
+    typical_time_per_rep_sec: 4.0
+    joint_actions: [hip_abduction, hip_adduction, knee_flexion]
+    parallel_category: null
+    zones_typical: null
+    variations:
+      - { id: banded, name: "Band-resisted", modifies: [assistance],
+          mechanical_demand_delta: 0.8, technical_complexity_delta: 0.2,
+          notes: "Hip-level band adds frontal-plane load; same variation precedent as sprint_acceleration@resisted_band." }
+    tags: [soccer, frontal_plane, cod, alactic]
+
+  # ---------------------------------------------------------------------------
+  # KNEE FLEXION — the eccentric knee-flexor node the seed has no equivalent for
+  # ---------------------------------------------------------------------------
+
+  nordic_hamstring_curl:
+    name: "Nordic hamstring curl"
+    name_es: "Curl nórdico"
+    aliases: [nordic, russian_curl, glute_ham_lower]
+    movement_pattern: knee_flexion
+    body_segment: lower
+    primary_muscles: [hamstrings]
+    secondary_muscles: [glutes, calves, spinal_erectors]
+    muscle_contribution_override: { hamstrings: 1.0, glutes: 0.4, calves: 0.2, spinal_erectors: 0.3 }
+    kinetic_chain: closed
+    laterality_default: bilateral
+    implement: bodyweight
+    load_metric_primary: bodyweight_ratio
+    load_metrics_supported: [bodyweight_ratio, absolute_load]
+    is_loadable_external: true
+    mechanical_demand_index: 7.0
+    technical_complexity_index: 4.0
+    typical_time_per_rep_sec: 6.0
+    joint_actions: [knee_flexion_eccentric, hip_extension_isometric]
+    parallel_category: null
+    zones_typical: [Z1, Z2, Z3]
+    variations:
+      - { id: band_assisted, name: "Band assisted", modifies: [assistance],
+          mechanical_demand_delta: -1.8, technical_complexity_delta: -0.5,
+          notes: "Overhead band unloads the eccentric; the standard entry step." }
+      - { id: razor_curl, name: "Razor curl (hip flexed)", modifies: [leverage],
+          mechanical_demand_delta: -1.0, technical_complexity_delta: 0.4,
+          notes: "Hip flexion shortens the effective lever and biases the biarticular hamstring differently." }
+    # No explicit progression edge: band_assisted (5.2) -> razor_curl (6.0) ->
+    # full (7.0) is exactly the IMPLICIT intra-base ladder the schema derives
+    # from mechanical_demand_delta (B.0.8). Declaring it again would create a
+    # P1-inverted edge from the base node down to a lower-demand variation.
+    equivalences:
+      - { target: { exercise: leg_curl_lying, variation: single_leg }, similarity: medium,
+          load_translation: null,
+          notes: "Machine knee flexion is the seed's nearest node; it is concentric-dominant and open-chain, so it substitutes for volume, not for the eccentric stimulus." }
+    tags: [soccer, hamstring, eccentric, injury_prevention]
+    notes: >
+      The eccentric knee-flexor exposure this catalog exists to add. Its own
+      demand index (7.0) sits above every seed lower-body bodyweight node except
+      pistol_squat because a full unassisted Nordic is a genuinely rare capacity.
+
+  # ---------------------------------------------------------------------------
+  # JUMP — unilateral reactive nodes (the seed has only bilateral box_jump)
+  # ---------------------------------------------------------------------------
+
+  hop_single_leg:
+    name: "Single-leg hop"
+    name_es: "Salto a una pierna"
+    aliases: [single_leg_hop, pogo_single, bound]
+    movement_pattern: jump
+    body_segment: lower
+    primary_muscles: [calves, quadriceps, glutes]
+    secondary_muscles: [hamstrings, abductors, adductors]
+    kinetic_chain: closed
+    laterality_default: unilateral_one_side
+    implement: bodyweight
+    load_metric_primary: bodyweight_ratio
+    load_metrics_supported: [bodyweight_ratio, distance, none]
+    is_loadable_external: false
+    mechanical_demand_index: 4.5
+    technical_complexity_index: 4.0
+    typical_time_per_rep_sec: 1.0
+    joint_actions: [ankle_plantarflexion, knee_extension, hip_extension]
+    parallel_category: plyometric
+    zones_typical: null
+    variations:
+      - { id: repeat_vertical, name: "Repeat vertical hop", modifies: [tempo],
+          mechanical_demand_delta: 0.4, technical_complexity_delta: 0.2,
+          notes: "Continuous short-contact hopping (<250 ms): the reactive-strength expression, FV4." }
+      - { id: lateral, name: "Lateral hop", modifies: [angle],
+          mechanical_demand_delta: 0.3, technical_complexity_delta: 0.5,
+          notes: "Frontal-plane displacement; the reorientation-specific version." }
+      - { id: horizontal_bound, name: "Horizontal bound", modifies: [angle],
+          mechanical_demand_delta: 0.7, technical_complexity_delta: 0.6,
+          notes: "Maximal horizontal displacement per contact; the acceleration-specific version." }
+    progressions:
+      - { target: { exercise: hop_single_leg, variation: horizontal_bound },
+          mechanism: complexity, magnitude: small,
+          notes: "Vertical hop -> maximal horizontal bound. P1 holds: 4.5 -> 5.2 effective." }
+    equivalences:
+      - { target: { exercise: box_jump, variation: rebound }, similarity: medium,
+          load_translation: null,
+          notes: "box_jump@rebound is the seed's short-contact reactive node, but bilateral: it does not expose the asymmetry this one does." }
+    tags: [soccer, plyometric, unilateral, ssc]
+
+  # ---------------------------------------------------------------------------
+  # RANGE OF MOTION / TISSUE — ankle and adductor nodes the seed lacks
+  # ---------------------------------------------------------------------------
+
+  ankle_dorsiflexion_rocker:
+    name: "Ankle dorsiflexion rocker"
+    name_es: "Mecedora de dorsiflexión"
+    aliases: [knee_to_wall_rocker, ankle_rocker]
+    movement_pattern: calf_raise
+    body_segment: lower
+    primary_muscles: [calves]
+    secondary_muscles: [quadriceps]
+    muscle_contribution_override: { calves: 0.6, quadriceps: 0.2 }
+    kinetic_chain: closed
+    laterality_default: unilateral_one_side
+    implement: bodyweight
+    load_metric_primary: bodyweight_ratio
+    load_metrics_supported: [bodyweight_ratio, time, none]
+    is_loadable_external: true
+    mechanical_demand_index: 1.0
+    technical_complexity_index: 1.5
+    typical_time_per_rep_sec: 3.5
+    joint_actions: [ankle_dorsiflexion]
+    parallel_category: null
+    zones_typical: [Z4, Z5, Z6]
+    variations:
+      - { id: weighted, name: "Weighted (load over the knee)", modifies: [load_position],
+          mechanical_demand_delta: 0.6, technical_complexity_delta: 0.2,
+          notes: "External load rested over the knee drives the tibia forward under compression." }
+    equivalences:
+      - { target: { exercise: calf_raise_machine, variation: pause_stretch },
+          similarity: medium, load_translation: null,
+          notes: "The paused bottom position of a machine calf raise loads the same end range under a very different load metric." }
+    tags: [soccer, mobility, prehab, ankle]
+    notes: >
+      Classified `calf_raise` because that is the only ankle-sagittal pattern in
+      the closed 23-value enum. muscle_contribution_override is declared below
+      1.0 so a mobility drill cannot inflate the calves volume counter against
+      the Layer C landmarks.
+
+  copenhagen_adduction:
+    name: "Copenhagen adduction"
+    name_es: "Aducción de Copenhague"
+    aliases: [copenhagen_plank, side_plank_adduction]
+    movement_pattern: hip_adduction
+    body_segment: lower
+    primary_muscles: [adductors]
+    secondary_muscles: [obliques, abdominals, glutes]
+    muscle_contribution_override: { adductors: 1.0, obliques: 0.5, abdominals: 0.3, glutes: 0.3 }
+    kinetic_chain: closed
+    laterality_default: unilateral_one_side
+    implement: bodyweight
+    load_metric_primary: bodyweight_ratio
+    load_metrics_supported: [bodyweight_ratio, time]
+    is_loadable_external: false
+    mechanical_demand_index: 5.5
+    technical_complexity_index: 3.5
+    typical_time_per_rep_sec: 3.5
+    joint_actions: [hip_adduction, hip_abduction_eccentric]
+    parallel_category: null
+    zones_typical: [Z3, Z4, Z5]
+    variations:
+      - { id: short_lever, name: "Short lever (knee supported)", modifies: [leverage],
+          mechanical_demand_delta: -1.8, technical_complexity_delta: -0.6,
+          notes: "Support at the knee instead of the ankle: the standard entry step." }
+      - { id: isometric_hold, name: "Isometric hold", modifies: [tempo],
+          mechanical_demand_delta: -0.4, technical_complexity_delta: -0.4 }
+    # short_lever (3.7) -> full (5.5) is the implicit leverage ladder; not
+    # re-declared, for the same P1 reason as nordic_hamstring_curl.
+    equivalences:
+      - { target: { exercise: hip_adduction_machine, variation: null },
+          similarity: medium, load_translation: null,
+          notes: "Machine adduction is concentric and open-chain; it substitutes for volume, not for the eccentric groin exposure." }
+    tags: [soccer, adductor, prehab, eccentric]

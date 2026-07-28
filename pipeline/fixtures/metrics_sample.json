@@ -1,0 +1,754 @@
+{
+ "measured": false,
+ "fixture": true,
+ "fixture_note": "SCHEMA FIXTURE — not measured. Stands in for web/public/pitch/metrics.json until the metrics stage lands. Values are plausible-range draws from a seeded PRNG, NOT observations. Any output fitted from this file carries fitted_from.fixture = true.",
+ "generator": "pipeline/fixtures/metrics_sample.json (hand-seeded fixture)",
+ "corpus": {
+  "videos": 1,
+  "clips": 0,
+  "live_s": 0,
+  "note": "fixture — no corpus"
+ },
+ "metricDefs": [
+  {
+   "key": "topSpeed",
+   "name": "Top speed",
+   "unit": "m/s",
+   "from": [
+    "pitchPos"
+   ],
+   "higherIsBetter": true
+  },
+  {
+   "key": "accelLoad",
+   "name": "Acceleration load",
+   "unit": "au",
+   "from": [
+    "pitchPos"
+   ],
+   "higherIsBetter": true
+  },
+  {
+   "key": "hsr_m",
+   "name": "High-speed running",
+   "unit": "m",
+   "from": [
+    "pitchPos"
+   ],
+   "higherIsBetter": true
+  },
+  {
+   "key": "sprints",
+   "name": "Sprints",
+   "unit": "count",
+   "from": [
+    "pitchPos"
+   ],
+   "higherIsBetter": true
+  },
+  {
+   "key": "codPeak",
+   "name": "Change-of-direction peak",
+   "unit": "deg/s",
+   "from": [
+    "pitchPos"
+   ],
+   "higherIsBetter": true
+  },
+  {
+   "key": "strideAsym",
+   "name": "Stride asymmetry",
+   "unit": "%",
+   "from": [
+    "kneeOmega"
+   ],
+   "higherIsBetter": false
+  },
+  {
+   "key": "kneeROM",
+   "name": "Knee range of motion",
+   "unit": "deg",
+   "from": [
+    "kneeAngle"
+   ],
+   "higherIsBetter": true
+  },
+  {
+   "key": "anklePush",
+   "name": "Ankle push-off",
+   "unit": "N",
+   "from": [
+    "ankleAngle",
+    "ankleOmega"
+   ],
+   "higherIsBetter": true
+  },
+  {
+   "key": "losReactivity",
+   "name": "Line-of-sight reactivity",
+   "unit": "0-100",
+   "from": [
+    "losOmega"
+   ],
+   "higherIsBetter": true
+  },
+  {
+   "key": "scanRate",
+   "name": "Scan rate",
+   "unit": "Hz",
+   "from": [
+    "headYaw"
+   ],
+   "higherIsBetter": true
+  },
+  {
+   "key": "reactionMs",
+   "name": "Reaction latency",
+   "unit": "ms",
+   "from": [
+    "losOmega"
+   ],
+   "higherIsBetter": false
+  }
+ ],
+ "players": [
+  {
+   "id": 2,
+   "team": "A",
+   "label": "1",
+   "minutes": 14.2,
+   "quality": 0.67,
+   "face": null,
+   "measured": {
+    "topSpeed": 5.76,
+    "accelLoad": 12.4,
+    "hsr_m": 17.7,
+    "sprints": 1,
+    "codPeak": 97.6,
+    "strideAsym": 7.5,
+    "kneeROM": 103.5,
+    "anklePush": 439.7,
+    "losReactivity": 64.7,
+    "scanRate": 0.131,
+    "reactionMs": 258
+   },
+   "scores": {
+    "durability": 52,
+    "explosiveness": 44,
+    "reactivity": 74,
+    "coordination": 51,
+    "spatialAwareness": 51,
+    "overall": 54
+   }
+  },
+  {
+   "id": 5,
+   "team": "A",
+   "label": "2",
+   "minutes": 14.1,
+   "quality": 0.63,
+   "face": null,
+   "measured": {
+    "topSpeed": 8.39,
+    "accelLoad": 38.8,
+    "hsr_m": 114,
+    "sprints": 8,
+    "codPeak": 130.9,
+    "strideAsym": 2.1,
+    "kneeROM": 116.7,
+    "anklePush": 472.7,
+    "losReactivity": 60.4,
+    "scanRate": 0.19,
+    "reactionMs": 303
+   },
+   "scores": {
+    "durability": 81,
+    "explosiveness": 74,
+    "reactivity": 66,
+    "coordination": 77,
+    "spatialAwareness": 52,
+    "overall": 70
+   }
+  },
+  {
+   "id": 7,
+   "team": "A",
+   "label": "3",
+   "minutes": 10.8,
+   "quality": 0.73,
+   "face": null,
+   "measured": {
+    "topSpeed": 7.12,
+    "accelLoad": 30.1,
+    "hsr_m": 196.2,
+    "sprints": 4,
+    "codPeak": 152.2,
+    "strideAsym": 7.6,
+    "kneeROM": 100.9,
+    "anklePush": 649.9,
+    "losReactivity": 71.7,
+    "scanRate": 0.35,
+    "reactionMs": 355
+   },
+   "scores": {
+    "durability": 51,
+    "explosiveness": 62,
+    "reactivity": 69,
+    "coordination": 49,
+    "spatialAwareness": 66,
+    "overall": 59
+   }
+  },
+  {
+   "id": 9,
+   "team": "A",
+   "label": "5",
+   "minutes": 13.8,
+   "quality": 0.88,
+   "face": null,
+   "measured": {
+    "topSpeed": 8.51,
+    "accelLoad": 27.4,
+    "hsr_m": 165.1,
+    "sprints": 9,
+    "codPeak": 169.2,
+    "strideAsym": 7.5,
+    "kneeROM": 110.5,
+    "anklePush": 546.1,
+    "losReactivity": 80.9,
+    "scanRate": 0.565,
+    "reactionMs": 458
+   },
+   "scores": {
+    "durability": 55,
+    "explosiveness": 68,
+    "reactivity": 66,
+    "coordination": 56,
+    "spatialAwareness": 83,
+    "overall": 66
+   }
+  },
+  {
+   "id": 12,
+   "team": "A",
+   "label": "6",
+   "minutes": 11.4,
+   "quality": 0.67,
+   "face": null,
+   "measured": {
+    "topSpeed": 8.52,
+    "accelLoad": 41.5,
+    "hsr_m": 143.7,
+    "sprints": 7,
+    "codPeak": 101.3,
+    "strideAsym": 9.3,
+    "kneeROM": 99.8,
+    "anklePush": 671.8,
+    "losReactivity": 46.9,
+    "scanRate": 0.458,
+    "reactionMs": 457
+   },
+   "scores": {
+    "durability": 43,
+    "explosiveness": 76,
+    "reactivity": 43,
+    "coordination": 43,
+    "spatialAwareness": 62,
+    "overall": 53
+   }
+  },
+  {
+   "id": 14,
+   "team": "A",
+   "label": "8",
+   "minutes": 12.7,
+   "quality": 0.9,
+   "face": null,
+   "measured": {
+    "topSpeed": 8.02,
+    "accelLoad": 34.6,
+    "hsr_m": 144.7,
+    "sprints": 11,
+    "codPeak": 127.8,
+    "strideAsym": 6.5,
+    "kneeROM": 98,
+    "anklePush": 431.7,
+    "losReactivity": 45.2,
+    "scanRate": 0.41,
+    "reactionMs": 370
+   },
+   "scores": {
+    "durability": 54,
+    "explosiveness": 70,
+    "reactivity": 50,
+    "coordination": 51,
+    "spatialAwareness": 58,
+    "overall": 57
+   }
+  },
+  {
+   "id": 16,
+   "team": "A",
+   "label": "11",
+   "minutes": 12.8,
+   "quality": 0.69,
+   "face": null,
+   "measured": {
+    "topSpeed": 7.71,
+    "accelLoad": 36.9,
+    "hsr_m": 216.6,
+    "sprints": 11,
+    "codPeak": 97.2,
+    "strideAsym": 7.2,
+    "kneeROM": 113.5,
+    "anklePush": 420.6,
+    "losReactivity": 52.4,
+    "scanRate": 0.217,
+    "reactionMs": 321
+   },
+   "scores": {
+    "durability": 57,
+    "explosiveness": 69,
+    "reactivity": 59,
+    "coordination": 59,
+    "spatialAwareness": 50,
+    "overall": 59
+   }
+  },
+  {
+   "id": 19,
+   "team": "A",
+   "label": "14",
+   "minutes": 12.1,
+   "quality": 0.85,
+   "face": null,
+   "measured": {
+    "topSpeed": 8.45,
+    "accelLoad": 35.3,
+    "hsr_m": 251,
+    "sprints": 7,
+    "codPeak": 99.2,
+    "strideAsym": 6,
+    "kneeROM": 97.3,
+    "anklePush": 557.9,
+    "losReactivity": 85.3,
+    "scanRate": 0.242,
+    "reactionMs": 462
+   },
+   "scores": {
+    "durability": 56,
+    "explosiveness": 73,
+    "reactivity": 68,
+    "coordination": 52,
+    "spatialAwareness": 66,
+    "overall": 63
+   }
+  },
+  {
+   "id": 21,
+   "team": "A",
+   "label": "16",
+   "minutes": 10.2,
+   "quality": 0.79,
+   "face": null,
+   "measured": {
+    "topSpeed": 9.19,
+    "accelLoad": 56.8,
+    "hsr_m": 238.8,
+    "sprints": 8,
+    "codPeak": 156.2,
+    "strideAsym": 8.1,
+    "kneeROM": 118.1,
+    "anklePush": 451.9,
+    "losReactivity": 47.2,
+    "scanRate": 0.452,
+    "reactionMs": 340
+   },
+   "scores": {
+    "durability": 55,
+    "explosiveness": 89,
+    "reactivity": 54,
+    "coordination": 59,
+    "spatialAwareness": 61,
+    "overall": 64
+   }
+  },
+  {
+   "id": 23,
+   "team": "A",
+   "label": "18",
+   "minutes": 11.4,
+   "quality": 0.73,
+   "face": null,
+   "measured": {
+    "topSpeed": 8.8,
+    "accelLoad": 58,
+    "hsr_m": 196.6,
+    "sprints": 10,
+    "codPeak": 166.2,
+    "strideAsym": 1.9,
+    "kneeROM": 104.5,
+    "anklePush": 464.4,
+    "losReactivity": 75.7,
+    "scanRate": 0.515,
+    "reactionMs": 388
+   },
+   "scores": {
+    "durability": 76,
+    "explosiveness": 87,
+    "reactivity": 69,
+    "coordination": 69,
+    "spatialAwareness": 78,
+    "overall": 76
+   }
+  },
+  {
+   "id": 26,
+   "team": "A",
+   "label": "21",
+   "minutes": 14,
+   "quality": 0.75,
+   "face": null,
+   "measured": {
+    "topSpeed": 8.21,
+    "accelLoad": 43.6,
+    "hsr_m": 312.7,
+    "sprints": 7,
+    "codPeak": 189.3,
+    "strideAsym": 2.5,
+    "kneeROM": 97.7,
+    "anklePush": 496.3,
+    "losReactivity": 88.6,
+    "scanRate": 0.245,
+    "reactionMs": 299
+   },
+   "scores": {
+    "durability": 71,
+    "explosiveness": 76,
+    "reactivity": 86,
+    "coordination": 63,
+    "spatialAwareness": 68,
+    "overall": 73
+   }
+  },
+  {
+   "id": 28,
+   "team": "B",
+   "label": "13",
+   "minutes": 12.1,
+   "quality": 0.81,
+   "face": null,
+   "measured": {
+    "topSpeed": 5.47,
+    "accelLoad": 10.1,
+    "hsr_m": 12.1,
+    "sprints": 2,
+    "codPeak": 75.5,
+    "strideAsym": 3.5,
+    "kneeROM": 111,
+    "anklePush": 386.8,
+    "losReactivity": 75.3,
+    "scanRate": 0.151,
+    "reactionMs": 284
+   },
+   "scores": {
+    "durability": 72,
+    "explosiveness": 41,
+    "reactivity": 78,
+    "coordination": 69,
+    "spatialAwareness": 57,
+    "overall": 63
+   }
+  },
+  {
+   "id": 31,
+   "team": "B",
+   "label": "4",
+   "minutes": 11.7,
+   "quality": 0.65,
+   "face": null,
+   "measured": {
+    "topSpeed": 8.56,
+    "accelLoad": 28.5,
+    "hsr_m": 98.1,
+    "sprints": 9,
+    "codPeak": 140.1,
+    "strideAsym": 1.5,
+    "kneeROM": 114.3,
+    "anklePush": 434.9,
+    "losReactivity": 70.1,
+    "scanRate": 0.309,
+    "reactionMs": 341
+   },
+   "scores": {
+    "durability": 82,
+    "explosiveness": 69,
+    "reactivity": 69,
+    "coordination": 77,
+    "spatialAwareness": 63,
+    "overall": 72
+   }
+  },
+  {
+   "id": 33,
+   "team": "B",
+   "label": "7",
+   "minutes": 14.1,
+   "quality": 0.93,
+   "face": null,
+   "measured": {
+    "topSpeed": 8.11,
+    "accelLoad": 27.4,
+    "hsr_m": 128.4,
+    "sprints": 5,
+    "codPeak": 174.1,
+    "strideAsym": 2.9,
+    "kneeROM": 117.2,
+    "anklePush": 509.8,
+    "losReactivity": 79.4,
+    "scanRate": 0.591,
+    "reactionMs": 460
+   },
+   "scores": {
+    "durability": 77,
+    "explosiveness": 66,
+    "reactivity": 65,
+    "coordination": 75,
+    "spatialAwareness": 84,
+    "overall": 73
+   }
+  },
+  {
+   "id": 35,
+   "team": "B",
+   "label": "9",
+   "minutes": 9.7,
+   "quality": 0.84,
+   "face": null,
+   "measured": {
+    "topSpeed": 7.17,
+    "accelLoad": 30.8,
+    "hsr_m": 163.2,
+    "sprints": 8,
+    "codPeak": 176.6,
+    "strideAsym": 3,
+    "kneeROM": 112,
+    "anklePush": 569.3,
+    "losReactivity": 82.4,
+    "scanRate": 0.603,
+    "reactionMs": 325
+   },
+   "scores": {
+    "durability": 75,
+    "explosiveness": 63,
+    "reactivity": 79,
+    "coordination": 71,
+    "spatialAwareness": 86,
+    "overall": 75
+   }
+  },
+  {
+   "id": 38,
+   "team": "B",
+   "label": "12",
+   "minutes": 11.1,
+   "quality": 0.89,
+   "face": null,
+   "measured": {
+    "topSpeed": 7.54,
+    "accelLoad": 30,
+    "hsr_m": 126.2,
+    "sprints": 3,
+    "codPeak": 151.3,
+    "strideAsym": 6.2,
+    "kneeROM": 96.8,
+    "anklePush": 544,
+    "losReactivity": 49.5,
+    "scanRate": 0.307,
+    "reactionMs": 413
+   },
+   "scores": {
+    "durability": 55,
+    "explosiveness": 64,
+    "reactivity": 49,
+    "coordination": 51,
+    "spatialAwareness": 54,
+    "overall": 55
+   }
+  },
+  {
+   "id": 40,
+   "team": "B",
+   "label": "15",
+   "minutes": 13.2,
+   "quality": 0.84,
+   "face": null,
+   "measured": {
+    "topSpeed": 8.02,
+    "accelLoad": 43.4,
+    "hsr_m": 236.5,
+    "sprints": 7,
+    "codPeak": 187,
+    "strideAsym": 3.1,
+    "kneeROM": 123.9,
+    "anklePush": 713.4,
+    "losReactivity": 74,
+    "scanRate": 0.579,
+    "reactionMs": 421
+   },
+   "scores": {
+    "durability": 79,
+    "explosiveness": 75,
+    "reactivity": 65,
+    "coordination": 79,
+    "spatialAwareness": 80,
+    "overall": 76
+   }
+  },
+  {
+   "id": 42,
+   "team": "B",
+   "label": "17",
+   "minutes": 10.3,
+   "quality": 0.69,
+   "face": null,
+   "measured": {
+    "topSpeed": 8.22,
+    "accelLoad": 43.9,
+    "hsr_m": 218.7,
+    "sprints": 6,
+    "codPeak": 104.1,
+    "strideAsym": 2.8,
+    "kneeROM": 103,
+    "anklePush": 488.2,
+    "losReactivity": 68.8,
+    "scanRate": 0.343,
+    "reactionMs": 354
+   },
+   "scores": {
+    "durability": 72,
+    "explosiveness": 76,
+    "reactivity": 67,
+    "coordination": 66,
+    "spatialAwareness": 65,
+    "overall": 69
+   }
+  },
+  {
+   "id": 45,
+   "team": "B",
+   "label": "20",
+   "minutes": 11.8,
+   "quality": 0.77,
+   "face": null,
+   "measured": {
+    "topSpeed": 7.47,
+    "accelLoad": 49,
+    "hsr_m": 179.8,
+    "sprints": 7,
+    "codPeak": 133.3,
+    "strideAsym": 7.9,
+    "kneeROM": 124.4,
+    "anklePush": 680.5,
+    "losReactivity": 85.8,
+    "scanRate": 0.304,
+    "reactionMs": 320
+   },
+   "scores": {
+    "durability": 59,
+    "explosiveness": 75,
+    "reactivity": 82,
+    "coordination": 64,
+    "spatialAwareness": 70,
+    "overall": 70
+   }
+  },
+  {
+   "id": 47,
+   "team": "B",
+   "label": "22",
+   "minutes": 11.9,
+   "quality": 0.74,
+   "face": null,
+   "measured": {
+    "topSpeed": 8.07,
+    "accelLoad": 44.4,
+    "hsr_m": 198,
+    "sprints": 8,
+    "codPeak": 180.9,
+    "strideAsym": 5.7,
+    "kneeROM": 133,
+    "anklePush": 523.7,
+    "losReactivity": 82.4,
+    "scanRate": 0.426,
+    "reactionMs": 359
+   },
+   "scores": {
+    "durability": 72,
+    "explosiveness": 75,
+    "reactivity": 76,
+    "coordination": 77,
+    "spatialAwareness": 76,
+    "overall": 75
+   }
+  },
+  {
+   "id": 49,
+   "team": "B",
+   "label": "25",
+   "minutes": 12.9,
+   "quality": 0.85,
+   "face": null,
+   "measured": {
+    "topSpeed": 8.86,
+    "accelLoad": 44.2,
+    "hsr_m": 195.7,
+    "sprints": 12,
+    "codPeak": 101.2,
+    "strideAsym": 4.9,
+    "kneeROM": 121.3,
+    "anklePush": 578.8,
+    "losReactivity": 59.9,
+    "scanRate": 0.507,
+    "reactionMs": 446
+   },
+   "scores": {
+    "durability": 70,
+    "explosiveness": 80,
+    "reactivity": 53,
+    "coordination": 71,
+    "spatialAwareness": 70,
+    "overall": 69
+   }
+  },
+  {
+   "id": 52,
+   "team": "B",
+   "label": "27",
+   "minutes": 9.9,
+   "quality": 0.86,
+   "face": null,
+   "measured": {
+    "topSpeed": 8.36,
+    "accelLoad": 53.8,
+    "hsr_m": 250.8,
+    "sprints": 14,
+    "codPeak": 119,
+    "strideAsym": 4.6,
+    "kneeROM": 102.7,
+    "anklePush": 734.9,
+    "losReactivity": 62.2,
+    "scanRate": 0.322,
+    "reactionMs": 442
+   },
+   "scores": {
+    "durability": 64,
+    "explosiveness": 82,
+    "reactivity": 55,
+    "coordination": 60,
+    "spatialAwareness": 61,
+    "overall": 64
+   }
+  }
+ ]
+}

@@ -1,0 +1,211 @@
+# =============================================================================
+# Athlete Profile Extension v2 — ADDITIVE over athlete/athlete_profile_schema.yaml
+# =============================================================================
+# Upstream (READ-ONLY): athlete/athlete_profile_schema.yaml @ schema_version 1
+#   event{date,discipline} · strength.<hub>_e1rm · conditioning.<station>_sec ·
+#   weak_stations · availability{days_per_week,session_minutes,equipment} ·
+#   injuries · landmarks.<muscle_group>{mev,mav,mrv} ·
+#   calibration{signal_confidence,deload_style,bar_increment_kg}
+#
+# EVERY upstream field keeps its upstream meaning. Only FOUR of them actually
+# steer the upstream generator (generator/generator.js, V3.2):
+#   availability.equipment  — whitelist; any implement outside it is blocked
+#   injuries                — patterns/segments to avoid; nothing matching is picked
+#   weak_stations           — doubles matching candidates in the selection urn
+#   strength.<id>_e1rm      — converts %1RM into kg
+# The blocks added below are DIAGNOSTIC INPUT: they are what mapping.yaml reads
+# to derive those four fields plus the flag set. They never bypass them.
+#
+# UNITS: metres, seconds, m/s, m/s^2, degrees, deg/s, kilograms, percent.
+# Every field below is a computer-vision estimate unless marked otherwise.
+# =============================================================================
+
+schema_version: 2
+extends: "athlete_profile_schema.yaml@1"
+layer: "ext/soccer"
+
+# -----------------------------------------------------------------------------
+# 1. WIDENED UPSTREAM FIELDS (values added, nothing removed)
+# -----------------------------------------------------------------------------
+
+widened:
+  event.discipline:
+    upstream_values: [hyrox, powerlifting, general]
+    added: [soccer]
+    note: "Selects the concurrent_hybrid periodization model, which is already
+           tagged team_sport_offseason upstream. No new model is introduced."
+
+# -----------------------------------------------------------------------------
+# 2. NEW TOP-LEVEL FIELDS
+# -----------------------------------------------------------------------------
+
+fields:
+
+  level:
+    type: enum
+    values: [beginner, intermediate, advanced]
+    default: intermediate
+    consumed_by: "periodization_schema.deload_overdue_threshold.level_source
+                  (beginner 7 / intermediate 5 / advanced 4 weeks)"
+    note: "NOT derivable from video. Set from squad status, declared per athlete."
+
+  position:
+    type: enum
+    values: [GK, CB, FB, DM, CM, AM, W, ST]
+    note: "Roster metadata, not a measurement. Used for positional reference
+           bands (max_velocity_deficit) and for the assumed body mass that the
+           e1RM estimator needs."
+
+  body_mass_kg:
+    type: kg
+    measured: false
+    note: "ASSUMPTION. Monocular broadcast video cannot measure mass. Populated
+           from published positional means and labelled in profile.derivation.
+           It exists only because %1RM -> kg needs a scale."
+
+  risk_gates:
+    type: list
+    item: string
+    values: [max_velocity_exposure_withheld, high_volume_plyometric_capped]
+    note: >
+      EXTENSION MECHANISM. The upstream `injuries` list blocks whole movement
+      patterns from selection, which is the wrong instrument for a screening
+      signal: blocking `hinge` would remove the very RDL/nordic work the signal
+      asks for. risk_gates instead caps or withholds SPECIFIC nodes. Emitted
+      only by a flag at level hard_fail.
+
+  # ---------------------------------------------------------------------------
+  kinematics:
+    description: "Locomotor and skeletal measures, per tracked window."
+    fields:
+      top_speed_mps:
+        type: "m/s"
+        source: "metrics.json measured.topSpeed"
+        derivation: "max over the tracked window of ||v(t)|| after spike rejection"
+        caveat: "Peak observed within a short tracked window UNDERESTIMATES
+                 season maximal velocity. Never report it as vmax."
+      accel_load_per_min:
+        type: "arbitrary units / min"
+        source: "metrics.json measured.accelLoad / measured.minutes"
+        derivation: "vision PlayerLoad (jerk accumulation) normalised by tracked minutes"
+        caveat: "Device- and formula-specific. Comparable WITHIN this pipeline
+                 only; every threshold on it is a cohort z-score."
+      hsr_per_min:
+        type: "m/min"
+        source: "metrics.json measured.hsr_m / measured.minutes"
+        derivation: "high-speed-running metres (>=5.5 m/s band) per tracked minute"
+      sprint_count:
+        type: count
+        source: "metrics.json measured.sprints"
+        derivation: "contiguous efforts >=7 m/s, >=1 s, <1 s gaps merged"
+      cod_peak_degs:
+        type: "deg/s"
+        source: "metrics.json measured.codPeak"
+        derivation: "peak heading-change rate d(atan2(vy,vx))/dt across detected cuts"
+      stride_asymmetry_pct:
+        type: percent
+        source: "metrics.json measured.strideAsym"
+        derivation: "|L-R| / max(L,R) x 100 over matched stride events"
+        caveat: "Kinematic symmetry index, not a force-plate asymmetry."
+      knee_rom_deg:
+        type: degrees
+        source: "metrics.json measured.kneeROM"
+        derivation: "knee flexion range through the braking / swing window"
+      ankle_rom_deg:
+        type: degrees
+        source: "metrics.json measured.ankleROM"
+        derivation: "sagittal ankle excursion through stance"
+        caveat: "PROXY for weight-bearing dorsiflexion. Not a knee-to-wall test."
+      hip_ext_rom_deg:
+        type: degrees
+        source: "metrics.json measured.hipExtROM"
+        derivation: "peak hip extension at toe-off relative to trunk vertical"
+      ankle_push_degs:
+        type: "deg/s"
+        source: "metrics.json measured.anklePush"
+        derivation: "peak plantarflexion angular velocity at toe-off"
+        caveat: "PROXY for force-plate Reactive Strength Index."
+
+  perception:
+    description: "Perception-action measures. None of these are trainable by
+                  any node in taxonomy-v2; they are surfaced, not prescribed."
+    fields:
+      scan_rate_hz:
+        type: "scans/s"
+        source: "metrics.json measured.scanRate"
+        derivation: "discrete head-yaw excursions away from the ball and back,
+                     per second of tracked time"
+        reference_band: "0.30-0.60 professional; 0.62-0.83 elite exemplars"
+      reaction_latency_ms:
+        type: ms
+        source: "metrics.json measured.reactionMs"
+        derivation: "median stimulus-to-response onset delay, 100-700 ms plausibility window"
+        caveat: "At 25 fps one frame is 40 ms of quantisation. Rank, do not grade."
+      los_reactivity:
+        type: "0-100"
+        source: "metrics.json measured.losReactivity"
+        derivation: "responsiveness of the athlete's own motion to line-of-sight
+                     rotation rate against nearest opponents"
+
+  team_context:
+    description: "Where the athlete sits in the tracked cohort. Every cohort_z
+                  threshold in mapping.yaml resolves against this."
+    fields:
+      cohort_id:
+        type: string
+        note: "e.g. the match id. z-scores are only valid inside one cohort."
+      cohort_n:
+        type: integer
+      tracked_minutes:
+        type: minutes
+        source: "metrics.json players[].minutes"
+      tracking_quality:
+        type: "0-1"
+        source: "metrics.json players[].quality"
+        note: "Below 0.55 the profile is emitted with calibration.signal_confidence
+               forced to low and no hard_fail level is allowed to fire."
+      z:
+        type: "map<metric_key, number>"
+        note: "Cohort z per metric, computed with the sample standard deviation
+               over players with quality >= 0.55."
+
+  derivation:
+    description: >
+      MANDATORY provenance block. Every inferred field states its estimator in
+      plain language. An estimated e1RM from computer vision is an INFERENCE and
+      is labelled as one here; nothing downstream may present it as a test result.
+    fields:
+      body_mass_kg: string
+      strength_e1rm: string
+      weak_stations: string
+      injuries: string
+      level: string
+      confidence: "enum [high, medium, low]"
+
+# -----------------------------------------------------------------------------
+# 3. THE e1RM ESTIMATOR, STATED IN FULL
+# -----------------------------------------------------------------------------
+
+e1rm_estimator:
+  status: INFERRED
+  never: "presented as a tested or measured one-repetition maximum"
+  inputs: [scores.explosiveness, position, body_mass_kg]
+  steps:
+    1: "relative_squat = 1.30 + 0.80 x (explosiveness / 100)
+        -> spans 1.30-2.10 x body mass across the 0-100 score range,
+        which brackets published relative back-squat strength in senior
+        professional soccer squads."
+    2: "back_squat_e1rm = round(relative_squat x body_mass_kg / bar_increment_kg)
+        x bar_increment_kg   (global_hub, per catalog strength_hubs)"
+    3: "the other hubs are NOT re-estimated from video. They are composed from
+        the REAL inter_hub_ratios declared in catalog_seed_part1.yaml:
+          deadlift_conventional = back_squat x 1.20   (confidence high)
+          bench_press_barbell   = back_squat x 0.75   (confidence medium)
+          power_clean           = back_squat x 0.68   (confidence medium)
+        Confidence degrades one level per hub jump, per B.4."
+  error_bars: "+/- 20% is the honest interval. Every prescription that consumes
+               it emits load as a %1RM FIRST and kg SECOND, so the plan stays
+               correct even when the kg number is wrong."
+  consequence: "calibration.signal_confidence is forced to `low` for every
+                profile built this way, which is the upstream enum value that
+                exists for exactly this situation."
