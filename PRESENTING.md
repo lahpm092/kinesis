@@ -25,11 +25,14 @@ cd ../dist && python3 -m http.server 8080     # → http://localhost:8080/pitch.
 |---|---|
 | **→** | Next step. This is the only key you need. |
 | ← | Back one step |
-| ↓ / ↑ | Jump a whole beat forward / back |
+| ↓ / PageDown | Next beat (skip the rest of this one) |
+| ↑ / PageUp | Previous beat |
 | Space | Replay the current animation |
-| Esc | Beat index — click or press a number to jump |
-| Home | Back to the start |
+| Esc | Beat index — then `1`–`9`, `0`, `-` to jump, or click |
+| Home / End | First stage / last stage |
 | `f` | Fullscreen |
+
+*(Verified against `web/src/pitch/deck.js` — these are the real bindings, not aspirational ones.)*
 
 Eleven beats, about thirty-four steps. Every step plays an animation and then **holds on a
 stable frame indefinitely** — you can talk over it for as long as you like. Nothing is on a
