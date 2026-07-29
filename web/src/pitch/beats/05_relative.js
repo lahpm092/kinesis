@@ -101,8 +101,12 @@ export function create(ctx) {
     if (!m) { ui.scrim('relative.json · pipeline rendering'); return; }
     model = m;
     ui.title.textContent = `${m.title} — ▲ team a · ▼ team b`;
+    // relative.json has not landed and the beat is running on the tracked clip
+    // already in the repo — never let that pass for this match's geometry
+    const fallback = m.origin === 'demo'
+      ? ` · fallback clip · ${String(m.note || 'not this match').toLowerCase()}` : '';
     ui.note.textContent =
-      `${m.counts.all} tracks · pitch 105 × 68 m · ${Math.round(m.fps)} fps`;
+      `${m.counts.all} tracks · pitch 105 × 68 m · ${Math.round(m.fps)} fps${fallback}`;
     plate = new RelativePlate({
       canvas: ui.canvas,
       box: ui.box,

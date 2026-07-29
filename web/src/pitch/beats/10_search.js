@@ -70,6 +70,31 @@ const COLS = 4, ROWS = 3, PAD = 7, TSC = 0.5;
 const TILE_DUR = 20;                 // seconds of possession per miniature board
 const ANSWER_AT = [0, -260];         // where the full-size answer board lives
 
+/* the miniature grid, in world metres */
+const GRID_W = COLS * 105 * TSC + (COLS - 1) * PAD;
+const GRID_D = ROWS * 68 * TSC + (ROWS - 1) * PAD;
+const GRID_CX = GRID_W / 2 - 105 * TSC / 2 + 5;
+const GRID_CZ = GRID_D / 2 - 68 * TSC / 2;
+
+/**
+ * Stage 3 holds the grid and the map in the same frame, so the plate is seen
+ * from nearer overhead: at that width twelve boards only keep their markings
+ * when they are less foreshortened, and a near-plan grid of boards rhymes with
+ * the near-plan grid of the map beside it.
+ */
+const MAP_ELEV = 0.95;
+
+/**
+ * ...and the grid is re-laid smaller in world metres for that stage. The
+ * plate's fog is fixed (150 m → 380 m), so a camera pulled far enough back to
+ * frame the full-size grid into half a frame would dissolve it into coal. Half
+ * the grid seen from half the distance is the same picture, inside the fog.
+ */
+const MAP_K = 0.5;
+
+/** a settled pose per tile — twelve worlds caught at twelve different moments */
+const TILE_POSE = (i) => (3.1 + i * 2.9) % (TILE_DUR - 0.05);
+
 /**
  * The map's colour ramp. Anchored at zero when the sampled field straddles it,
  * and stretched across the observed range when it does not — a field that is
@@ -197,7 +222,10 @@ export function create(ctx) {
       board.own({ dispose: () => { frame.geometry.dispose(); frame.material.dispose(); } });
 
       holder.scale.setScalar(0.001);
-      tiles.push({ holder, pts, pos, bpt, bpos, tline, tpos, N, frame, z: cells[i], res: null, done: false });
+      tiles.push({
+        holder, pts, pos, bpt, bpos, tline, tpos, N, frame,
+        at: [cx, cz], z: cells[i], res: null, done: false,
+      });
     }
 
     // --- the full-size answer board --------------------------------------
@@ -213,9 +241,7 @@ export function create(ctx) {
     answer.add(aBall.group);
     board.own(aBall);
 
-    const GW = COLS * 105 * TSC + (COLS - 1) * PAD;
-    const GD = ROWS * 68 * TSC + (ROWS - 1) * PAD;
-    const gridFit = board.fitRect(GW / 2 - 105 * TSC / 2 + 5, GD / 2 - 68 * TSC / 2, GW, GD, { margin: 1.24 });
+    const gridFit = board.fitRect(GRID_CX, GRID_CZ, GRID_W, GRID_D, { margin: 1.24 });
     board.moveTo(gridFit.pos, gridFit.tgt, 0);
     const answerFit = board.fitRect(52.5 + ANSWER_AT[0], 34 + ANSWER_AT[1], 105, 68, { margin: 1.12 });
 
@@ -231,8 +257,8 @@ export function create(ctx) {
     root.appendChild(mapWrap);
 
     return {
-      board, sim, search, fit, opp, tiles, answer, aPieces, aBall,
-      gridFit, answerFit, side, foot, mapWrap,
+      board, sim, search, fit, opp, tiles, answer, aPieces, aBall, dotMat, ballMat,
+      gridFit, answerFit, mapFit: null, gridK: 1, side, foot, mapWrap,
       spawned: 0, noise: (search && search.noise_floor) || null,
       answerRun: null, answerCho: null, best: null,
     };
@@ -272,6 +298,64 @@ export function create(ctx) {
     t.gd = gd;
     t.frame.material.color.set(gdColor(gd, 0.35));
     t.frame.material.opacity = 0.75;
+  }
+
+  /** Re-lay the grid at world scale `k` (1 = the full-frame grid of stages 1–2). */
+  function layoutTiles(b, k) {
+    if (b.gridK === k) return;
+    b.gridK = k;
+    for (const t of b.tiles) {
+      t.holder.position.set(t.at[0] * k, 0, t.at[1] * k);
+      t.holder.scale.setScalar(TSC * k);
+    }
+    // Point sprites are sized in metres, and a grid seen from k times nearer
+    // would otherwise print its players k times larger against their pitch.
+    // The small boards carry a little more than their share so that thirteen
+    // pieces still read as a team rather than as dust.
+    const boost = k < 1 ? 1.4 : 1;
+    b.dotMat.size = 1.5 * k * boost;
+    b.ballMat.size = 2.0 * k * boost;
+  }
+
+  /**
+   * Every miniature board carries a real run, is at full size and is posed.
+   * A stage can be entered directly from the address bar, so no stage may
+   * assume that the one before it has already grown the grid in — that is what
+   * left the plate empty behind the map.
+   */
+  function ensureTiles(b, k, phase) {
+    layoutTiles(b, k);
+    for (let i = 0; i < b.tiles.length; i++) {
+      const t = b.tiles[i];
+      if (!t.done) runTile(b, i);
+      t.holder.visible = true;
+      t.holder.scale.setScalar(TSC * k);
+      tileFrame(t, phase ? phase(i) : TILE_DUR - 0.05);
+    }
+    b.spawned = b.tiles.length;
+  }
+
+  /**
+   * Frame the grid into the strip of plate the map card leaves free, so the
+   * eye reads twelve worlds and then the one answer without either being
+   * cropped by the other. Measured, not assumed: the card is sized in vw.
+   */
+  function fitGridLeft(b) {
+    const host = root.getBoundingClientRect();
+    const card = b.mapWrap.querySelector('.sm-map-card');
+    const box = card ? card.getBoundingClientRect() : null;
+    const free = box && box.width ? box.left - host.left : host.width;
+    // 0.90 of the free strip: the near row of a perspective grid is wider than
+    // the row the fit is computed for, and must clear the card too.
+    const frac = clamp((free / Math.max(1, host.width)) * 0.90, 0.3, 1);
+    const k = b.gridK;
+    const w = GRID_W * k, d = GRID_D * k;
+    const wide = w / frac;
+    // the near half of a plane at this inclination prints taller than the far
+    // half, so the aim is carried forward to put the grid's apparent centre —
+    // not its geometric one — level with the middle of the card
+    return b.board.fitRect(w / 2 + (wide - w) / 2, d / 2 + d * 0.18, wide, d,
+      { margin: 1.18, elev: MAP_ELEV });
   }
 
   function tileFrame(t, tt) {
@@ -567,6 +651,7 @@ export function create(ctx) {
   // ---- 1. many worlds ---------------------------------------------------
   function stageWorlds(b, alive) {
     b.side.innerHTML = worldsPanel(b);
+    layoutTiles(b, 1);
     b.board.moveTo(b.gridFit.pos, b.gridFit.tgt, 700);
     ctx.deck.annotate({ stats: [] });
     const t0 = performance.now();
@@ -583,7 +668,7 @@ export function create(ctx) {
         for (let i = 0; i < b.tiles.length; i++) {
           const t = b.tiles[i];
           const u = clamp((el - i * 0.12) / 0.5, 0, 1);
-          t.holder.scale.setScalar(TSC * (0.001 + 0.999 * (1 - Math.pow(1 - u, 3))));
+          t.holder.scale.setScalar(TSC * b.gridK * (0.001 + 0.999 * (1 - Math.pow(1 - u, 3))));
           if (t.res) tileFrame(t, clamp(el - i * 0.12, 0, TILE_DUR - 0.05));
         }
         if (el > 6.0 && b.spawned >= b.tiles.length) { stop(); resolve(); }
@@ -598,11 +683,7 @@ export function create(ctx) {
     paintCounters(b);
     startPool(b);
     b.board.moveTo(b.gridFit.pos, b.gridFit.tgt, 500);
-    for (let i = 0; i < b.tiles.length; i++) {
-      if (!b.tiles[i].done) runTile(b, i);
-      b.tiles[i].holder.scale.setScalar(TSC);
-      tileFrame(b.tiles[i], TILE_DUR - 0.05);
-    }
+    ensureTiles(b, 1);
     b.foot.innerHTML = `<div class="sm-cap">${workerCount()} hardware threads · one island each<br>the counter is measured here, not read from a file</div>`;
     const t0 = performance.now();
     const stop = b.board.loop((now) => {
@@ -633,16 +714,32 @@ export function create(ctx) {
           if (life.dead) return;
           b.search = json;
           if (veil) { veil.remove(); veil = null; }
-          if (curStage === 2) { b.mapWrap.style.display = ''; drawMap(b); ensureNoise(b); b.board.idle(); }
+          if (curStage === 2) {
+            b.mapWrap.style.display = '';
+            drawMap(b);
+            b.mapFit = fitGridLeft(b);
+            b.board.moveTo(b.mapFit.pos, b.mapFit.tgt, 400).then(() => ensureNoise(b));
+          }
         }));
       }
+      ensureTiles(b, MAP_K, TILE_POSE);
+      b.mapFit = fitGridLeft(b);
+      b.board.moveTo(b.mapFit.pos, b.mapFit.tgt, 600);
       return wait(500);
     }
     if (veil) { veil.remove(); veil = null; }
     b.mapWrap.style.display = '';
-    for (const t of b.tiles) { t.holder.visible = true; tileFrame(t, TILE_DUR - 0.05); }
-    b.board.moveTo(b.gridFit.pos, b.gridFit.tgt, 600);
+    ensureTiles(b, MAP_K, TILE_POSE);
+    // what ties the grid to the map: the boards are cells of it
+    const nPts = Array.isArray(b.search.points) ? b.search.points.length : null;
+    const seeds = b.search.seeds_per_point;
+    b.foot.innerHTML = `<div class="sm-cap">${
+      nPts != null ? `${nPts} strategies scored` : 'the searched map'}${
+      seeds ? ` · ${seeds} seeds each` : ''}<br><b>${b.tiles.length}</b> of them running here as boards</div>`;
+    // the card first: the camera frames the strip of plate the card leaves free
     drawMap(b);
+    b.mapFit = fitGridLeft(b);
+    b.board.moveTo(b.mapFit.pos, b.mapFit.tgt, 600);
     ensureNoise(b);
     ctx.deck.annotate({ stats: [] });
     return wait(900);
@@ -730,10 +827,13 @@ export function create(ctx) {
     resize() {
       if (!built) return;
       built.board.resize();
-      const GW = COLS * 105 * TSC + (COLS - 1) * PAD;
-      const GD = ROWS * 68 * TSC + (ROWS - 1) * PAD;
-      built.gridFit = built.board.fitRect(GW / 2 - 105 * TSC / 2 + 5, GD / 2 - 68 * TSC / 2, GW, GD, { margin: 1.24 });
+      built.gridFit = built.board.fitRect(GRID_CX, GRID_CZ, GRID_W, GRID_D, { margin: 1.24 });
       built.answerFit = built.board.fitRect(52.5 + ANSWER_AT[0], 34 + ANSWER_AT[1], 105, 68, { margin: 1.12 });
+      if (curStage === 2) {
+        built.mapFit = fitGridLeft(built);
+        built.board.moveTo(built.mapFit.pos, built.mapFit.tgt, 0);
+        built.board.requestRender();
+      }
     },
     dispose() {
       token++;

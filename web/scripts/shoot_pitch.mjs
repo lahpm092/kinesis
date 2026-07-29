@@ -53,7 +53,7 @@ async function bootDeck() {
     try {
       await page.goto(`${BASE}/pitch.html`, { waitUntil: 'domcontentloaded', timeout: 60000 });
       await page.evaluate(() => window.__deckReady);
-      await page.waitForFunction(() => window.__stageSettled === true, { timeout: 30000 });
+      await page.waitForFunction(() => window.__stageSettled === true, { timeout: 180000 });
       return;
     } catch (err) {
       if (attempt >= 3) throw err;
@@ -110,13 +110,13 @@ async function walk() {
   await gotoStage(manifest[0].id, 0);
   for (let i = 1; i < total; i++) {
     await page.keyboard.press('ArrowRight');
-    await page.waitForFunction(() => window.__stageSettled === true, { timeout: 30000 });
+    await page.waitForFunction(() => window.__stageSettled === true, { timeout: 180000 });
   }
   const end = await page.evaluate(() => window.__deckState);
   console.log('walk → end', JSON.stringify(end));
   for (let i = 1; i < total; i++) {
     await page.keyboard.press('ArrowLeft');
-    await page.waitForFunction(() => window.__stageSettled === true, { timeout: 30000 });
+    await page.waitForFunction(() => window.__stageSettled === true, { timeout: 180000 });
   }
   const start = await page.evaluate(() => window.__deckState);
   console.log('walk ← start', JSON.stringify(start));
