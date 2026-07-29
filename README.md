@@ -1,97 +1,99 @@
-# KINESIS — Ecological Performance Intelligence
+# KINESIS — investor deck
 
-An end-to-end demo: open-licensed match footage → local computer-vision
-pipeline → an investor-grade interactive study of soccer performance through
-the lens of **ecological dynamics** — from a 10-second broadcast clip up to a
-full fixed-camera half that is cut, tracked, profiled, and finally **played
-forward** by a metrics-driven simulation.
+A fork of [KINESIS](https://github.com/lahpm092/kinesis) that adds a keyboard-driven,
+eleven-beat investor presentation and a **parameterised pipeline that runs on arbitrary
+broadcast footage** — the original scripts were hardcoded to two specific matches.
 
-- **Footage** — France – Germany, UEFA Nations League, Stade de France
-  (16 Oct 2018). Wikimedia Commons, **CC BY-SA 4.0** (10.4 s working clip,
-  1920×736 @ 30 fps).
-- **Segmentation** — **SAM 3** (`Sam3VideoModel`, transformers) running
-  locally on Apple Silicon (MPS), text-prompted with *“person”*: per-frame
-  masks + persistent track identities for every player.
-- **Pose** — **RTMPose-x** (halpe26, 26 joints) on every SAM3 box +
-  **RTMW3D-x** whole-body 3D for the articulated viewer (rtmlib / ONNX).
-- **Calibration** — hand-refined pitch homography (goal posts, penalty-D
-  arc, line constraints; least-squares) + per-frame camera-pan compensation
-  (phase correlation on the stands), giving positions in meters.
-- **Metrics** (see `docs/metrics_spec.md` — 30 measures, cited):
-  kinematics (speed, accel/decel, sprints, HSR, accel load), perception-action
-  proxies (reaction latency, COD sharpness), attention (scan rate), and the
-  ecological-dynamics core (stretch index, effective playing space, centroid
-  coupling, cluster-phase synchrony, dyadic relative phase, Voronoi regions).
-- **Biomechanics** — `web/src/scenes/biomech.js` (+ `gait/data.js`,
-  `pipeline/12_biomech_clip.py`): a NEW dataset video (the 1st-half panorama,
-  untouched by every other chapter) → the pipeline finds its most visible
-  sprint on its own (median-background blobs → greedy tracks → visibility
-  score) → a portrait crop rides the runner → **SAM 3** person masks →
-  **RTMPose-x** (halpe26) per frame → interior joint angles by the normalised
-  dot product, angular speed by central difference, joint velocity vectors in
-  m/s through the local homography Jacobian → a synchronized triptych
-  (segmentation | skeleton | geometry) + measured features in
-  `web/public/gait.json`. Stage 11 remains the 2nd-half/master variant.
-- **Experience** — `web/`: vite + three.js, sepia editorial design; scenes:
-  Segment (mask overlay on footage) → Skeleton (glowing 3D articulated
-  reconstruction with live joint-angle arcs) → Kinematics (trace plates) →
-  Field (3D ecology view) → Biomechanics (joint goniometry → training) →
-  Athletes / Regime / Affordance → Theory (cited index of measures).
-
-## Run the demo
+**To present it, read [`PRESENTING.md`](PRESENTING.md).** One page, one key.
 
 ```bash
-cd web
-npm install
-npm run dev        # → http://localhost:5173
+cd web && npm install && npm run dev     # → http://localhost:5173/pitch.html
 ```
 
-Space bar = play/pause anywhere. Click a player in the Segment scene (or a
-row in Kinematics) to select them everywhere. Drag to orbit the 3D scenes.
+Press **→**. That is the whole interface.
 
-## Reproduce the pipeline
+The original study site is untouched and still builds at `/index.html`.
+
+---
+
+## The footage
+
+**Manchester City 0 – 1 Manchester United**, Premier League, 20 March 2016.
+SoccerNet v2, 720p / 25 fps, first half (2700 s).
+
+Everything on screen in beats I–VI and the measured column of XI is computed from that file.
+
+## What it shows
+
+| | Beat | Measured result |
+|---|---|---|
+| I | Raw match video | One broadcast feed. No sensors, no vests. |
+| II | Clipping | **18.5 min of live play** from 45:00, 226 segments / 38 kept |
+| III | Segmentation | 18 identities, **zero id switches**, ball in 31/31 frames |
+| IV | Skeleton | Peak knee flexion **121°**, top speed **10.08 m/s** |
+| V | Relative geometry | Line-of-sight rotation rate — bearing held vs bearing swept |
+| VI | Metrics | **65-node derivation graph**, every metric traceable to footage |
+| VII | Simulation | `p_real = p_complete × p_control × (1 − p_intercept)` |
+| VIII | Training | **55 flags, 204 work units**, real `taxonomy-v2` identifiers |
+| IX | Before / after | Completion **+0.094 [+0.070, +0.117]**, z = 7.87 |
+| X | Parallel search | **2627 sims/s** across 8 workers, 61/63 cells resolved |
+| XI | Ranking | 13 tracked players, ranked on measurement |
+
+## The pipeline
 
 ```bash
-uv venv --python 3.12 .venv
-uv pip install --python .venv/bin/python torch torchvision transformers \
-  accelerate opencv-python rtmlib onnxruntime numpy scipy pillow tqdm
-
-# 0. data/raw/…ogv  — source video (see data/raw for provenance)
-# 1. frames + web clip           (ffmpeg, see git history / docs)
-.venv/bin/python pipeline/01_landmarks.py       # homography (edit CORR to refine)
-.venv/bin/python pipeline/01b_camera_motion.py  # pan compensation
-.venv/bin/python pipeline/02_segment_sam3.py    # SAM3 video segmentation (MPS)
-.venv/bin/python pipeline/03_pose_rtm.py        # RTMPose 2D + RTMW3D 3D
-.venv/bin/python pipeline/04_metrics_export.py  # metrics → web/public/data/demo.json
+python pipeline/10_acquire.py     # resumable parallel range downloader
+python pipeline/20_cut.py         # dead-time removal
+python pipeline/30_segment.py     # SAM 3, windowed + identity-stitched
+python pipeline/31_project.py     # PnLCalib → metric coordinates
+python pipeline/40_pose.py        # RTMPose-x via CoreML
+python pipeline/50_relative.py    # dyad geometry
+python pipeline/60_metrics.py     # metrics + derivation graph
+node   pipeline/70_simulate.mjs   # before / after, 400 paired seeds
+python pipeline/80_prescribe.py   # taxonomy-v2 prescription
+node   pipeline/90_search.mjs     # parallel strategy search
+python pipeline/95_roster.py      # ranking + face mining
+python pipeline/99_validate_pitch.py   # contract validator; exits non-zero on violation
 ```
 
-## Full-match study (SoccerTrack v2, CC BY 4.0)
+Weights and footage are gitignored. `models/sam3-hf` (3.2 GB) comes from an ungated
+`Sam3VideoModel` mirror; `models/pnlcalib` from the PnLCalib release.
 
-Match 117092 (Tsukuba B vs C1, 2023-11-18) — 4K fixed panoramic camera.
-The 6.7 GB half videos are never stored: `pipeline/rangeproxy.py` serves the
-Google Drive files as a seekable HTTP source (8 MB sub-ranges, consent-token
-retries) and one ffmpeg pass emits an activity proxy (640/8fps), analysis
-master (3200/12.5fps) and reel base (1280/25fps).
+## What we know, and what we do not
 
-```bash
-pipeline/fetch_half.sh 2nd            # stream the half via rangeproxy (never stores the 6.7 GB)
-pipeline/run_match_pipeline.sh 2nd    # cut → track → metrics → reel
-.venv/bin/python pipeline/10_match_sam3.py 2nd 60 6   # SAM3 showcase window (optional)
-.venv/bin/python pipeline/11_gait_angles.py 2nd       # lower-body gait angles → web/public/gait.json (optional)
-```
+This is the part worth reading before you present it.
 
-Google Drive throttles the panorama files aggressively; `rangeproxy.py`
-self-tunes its chunk size and retries through the consent/quota pages. If it
-reports sustained failures, wait out the per-IP cool-down and rerun — the
-probes in this repo's session logs recovered within the hour.
+- **Every artifact carries `measured` and `generator` fields.** Beats VII, IX and X render a
+  `SIMULATED` chip; anything post-training renders `PROJECTED`. The deck says which is which
+  without being asked.
+- **Degenerate input is flagged, not smoothed.** `metrics.json` carries a `degenerate` guard;
+  a run whose values pin to their safety clamps refuses to present itself as a measurement.
+- **Prescription coverage is explicit.** 91 of 143 rule evaluations had no usable input on a
+  3.9-second window, and each says so with a reason — `input_missing`, `input_clamped`,
+  `cohort_dispersion_unavailable`. Silence is never confusable with health.
+- **xG and goals do not move** in the before/after comparison, and we say so. Completion and
+  shot volume do, strongly. The cause is traceable: `finish` carries only 30 % of its fit
+  weight while the joint-kinematic channels are unpopulated. That is a falsifiable prediction,
+  not a hedge.
+- **No player's face is claimed.** 17 portrait-grade crops were mined from the close-ups the
+  cutter discards, but none could be honestly associated with a tracked player — the nearest
+  is 158 s from the tracked window. Ranked players show the team glyph.
+- **Calibration coverage is 52 % on live play, 37 % overall**, at 0.29 m median positional
+  error at midfield. See [`docs/CALIBRATION.md`](docs/CALIBRATION.md), which records two dead
+  ends before the method that worked.
 
-SAM3 weights: place the transformers-format checkpoint in `models/sam3-hf/`
-(config + model.safetensors + tokenizer files). The official repo is
-`facebook/sam3` (gated; community mirrors exist).
+## Documents
 
-## Honest-numbers notes
+| File | |
+|---|---|
+| [`PRESENTING.md`](PRESENTING.md) | how to drive the deck, and the answers to hard questions |
+| [`docs/PITCH_PLAN.md`](docs/PITCH_PLAN.md) | the eleven beats and their stages |
+| [`docs/PITCH_COPY.md`](docs/PITCH_COPY.md) | every word on screen, and the honesty requirements |
+| [`docs/PITCH_DATA_CONTRACT.md`](docs/PITCH_DATA_CONTRACT.md) | the JSON schemas |
+| [`docs/CALIBRATION.md`](docs/CALIBRATION.md) | how we know where the players are, and where we do not |
 
-Vision-only estimates from a single handheld camera: speeds are demo-grade
-(~±10 %), scan rate & reaction latency are proxies (see the Theory scene's
-footnotes). Skeletons for far-side players are low-confidence and filtered
-by track quality.
+## Credits
+
+Footage: SoccerNet (research use). Segmentation: SAM 3. Pose: RTMPose-x / halpe26.
+Calibration: PnLCalib. Training taxonomy: `taxonomy-v2` plus an additive soccer extension
+in `pipeline/taxonomy_ext/`, which modifies no upstream file.
