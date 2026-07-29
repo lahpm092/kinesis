@@ -249,6 +249,8 @@ export function readRoster(data) {
     meanGain: gains.length ? gains.reduce((a, b) => a + b, 0) / gains.length : null,
     promoted: hasProjection
       ? players.filter((p) => p.rankDelta != null && p.rankDelta > 0).length : null,
+    moved: hasProjection
+      ? players.filter((p) => p.rankDelta != null && p.rankDelta !== 0).length : null,
     tiers,
   };
 }

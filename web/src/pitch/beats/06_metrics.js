@@ -392,8 +392,10 @@ export function create(ctx) {
 
   // ---------------------------------------------------------------- scale --
   function buildScale() {
-    const note = String(corpus.note || 'the chain is per clip and scales linearly');
-    const body = el('div', 'der-scale-note', note.charAt(0).toUpperCase() + note.slice(1));
+    const raw = String(corpus.note || 'the chain is per clip and scales linearly').trim();
+    // the file writes a fragment; on screen it is a sentence
+    const note = raw.charAt(0).toUpperCase() + raw.slice(1) + (/[.!?]$/.test(raw) ? '' : '.');
+    const body = el('div', 'der-scale-note', note);
     const keys = el('div', 'der-scale-keys');
     const unit = (n, u, k) => {
       const w = el('div', 'u');

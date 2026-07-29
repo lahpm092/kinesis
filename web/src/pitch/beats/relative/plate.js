@@ -53,8 +53,10 @@ const SPOTS = [[L / 2, W / 2], [11, W / 2], [L - 11, W / 2]];
 
 // The camera never zooms past the point where the pitch stops being readable:
 // whatever it is framing, this much of the surveyed pitch stays in shot.
-const MIN_CTX_X = 60;   // metres of pitch length always visible
-const MIN_CTX_Y = 42;   // metres of pitch width always visible
+// Both penalty areas span 13.8–54.2 m across, so 52 m of width keeps the paint
+// — the only markings that say where on the pitch this is — inside every frame.
+const MIN_CTX_X = 84;   // metres of pitch length always visible
+const MIN_CTX_Y = 52;   // metres of pitch width always visible
 
 export class RelativePlate {
   constructor({ canvas, box, model, onResize }) {
@@ -635,10 +637,14 @@ export class RelativePlate {
       const dist = Number.isFinite(f.centroidDist)
         ? f.centroidDist
         : Math.hypot(ca[0] - cb[0], ca[1] - cb[1]);
+      // the two centroids can be metres apart and still only tens of pixels
+      // apart on screen, so the distance label clears the team tags by more
+      // than the tags are tall
       const ux = BX - AX; const uy = BY - AY;
       const len = Math.max(1, Math.hypot(ux, uy));
-      const mx = (AX + BX) / 2 - (uy / len) * 30;
-      const my = (AY + BY) / 2 + (ux / len) * 30;
+      const off = len < 90 ? 48 : 30;
+      const mx = (AX + BX) / 2 - (uy / len) * off;
+      const my = (AY + BY) / 2 + (ux / len) * off;
       this._mono(c, 'CENTROID DISTANCE', mx, my - 11,
         { size: 8, color: hexA(T.bone2, 0.9), align: 'center', halo: true, tracking: '1.8px' });
       this._value(c, mx, my + 8, dist.toFixed(1), 'M', { size: 19, align: 'center', color: T.bone });

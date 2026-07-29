@@ -88,4047 +88,3269 @@
  "events": [
   {
    "run": "before",
-   "t": 2.52,
-   "key": "one_v_one_dribble",
-   "player": 5,
-   "team": "A",
-   "taken": false,
-   "value": 0.095,
-   "p_real": 0.602,
-   "p_complete": 0.8187,
-   "p_control": 0.8932,
-   "p_intercept": 0.1768,
-   "p_perceive": 0.2675,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    56.12,
-    34
-   ],
-   "target": [
-    62.12,
-    36.5
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.82"
-  },
-  {
-   "run": "before",
-   "t": 4.08,
+   "t": 3.6,
    "key": "driving_run_into_space",
-   "player": 5,
+   "player": 2,
    "team": "A",
    "taken": true,
-   "value": 0.175,
-   "p_real": 0.6836,
-   "p_complete": 0.8191,
-   "p_control": 0.9305,
-   "p_intercept": 0.1031,
-   "p_perceive": 0.3327,
+   "value": 0.101,
+   "p_real": 0.5968,
+   "p_complete": 0.7421,
+   "p_control": 0.8996,
+   "p_intercept": 0.1061,
+   "p_perceive": 0.3633,
    "limiting": "p_complete",
    "available_s": 0,
    "n": 1,
    "xy": [
-    61.36,
+    57.61,
     34
    ],
    "target": [
-    70.36,
+    66.61,
     32
    ],
-   "note": "taken · p_real 0.68"
+   "note": "taken · p_real 0.60"
   },
   {
    "run": "before",
-   "t": 6.56,
-   "key": "driving_run_into_space",
-   "player": 5,
+   "t": 3.6,
+   "key": "switch_of_play",
+   "player": 2,
    "team": "A",
    "taken": false,
-   "value": 0.094,
-   "p_real": 0.7025,
-   "p_complete": 0.8398,
-   "p_control": 0.9321,
-   "p_intercept": 0.1025,
-   "p_perceive": 0.4225,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    73.63,
-    32.2
-   ],
-   "target": [
-    82.63,
-    30.2
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.84"
-  },
-  {
-   "run": "before",
-   "t": 6.56,
-   "key": "through_ball_timing_run",
-   "player": 5,
-   "team": "A",
-   "taken": true,
-   "value": 0.033,
-   "p_real": 0.7416,
-   "p_complete": 0.9512,
-   "p_control": 0.8472,
-   "p_intercept": 0.0798,
-   "p_perceive": 0.3909,
+   "value": 0.098,
+   "p_real": 0.8526,
+   "p_complete": 0.9335,
+   "p_control": 0.9134,
+   "p_intercept": 0,
+   "p_perceive": 0.3259,
    "limiting": "p_control",
    "available_s": 0,
    "n": 1,
    "xy": [
-    73.63,
-    32.2
+    57.61,
+    34
    ],
    "target": [
-    78.83,
-    14.11
+    60.03,
+    12.75
    ],
-   "note": "taken · p_real 0.74"
+   "note": "available 0.1 s, not taken · p_control 0.91"
   },
   {
    "run": "before",
-   "t": 8.84,
-   "key": "driving_run_into_space",
-   "player": 16,
+   "t": 7.12,
+   "key": "through_ball_timing_run",
+   "player": 2,
    "team": "A",
    "taken": true,
-   "value": 0.114,
-   "p_real": 0.5572,
-   "p_complete": 0.7161,
-   "p_control": 0.8755,
-   "p_intercept": 0.1112,
-   "p_perceive": 0.5718,
-   "limiting": "p_complete",
-   "available_s": 2.7,
-   "n": 2,
+   "value": 0.043,
+   "p_real": 0.6581,
+   "p_complete": 0.9161,
+   "p_control": 0.9173,
+   "p_intercept": 0.2168,
+   "p_perceive": 0.3922,
+   "limiting": "p_intercept",
+   "available_s": 0,
+   "n": 1,
    "xy": [
-    80.26,
-    14.11
+    70.14,
+    32.1
    ],
    "target": [
-    89.26,
-    12.11
+    74.61,
+    14.11
    ],
-   "note": "taken · p_real 0.56"
+   "note": "taken · p_real 0.66"
   },
   {
    "run": "before",
-   "t": 8.84,
-   "key": "one_v_one_dribble",
-   "player": 16,
+   "t": 11.68,
+   "key": "driving_run_into_space",
+   "player": 7,
    "team": "A",
    "taken": false,
-   "value": 0.061,
-   "p_real": 0.5026,
-   "p_complete": 0.7105,
-   "p_control": 0.8548,
-   "p_intercept": 0.1724,
-   "p_perceive": 0.5809,
+   "value": 0.111,
+   "p_real": 0.6214,
+   "p_complete": 0.7397,
+   "p_control": 0.941,
+   "p_intercept": 0.1073,
+   "p_perceive": 0.6764,
+   "limiting": "p_complete",
+   "available_s": 2.5,
+   "n": 2,
+   "xy": [
+    76.71,
+    14.11
+   ],
+   "target": [
+    85.71,
+    12.11
+   ],
+   "note": "available 2.5 s, not taken · p_complete 0.74"
+  },
+  {
+   "run": "before",
+   "t": 11.68,
+   "key": "give_and_go",
+   "player": 7,
+   "team": "A",
+   "taken": false,
+   "value": 0.09,
+   "p_real": 0.735,
+   "p_complete": 0.9843,
+   "p_control": 0.89,
+   "p_intercept": 0.161,
+   "p_perceive": 0.5769,
+   "limiting": "p_intercept",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    76.71,
+    14.11
+   ],
+   "target": [
+    70.61,
+    18.36
+   ],
+   "note": "available 0.1 s, not taken · p_intercept 0.84"
+  },
+  {
+   "run": "before",
+   "t": 11.68,
+   "key": "one_v_one_dribble",
+   "player": 7,
+   "team": "A",
+   "taken": true,
+   "value": 0.09,
+   "p_real": 0.5702,
+   "p_complete": 0.7343,
+   "p_control": 0.9298,
+   "p_intercept": 0.1649,
+   "p_perceive": 0.6844,
    "limiting": "p_complete",
    "available_s": 0,
    "n": 1,
    "xy": [
-    80.26,
+    76.71,
     14.11
    ],
    "target": [
-    86.26,
-    11.61
+    82.71,
+    16.61
+   ],
+   "note": "taken · p_real 0.57"
+  },
+  {
+   "run": "before",
+   "t": 14.2,
+   "key": "one_v_one_dribble",
+   "player": 7,
+   "team": "A",
+   "taken": false,
+   "value": 0.068,
+   "p_real": 0.5397,
+   "p_complete": 0.7093,
+   "p_control": 0.9267,
+   "p_intercept": 0.1789,
+   "p_perceive": 0.488,
+   "limiting": "p_complete",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    84.46,
+    16.37
+   ],
+   "target": [
+    90.46,
+    18.87
    ],
    "note": "available 0.1 s, not taken · p_complete 0.71"
   },
   {
    "run": "before",
-   "t": 13.72,
-   "key": "shot",
-   "player": 16,
-   "team": "A",
-   "taken": true,
-   "value": 0.002,
-   "p_real": 0.0271,
-   "p_complete": 0.5173,
-   "p_control": 0.0684,
-   "p_intercept": 0.2342,
-   "p_perceive": 0.3231,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    101.34,
-    10.72
-   ],
-   "target": [
-    105,
-    34
-   ],
-   "note": "taken · p_real 0.03"
-  },
-  {
-   "run": "before",
-   "t": 13.72,
-   "key": "switch_of_play",
-   "player": 16,
-   "team": "A",
-   "taken": false,
-   "value": 0.068,
-   "p_real": 0.665,
-   "p_complete": 0.8603,
-   "p_control": 0.8101,
-   "p_intercept": 0.0459,
-   "p_perceive": 0.3169,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    101.34,
-    10.72
-   ],
-   "target": [
-    92.35,
-    46.96
-   ],
-   "note": "available 0.1 s, not taken · p_control 0.81"
-  },
-  {
-   "run": "before",
-   "t": 15.48,
+   "t": 15.64,
    "key": "driving_run_into_space",
-   "player": 13,
+   "player": 9,
    "team": "B",
-   "taken": false,
-   "value": 0.078,
-   "p_real": 0.659,
-   "p_complete": 0.7848,
-   "p_control": 0.9353,
-   "p_intercept": 0.1023,
-   "p_perceive": 0.8191,
+   "taken": true,
+   "value": 0.057,
+   "p_real": 0.479,
+   "p_complete": 0.7292,
+   "p_control": 0.7484,
+   "p_intercept": 0.1224,
+   "p_perceive": 0.5766,
    "limiting": "p_complete",
    "available_s": 0,
    "n": 1,
    "xy": [
-    101.33,
-    24.24
+    82.87,
+    16.38
    ],
    "target": [
-    92.33,
-    22.24
+    73.87,
+    14.38
    ],
-   "note": "available 0.1 s, not taken · p_complete 0.78"
+   "note": "taken · p_real 0.48"
   },
   {
    "run": "before",
-   "t": 15.48,
+   "t": 15.64,
    "key": "give_and_go",
-   "player": 13,
-   "team": "B",
-   "taken": false,
-   "value": 0.092,
-   "p_real": 0.9066,
-   "p_complete": 0.9886,
-   "p_control": 0.9171,
-   "p_intercept": 0,
-   "p_perceive": 0.6782,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    101.33,
-    24.24
-   ],
-   "target": [
-    102.01,
-    12.61
-   ],
-   "note": "available 0.1 s, not taken · p_control 0.92"
-  },
-  {
-   "run": "before",
-   "t": 15.48,
-   "key": "line_splitting_pass",
-   "player": 13,
+   "player": 9,
    "team": "B",
    "taken": false,
    "value": 0.098,
-   "p_real": 0.8978,
-   "p_complete": 0.983,
-   "p_control": 0.9133,
+   "p_real": 0.9074,
+   "p_complete": 0.9599,
+   "p_control": 0.9453,
    "p_intercept": 0,
-   "p_perceive": 0.6782,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    101.33,
-    24.24
-   ],
-   "target": [
-    102.01,
-    12.61
-   ],
-   "note": "available 0.1 s, not taken · p_control 0.91"
-  },
-  {
-   "run": "before",
-   "t": 15.48,
-   "key": "switch_of_play",
-   "player": 13,
-   "team": "B",
-   "taken": false,
-   "value": 0.069,
-   "p_real": 0.6066,
-   "p_complete": 0.8373,
-   "p_control": 0.7254,
-   "p_intercept": 0.0012,
-   "p_perceive": 0.7918,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    101.33,
-    24.24
-   ],
-   "target": [
-    78.6,
-    42.8
-   ],
-   "note": "available 0.1 s, not taken · p_control 0.73"
-  },
-  {
-   "run": "before",
-   "t": 15.48,
-   "key": "third_man_run",
-   "player": 13,
-   "team": "B",
-   "taken": true,
-   "value": 0.104,
-   "p_real": 0.7113,
-   "p_complete": 0.8848,
-   "p_control": 0.8055,
-   "p_intercept": 0.002,
-   "p_perceive": 0.7918,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    101.33,
-    24.24
-   ],
-   "target": [
-    78.6,
-    42.8
-   ],
-   "note": "taken · p_real 0.71"
-  },
-  {
-   "run": "before",
-   "t": 18.12,
-   "key": "driving_run_into_space",
-   "player": 3,
-   "team": "B",
-   "taken": false,
-   "value": 0.112,
-   "p_real": 0.5225,
-   "p_complete": 0.6935,
-   "p_control": 0.8582,
-   "p_intercept": 0.1221,
-   "p_perceive": 0.4383,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    78.1,
-    42.8
-   ],
-   "target": [
-    69.1,
-    44.8
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.69"
-  },
-  {
-   "run": "before",
-   "t": 18.12,
-   "key": "switch_of_play",
-   "player": 3,
-   "team": "B",
-   "taken": true,
-   "value": 0.03,
-   "p_real": 0.3362,
-   "p_complete": 0.6612,
-   "p_control": 0.5182,
-   "p_intercept": 0.0186,
-   "p_perceive": 0.3959,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    78.1,
-    42.8
-   ],
-   "target": [
-    92.45,
-    15.4
-   ],
-   "note": "taken · p_real 0.34"
-  },
-  {
-   "run": "before",
-   "t": 20.72,
-   "key": "driving_run_into_space",
-   "player": 9,
-   "team": "B",
-   "taken": false,
-   "value": 0.083,
-   "p_real": 0.527,
-   "p_complete": 0.7971,
-   "p_control": 0.738,
-   "p_intercept": 0.1042,
-   "p_perceive": 0.8117,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    90.91,
-    15.4
-   ],
-   "target": [
-    81.91,
-    13.4
-   ],
-   "note": "available 0.1 s, not taken · p_control 0.74"
-  },
-  {
-   "run": "before",
-   "t": 20.72,
-   "key": "give_and_go",
-   "player": 9,
-   "team": "B",
-   "taken": false,
-   "value": 0.123,
-   "p_real": 0.905,
-   "p_complete": 0.9695,
-   "p_control": 0.9335,
-   "p_intercept": 0,
-   "p_perceive": 0.8177,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    90.91,
-    15.4
-   ],
-   "target": [
-    85.52,
-    18.64
-   ],
-   "note": "available 0.1 s, not taken · p_control 0.93"
-  },
-  {
-   "run": "before",
-   "t": 20.72,
-   "key": "line_splitting_pass",
-   "player": 9,
-   "team": "B",
-   "taken": false,
-   "value": 0.083,
-   "p_real": 0.6816,
-   "p_complete": 0.8186,
-   "p_control": 0.8926,
-   "p_intercept": 0.0672,
-   "p_perceive": 0.7836,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    90.91,
-    15.4
-   ],
-   "target": [
-    65.47,
-    32.06
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.82"
-  },
-  {
-   "run": "before",
-   "t": 20.72,
-   "key": "third_man_run",
-   "player": 9,
-   "team": "B",
-   "taken": true,
-   "value": 0.127,
-   "p_real": 0.8984,
-   "p_complete": 0.9593,
-   "p_control": 0.9365,
-   "p_intercept": 0,
-   "p_perceive": 0.8177,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    90.91,
-    15.4
-   ],
-   "target": [
-    85.52,
-    18.64
-   ],
-   "note": "taken · p_real 0.90"
-  },
-  {
-   "run": "before",
-   "t": 23.2,
-   "key": "driving_run_into_space",
-   "player": 16,
-   "team": "A",
-   "taken": true,
-   "value": 0.157,
-   "p_real": 0.5128,
-   "p_complete": 0.6835,
-   "p_control": 0.8648,
-   "p_intercept": 0.1325,
-   "p_perceive": 0.4603,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    87.03,
-    17.43
-   ],
-   "target": [
-    96.03,
-    15.43
-   ],
-   "note": "taken · p_real 0.51"
-  },
-  {
-   "run": "before",
-   "t": 27.2,
-   "key": "give_and_go",
-   "player": 12,
-   "team": "B",
-   "taken": true,
-   "value": 0.016,
-   "p_real": 0.6412,
-   "p_complete": 0.9835,
-   "p_control": 0.6519,
-   "p_intercept": 0,
-   "p_perceive": 0.2793,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    95.31,
-    15.96
-   ],
-   "target": [
-    97.89,
-    14.81
-   ],
-   "note": "taken · p_real 0.64"
-  },
-  {
-   "run": "before",
-   "t": 28.72,
-   "key": "give_and_go",
-   "player": 9,
-   "team": "B",
-   "taken": true,
-   "value": 0.077,
-   "p_real": 0.8727,
-   "p_complete": 0.9536,
-   "p_control": 0.9151,
-   "p_intercept": 0,
-   "p_perceive": 0.4978,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    95.64,
-    14.81
-   ],
-   "target": [
-    91.09,
-    17.32
-   ],
-   "note": "taken · p_real 0.87"
-  },
-  {
-   "run": "before",
-   "t": 28.72,
-   "key": "third_man_run",
-   "player": 9,
-   "team": "B",
-   "taken": false,
-   "value": 0.079,
-   "p_real": 0.8623,
-   "p_complete": 0.9384,
-   "p_control": 0.9189,
-   "p_intercept": 0,
-   "p_perceive": 0.4978,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    95.64,
-    14.81
-   ],
-   "target": [
-    91.09,
-    17.32
-   ],
-   "note": "available 0.1 s, not taken · p_control 0.92"
-  },
-  {
-   "run": "before",
-   "t": 30.4,
-   "key": "driving_run_into_space",
-   "player": 12,
-   "team": "B",
-   "taken": false,
-   "value": 0.068,
-   "p_real": 0.5744,
-   "p_complete": 0.6912,
-   "p_control": 0.9319,
-   "p_intercept": 0.1084,
-   "p_perceive": 0.2978,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    88.91,
-    17.32
-   ],
-   "target": [
-    79.91,
-    15.32
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.69"
-  },
-  {
-   "run": "before",
-   "t": 30.4,
-   "key": "switch_of_play",
-   "player": 12,
-   "team": "B",
-   "taken": true,
-   "value": 0.04,
-   "p_real": 0.6798,
-   "p_complete": 0.9271,
-   "p_control": 0.7332,
-   "p_intercept": 0,
-   "p_perceive": 0.2627,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    88.91,
-    17.32
-   ],
-   "target": [
-    87.48,
-    47.27
-   ],
-   "note": "taken · p_real 0.68"
-  },
-  {
-   "run": "before",
-   "t": 32.88,
-   "key": "driving_run_into_space",
-   "player": 3,
-   "team": "B",
-   "taken": false,
-   "value": 0.082,
-   "p_real": 0.5443,
-   "p_complete": 0.6988,
-   "p_control": 0.8647,
-   "p_intercept": 0.0992,
-   "p_perceive": 0.447,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    86.53,
-    47.27
-   ],
-   "target": [
-    77.53,
-    45.27
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.70"
-  },
-  {
-   "run": "before",
-   "t": 32.88,
-   "key": "line_splitting_pass",
-   "player": 3,
-   "team": "B",
-   "taken": true,
-   "value": 0.136,
-   "p_real": 0.7115,
-   "p_complete": 0.8541,
-   "p_control": 0.8914,
-   "p_intercept": 0.0655,
-   "p_perceive": 0.4045,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    86.53,
-    47.27
-   ],
-   "target": [
-    80.33,
-    20.4
-   ],
-   "note": "taken · p_real 0.71"
-  },
-  {
-   "run": "before",
-   "t": 35.96,
-   "key": "driving_run_into_space",
-   "player": 12,
-   "team": "B",
-   "taken": false,
-   "value": 0.159,
-   "p_real": 0.6409,
-   "p_complete": 0.7653,
-   "p_control": 0.935,
-   "p_intercept": 0.1044,
-   "p_perceive": 0.5865,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    78,
-    20.4
-   ],
-   "target": [
-    69,
-    18.4
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.77"
-  },
-  {
-   "run": "before",
-   "t": 35.96,
-   "key": "give_and_go",
-   "player": 12,
-   "team": "B",
-   "taken": true,
-   "value": 0.122,
-   "p_real": 0.7568,
-   "p_complete": 0.9831,
-   "p_control": 0.7698,
-   "p_intercept": 0,
-   "p_perceive": 0.5796,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    78,
-    20.4
-   ],
-   "target": [
-    87.34,
-    14.04
-   ],
-   "note": "taken · p_real 0.76"
-  },
-  {
-   "run": "before",
-   "t": 37.92,
-   "key": "driving_run_into_space",
-   "player": 9,
-   "team": "B",
-   "taken": false,
-   "value": 0.107,
-   "p_real": 0.5268,
-   "p_complete": 0.7952,
-   "p_control": 0.7383,
-   "p_intercept": 0.1026,
-   "p_perceive": 0.809,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    85.53,
-    14.04
-   ],
-   "target": [
-    76.53,
-    12.04
-   ],
-   "note": "available 0.1 s, not taken · p_control 0.74"
-  },
-  {
-   "run": "before",
-   "t": 37.92,
-   "key": "line_splitting_pass",
-   "player": 9,
-   "team": "B",
-   "taken": false,
-   "value": 0.153,
-   "p_real": 0.8306,
-   "p_complete": 0.913,
-   "p_control": 0.9367,
-   "p_intercept": 0.0288,
-   "p_perceive": 0.7929,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    85.53,
-    14.04
-   ],
-   "target": [
-    70.98,
-    22.11
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.91"
-  },
-  {
-   "run": "before",
-   "t": 37.92,
-   "key": "line_splitting_pass",
-   "player": 9,
-   "team": "B",
-   "taken": true,
-   "value": 0.127,
-   "p_real": 0.7492,
-   "p_complete": 0.8611,
-   "p_control": 0.9134,
-   "p_intercept": 0.0474,
-   "p_perceive": 0.7807,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    85.53,
-    14.04
-   ],
-   "target": [
-    65.3,
-    29.86
-   ],
-   "note": "taken · p_real 0.75"
-  },
-  {
-   "run": "before",
-   "t": 40.8,
-   "key": "driving_run_into_space",
-   "player": 4,
-   "team": "B",
-   "taken": false,
-   "value": 0.155,
-   "p_real": 0.6942,
-   "p_complete": 0.8426,
-   "p_control": 0.9319,
-   "p_intercept": 0.1159,
-   "p_perceive": 0.4566,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    63.69,
-    29.86
-   ],
-   "target": [
-    54.69,
-    27.86
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.84"
-  },
-  {
-   "run": "before",
-   "t": 40.8,
-   "key": "give_and_go",
-   "player": 4,
-   "team": "B",
-   "taken": true,
-   "value": 0.134,
-   "p_real": 0.932,
-   "p_complete": 0.9922,
-   "p_control": 0.9402,
-   "p_intercept": 0.0008,
-   "p_perceive": 0.4686,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    63.69,
-    29.86
-   ],
-   "target": [
-    60.73,
-    25.03
-   ],
-   "note": "taken · p_real 0.93"
-  },
-  {
-   "run": "before",
-   "t": 41.96,
-   "key": "driving_run_into_space",
-   "player": 12,
-   "team": "B",
-   "taken": true,
-   "value": 0.058,
-   "p_real": 0.5579,
-   "p_complete": 0.7427,
-   "p_control": 0.9209,
-   "p_intercept": 0.1843,
-   "p_perceive": 0.4101,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    60.09,
-    25.03
-   ],
-   "target": [
-    51.09,
-    23.03
-   ],
-   "note": "taken · p_real 0.56"
-  },
-  {
-   "run": "before",
-   "t": 41.96,
-   "key": "give_and_go",
-   "player": 12,
-   "team": "B",
-   "taken": false,
-   "value": 0.162,
-   "p_real": 0.93,
-   "p_complete": 0.992,
-   "p_control": 0.9375,
-   "p_intercept": 0,
-   "p_perceive": 0.5552,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    60.09,
-    25.03
-   ],
-   "target": [
-    60.3,
-    30.84
-   ],
-   "note": "available 0.1 s, not taken · p_control 0.94"
-  },
-  {
-   "run": "before",
-   "t": 44.92,
-   "key": "one_v_one_dribble",
-   "player": 5,
-   "team": "A",
-   "taken": true,
-   "value": 0.033,
-   "p_real": 0.6443,
-   "p_complete": 0.83,
-   "p_control": 0.9165,
-   "p_intercept": 0.153,
-   "p_perceive": 0.3917,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    51.37,
-    23.01
-   ],
-   "target": [
-    57.37,
-    20.51
-   ],
-   "note": "taken · p_real 0.64"
-  },
-  {
-   "run": "before",
-   "t": 46.68,
-   "key": "driving_run_into_space",
-   "player": 5,
-   "team": "A",
-   "taken": true,
-   "value": 0.105,
-   "p_real": 0.6909,
-   "p_complete": 0.8261,
-   "p_control": 0.9317,
-   "p_intercept": 0.1024,
-   "p_perceive": 0.391,
-   "limiting": "p_complete",
-   "available_s": 5.3,
-   "n": 3,
-   "xy": [
-    83.65,
-    17.36
-   ],
-   "target": [
-    92.65,
-    15.36
-   ],
-   "note": "taken · p_real 0.69"
-  },
-  {
-   "run": "before",
-   "t": 46.68,
-   "key": "through_ball_timing_run",
-   "player": 5,
-   "team": "A",
-   "taken": false,
-   "value": 0.148,
-   "p_real": 0.8263,
-   "p_complete": 0.9301,
-   "p_control": 0.8925,
-   "p_intercept": 0.0045,
-   "p_perceive": 0.4229,
+   "p_perceive": 0.5792,
    "limiting": "p_control",
    "available_s": 2.9,
    "n": 2,
    "xy": [
-    57.67,
-    20.96
+    82.87,
+    16.38
    ],
    "target": [
-    78.81,
-    36.68
+    75.95,
+    21.21
    ],
-   "note": "available 2.9 s, not taken · p_control 0.89"
+   "note": "available 2.9 s, not taken · p_control 0.95"
   },
   {
    "run": "before",
-   "t": 52,
-   "key": "one_v_one_dribble",
-   "player": 5,
-   "team": "A",
+   "t": 15.64,
+   "key": "third_man_run",
+   "player": 9,
+   "team": "B",
    "taken": false,
-   "value": 0.065,
-   "p_real": 0.6397,
-   "p_complete": 0.8221,
-   "p_control": 0.9172,
-   "p_intercept": 0.1516,
-   "p_perceive": 0.3999,
+   "value": 0.099,
+   "p_real": 0.8972,
+   "p_complete": 0.9466,
+   "p_control": 0.9478,
+   "p_intercept": 0,
+   "p_perceive": 0.5792,
+   "limiting": "p_complete",
+   "available_s": 2.9,
+   "n": 2,
+   "xy": [
+    82.87,
+    16.38
+   ],
+   "target": [
+    75.95,
+    21.21
+   ],
+   "note": "available 2.9 s, not taken · p_complete 0.95"
+  },
+  {
+   "run": "before",
+   "t": 18.56,
+   "key": "switch_of_play",
+   "player": 9,
+   "team": "B",
+   "taken": true,
+   "value": 0.025,
+   "p_real": 0.5215,
+   "p_complete": 0.7161,
+   "p_control": 0.747,
+   "p_intercept": 0.025,
+   "p_perceive": 0.3652,
    "limiting": "p_complete",
    "available_s": 0,
    "n": 1,
    "xy": [
-    83.65,
-    17.36
+    72.36,
+    14.57
    ],
    "target": [
-    89.65,
-    14.86
+    83.56,
+    46.89
    ],
-   "note": "available 0.1 s, not taken · p_complete 0.82"
+   "note": "taken · p_real 0.52"
   },
   {
    "run": "before",
-   "t": 54.92,
-   "key": "shot",
-   "player": 5,
-   "team": "A",
-   "taken": true,
-   "value": 0.01,
-   "p_real": 0.1021,
-   "p_complete": 0.6535,
-   "p_control": 0.2427,
-   "p_intercept": 0.356,
-   "p_perceive": 0.2636,
+   "t": 21.32,
+   "key": "line_splitting_pass",
+   "player": 13,
+   "team": "B",
+   "taken": false,
+   "value": 0.273,
+   "p_real": 0.8114,
+   "p_complete": 0.9439,
+   "p_control": 0.9022,
+   "p_intercept": 0.0472,
+   "p_perceive": 0.8172,
    "limiting": "p_control",
    "available_s": 0,
    "n": 1,
    "xy": [
-    95.95,
-    17.05
+    82.35,
+    46.89
+   ],
+   "target": [
+    63.02,
+    25.62
+   ],
+   "note": "available 0.1 s, not taken · p_control 0.90"
+  },
+  {
+   "run": "before",
+   "t": 21.32,
+   "key": "line_splitting_pass",
+   "player": 13,
+   "team": "B",
+   "taken": true,
+   "value": 0.126,
+   "p_real": 0.5318,
+   "p_complete": 0.8916,
+   "p_control": 0.6728,
+   "p_intercept": 0.1135,
+   "p_perceive": 0.8099,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    82.35,
+    46.89
+   ],
+   "target": [
+    64.3,
+    36.22
+   ],
+   "note": "taken · p_real 0.53"
+  },
+  {
+   "run": "before",
+   "t": 22.76,
+   "key": "switch_of_play",
+   "player": 8,
+   "team": "A",
+   "taken": false,
+   "value": 0.067,
+   "p_real": 0.7785,
+   "p_complete": 0.897,
+   "p_control": 0.881,
+   "p_intercept": 0.0148,
+   "p_perceive": 0.4186,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    73.62,
+    45.53
+   ],
+   "target": [
+    66.6,
+    20.44
+   ],
+   "note": "available 0.1 s, not taken · p_control 0.88"
+  },
+  {
+   "run": "before",
+   "t": 22.76,
+   "key": "through_ball_timing_run",
+   "player": 8,
+   "team": "A",
+   "taken": true,
+   "value": 0.138,
+   "p_real": 0.7883,
+   "p_complete": 0.8949,
+   "p_control": 0.8844,
+   "p_intercept": 0.004,
+   "p_perceive": 0.4269,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    73.62,
+    45.53
+   ],
+   "target": [
+    80.65,
+    27.32
+   ],
+   "note": "taken · p_real 0.79"
+  },
+  {
+   "run": "before",
+   "t": 24.56,
+   "key": "driving_run_into_space",
+   "player": 2,
+   "team": "A",
+   "taken": false,
+   "value": 0.175,
+   "p_real": 0.6769,
+   "p_complete": 0.8311,
+   "p_control": 0.9052,
+   "p_intercept": 0.1003,
+   "p_perceive": 0.7691,
+   "limiting": "p_complete",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    81.08,
+    27.32
+   ],
+   "target": [
+    90.08,
+    29.32
+   ],
+   "note": "available 0.1 s, not taken · p_complete 0.83"
+  },
+  {
+   "run": "before",
+   "t": 24.56,
+   "key": "give_and_go",
+   "player": 2,
+   "team": "A",
+   "taken": false,
+   "value": 0.173,
+   "p_real": 0.8344,
+   "p_complete": 0.9846,
+   "p_control": 0.9427,
+   "p_intercept": 0.1011,
+   "p_perceive": 0.758,
+   "limiting": "p_intercept",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    81.08,
+    27.32
+   ],
+   "target": [
+    69.91,
+    19.35
+   ],
+   "note": "available 0.1 s, not taken · p_intercept 0.90"
+  },
+  {
+   "run": "before",
+   "t": 24.56,
+   "key": "shot",
+   "player": 2,
+   "team": "A",
+   "taken": true,
+   "value": 0.005,
+   "p_real": 0.0532,
+   "p_complete": 0.6301,
+   "p_control": 0.1004,
+   "p_intercept": 0.1587,
+   "p_perceive": 0.5848,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    81.08,
+    27.32
    ],
    "target": [
     105,
     34
    ],
-   "note": "taken · p_real 0.10"
+   "note": "taken · p_real 0.05"
   },
   {
    "run": "before",
-   "t": 56.44,
-   "key": "driving_run_into_space",
-   "player": 13,
+   "t": 26.68,
+   "key": "line_splitting_pass",
+   "player": 4,
    "team": "B",
    "taken": false,
-   "value": 0.092,
-   "p_real": 0.6141,
-   "p_complete": 0.7721,
-   "p_control": 0.9268,
-   "p_intercept": 0.1418,
-   "p_perceive": 0.803,
+   "value": 0.061,
+   "p_real": 0.5899,
+   "p_complete": 0.7683,
+   "p_control": 0.8761,
+   "p_intercept": 0.1237,
+   "p_perceive": 0.3573,
    "limiting": "p_complete",
    "available_s": 0,
    "n": 1,
    "xy": [
-    99.22,
-    26.91
+    98.97,
+    41.95
    ],
    "target": [
-    90.22,
-    24.91
+    74.84,
+    49.31
    ],
    "note": "available 0.1 s, not taken · p_complete 0.77"
   },
   {
    "run": "before",
-   "t": 56.44,
-   "key": "line_splitting_pass",
-   "player": 13,
-   "team": "B",
-   "taken": false,
-   "value": 0.073,
-   "p_real": 0.496,
-   "p_complete": 0.8326,
-   "p_control": 0.6879,
-   "p_intercept": 0.1341,
-   "p_perceive": 0.7601,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    99.22,
-    26.91
-   ],
-   "target": [
-    78.59,
-    13.58
-   ],
-   "note": "available 0.1 s, not taken · p_control 0.69"
-  },
-  {
-   "run": "before",
-   "t": 56.44,
-   "key": "switch_of_play",
-   "player": 13,
-   "team": "B",
-   "taken": false,
-   "value": 0.094,
-   "p_real": 0.6217,
-   "p_complete": 0.8435,
-   "p_control": 0.7389,
-   "p_intercept": 0.0024,
-   "p_perceive": 0.774,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    99.22,
-    26.91
-   ],
-   "target": [
-    77.91,
-    44.5
-   ],
-   "note": "available 0.1 s, not taken · p_control 0.74"
-  },
-  {
-   "run": "before",
-   "t": 56.44,
+   "t": 26.68,
    "key": "third_man_run",
-   "player": 13,
+   "player": 4,
    "team": "B",
    "taken": true,
-   "value": 0.059,
-   "p_real": 0.6994,
-   "p_complete": 0.9682,
-   "p_control": 0.9105,
-   "p_intercept": 0.2066,
-   "p_perceive": 0.5624,
-   "limiting": "p_intercept",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    99.22,
-    26.91
-   ],
-   "target": [
-    96.88,
-    18.17
-   ],
-   "note": "taken · p_real 0.70"
-  },
-  {
-   "run": "before",
-   "t": 58.16,
-   "key": "driving_run_into_space",
-   "player": 12,
-   "team": "B",
-   "taken": true,
-   "value": 0.035,
-   "p_real": 0.5875,
-   "p_complete": 0.7071,
-   "p_control": 0.9327,
-   "p_intercept": 0.1092,
-   "p_perceive": 0.304,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    95.27,
-    18.17
-   ],
-   "target": [
-    86.27,
-    16.17
-   ],
-   "note": "taken · p_real 0.59"
-  },
-  {
-   "run": "before",
-   "t": 60.88,
-   "key": "driving_run_into_space",
-   "player": 12,
-   "team": "B",
-   "taken": false,
-   "value": 0.115,
-   "p_real": 0.626,
-   "p_complete": 0.7482,
-   "p_control": 0.9353,
-   "p_intercept": 0.1054,
-   "p_perceive": 0.5538,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    82.76,
-    16.35
-   ],
-   "target": [
-    73.76,
-    14.35
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.75"
-  },
-  {
-   "run": "before",
-   "t": 60.88,
-   "key": "give_and_go",
-   "player": 12,
-   "team": "B",
-   "taken": true,
-   "value": 0.12,
-   "p_real": 0.8331,
-   "p_complete": 0.9899,
-   "p_control": 0.9235,
-   "p_intercept": 0.0887,
-   "p_perceive": 0.5584,
-   "limiting": "p_intercept",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    82.76,
-    16.35
-   ],
-   "target": [
-    85.3,
-    23.56
-   ],
-   "note": "taken · p_real 0.83"
-  },
-  {
-   "run": "before",
-   "t": 62.32,
-   "key": "driving_run_into_space",
-   "player": 5,
-   "team": "A",
-   "taken": true,
-   "value": 0.251,
-   "p_real": 0.7097,
-   "p_complete": 0.8567,
-   "p_control": 0.9294,
-   "p_intercept": 0.1086,
-   "p_perceive": 0.6192,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    89.4,
-    20.99
-   ],
-   "target": [
-    98,
-    18.99
-   ],
-   "note": "taken · p_real 0.71"
-  },
-  {
-   "run": "before",
-   "t": 65.08,
-   "key": "one_v_one_dribble",
-   "player": 5,
-   "team": "A",
-   "taken": true,
-   "value": 0.075,
-   "p_real": 0.6056,
-   "p_complete": 0.8469,
-   "p_control": 0.8996,
-   "p_intercept": 0.2052,
-   "p_perceive": 0.3248,
-   "limiting": "p_intercept",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    99.76,
-    19.44
-   ],
-   "target": [
-    98,
-    16.94
-   ],
-   "note": "taken · p_real 0.61"
-  },
-  {
-   "run": "before",
-   "t": 66.52,
-   "key": "give_and_go",
-   "player": 5,
-   "team": "A",
-   "taken": false,
-   "value": 0.067,
-   "p_real": 0.7789,
-   "p_complete": 0.9737,
-   "p_control": 0.8719,
-   "p_intercept": 0.0824,
-   "p_perceive": 0.2752,
+   "value": 0.063,
+   "p_real": 0.5403,
+   "p_complete": 0.7894,
+   "p_control": 0.6892,
+   "p_intercept": 0.0068,
+   "p_perceive": 0.3971,
    "limiting": "p_control",
    "available_s": 0,
    "n": 1,
    "xy": [
-    99.03,
-    18.99
+    98.97,
+    41.95
    ],
    "target": [
-    92.64,
-    12.78
+    78.74,
+    36.06
    ],
-   "note": "available 0.1 s, not taken · p_control 0.87"
+   "note": "taken · p_real 0.54"
   },
   {
    "run": "before",
-   "t": 66.52,
-   "key": "shot",
-   "player": 5,
-   "team": "A",
-   "taken": true,
-   "value": 0.01,
-   "p_real": 0.1298,
-   "p_complete": 0.6717,
-   "p_control": 0.2785,
-   "p_intercept": 0.3064,
-   "p_perceive": 0.2508,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    99.03,
-    18.99
-   ],
-   "target": [
-    105,
-    34
-   ],
-   "note": "taken · p_real 0.13"
-  },
-  {
-   "run": "before",
-   "t": 67.6,
+   "t": 29.88,
    "key": "driving_run_into_space",
-   "player": 13,
-   "team": "B",
-   "taken": false,
-   "value": 0.066,
-   "p_real": 0.6136,
-   "p_complete": 0.7798,
-   "p_control": 0.9261,
-   "p_intercept": 0.1504,
-   "p_perceive": 0.8128,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    101.53,
-    26.98
-   ],
-   "target": [
-    92.53,
-    24.98
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.78"
-  },
-  {
-   "run": "before",
-   "t": 67.6,
-   "key": "give_and_go",
-   "player": 13,
-   "team": "B",
-   "taken": false,
-   "value": 0.104,
-   "p_real": 0.902,
-   "p_complete": 0.9902,
-   "p_control": 0.911,
-   "p_intercept": 0,
-   "p_perceive": 0.7224,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    101.53,
-    26.98
-   ],
-   "target": [
-    99.13,
-    19.78
-   ],
-   "note": "available 0.1 s, not taken · p_control 0.91"
-  },
-  {
-   "run": "before",
-   "t": 67.6,
-   "key": "line_splitting_pass",
-   "player": 13,
-   "team": "B",
-   "taken": false,
-   "value": 0.07,
-   "p_real": 0.5777,
-   "p_complete": 0.7186,
-   "p_control": 0.8297,
-   "p_intercept": 0.0312,
-   "p_perceive": 0.7849,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    101.53,
-    26.98
-   ],
-   "target": [
-    59.95,
-    26.06
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.72"
-  },
-  {
-   "run": "before",
-   "t": 67.6,
-   "key": "line_splitting_pass",
-   "player": 13,
+   "player": 12,
    "team": "B",
    "taken": true,
-   "value": 0.08,
-   "p_real": 0.6281,
-   "p_complete": 0.8488,
-   "p_control": 0.7586,
-   "p_intercept": 0.0245,
-   "p_perceive": 0.7849,
+   "value": 0.167,
+   "p_real": 0.5229,
+   "p_complete": 0.8373,
+   "p_control": 0.6957,
+   "p_intercept": 0.1023,
+   "p_perceive": 0.6185,
    "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
+   "available_s": 2.6,
+   "n": 2,
    "xy": [
-    101.53,
-    26.98
+    76.64,
+    36.06
    ],
    "target": [
-    76.8,
-    44.87
+    67.64,
+    38.06
    ],
-   "note": "taken · p_real 0.63"
+   "note": "taken · p_real 0.52"
   },
   {
    "run": "before",
-   "t": 67.6,
-   "key": "third_man_run",
-   "player": 13,
-   "team": "B",
-   "taken": false,
-   "value": 0.109,
-   "p_real": 0.9028,
-   "p_complete": 0.9868,
-   "p_control": 0.915,
-   "p_intercept": 0,
-   "p_perceive": 0.7224,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    101.53,
-    26.98
-   ],
-   "target": [
-    99.13,
-    19.78
-   ],
-   "note": "available 0.1 s, not taken · p_control 0.92"
-  },
-  {
-   "run": "before",
-   "t": 70.44,
-   "key": "through_ball_timing_run",
-   "player": 3,
-   "team": "B",
-   "taken": true,
-   "value": 0.084,
-   "p_real": 0.4976,
-   "p_complete": 0.6029,
-   "p_control": 0.8329,
-   "p_intercept": 0.0091,
-   "p_perceive": 0.3774,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    76.1,
-    44.87
-   ],
-   "target": [
-    45.48,
-    30.61
-   ],
-   "note": "taken · p_real 0.50"
-  },
-  {
-   "run": "before",
-   "t": 73.44,
+   "t": 35.04,
    "key": "driving_run_into_space",
    "player": 12,
    "team": "B",
    "taken": false,
-   "value": 0.108,
-   "p_real": 0.5947,
-   "p_complete": 0.7392,
-   "p_control": 0.9228,
-   "p_intercept": 0.1281,
-   "p_perceive": 0.4904,
-   "limiting": "p_complete",
+   "value": 0.149,
+   "p_real": 0.4948,
+   "p_complete": 0.834,
+   "p_control": 0.6623,
+   "p_intercept": 0.1042,
+   "p_perceive": 0.6104,
+   "limiting": "p_control",
    "available_s": 0,
    "n": 1,
    "xy": [
-    44,
-    30.61
+    51.48,
+    39.7
    ],
    "target": [
-    35,
-    28.61
+    42.48,
+    41.7
    ],
-   "note": "available 0.1 s, not taken · p_complete 0.74"
+   "note": "available 0.1 s, not taken · p_control 0.66"
   },
   {
    "run": "before",
-   "t": 73.44,
-   "key": "one_v_one_dribble",
-   "player": 12,
-   "team": "B",
-   "taken": false,
-   "value": 0.094,
-   "p_real": 0.534,
-   "p_complete": 0.7338,
-   "p_control": 0.9064,
-   "p_intercept": 0.1972,
-   "p_perceive": 0.5326,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    44,
-    30.61
-   ],
-   "target": [
-    38,
-    28.11
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.73"
-  },
-  {
-   "run": "before",
-   "t": 74.52,
-   "key": "one_v_one_dribble",
+   "t": 36.36,
+   "key": "driving_run_into_space",
    "player": 12,
    "team": "B",
    "taken": true,
-   "value": 0.036,
-   "p_real": 0.4729,
-   "p_complete": 0.6763,
-   "p_control": 0.9059,
-   "p_intercept": 0.228,
-   "p_perceive": 0.2194,
-   "limiting": "p_complete",
+   "value": 0.111,
+   "p_real": 0.4742,
+   "p_complete": 0.8198,
+   "p_control": 0.6484,
+   "p_intercept": 0.1078,
+   "p_perceive": 0.5763,
+   "limiting": "p_control",
    "available_s": 0,
    "n": 1,
    "xy": [
-    41.72,
-    30.61
+    47.48,
+    39.7
    ],
    "target": [
-    35.72,
-    28.11
+    38.48,
+    41.7
    ],
    "note": "taken · p_real 0.47"
   },
   {
    "run": "before",
-   "t": 83.08,
-   "key": "driving_run_into_space",
-   "player": 12,
-   "team": "B",
+   "t": 39.12,
+   "key": "line_splitting_pass",
+   "player": 5,
+   "team": "A",
    "taken": false,
-   "value": 0.108,
-   "p_real": 0.5806,
-   "p_complete": 0.7281,
-   "p_control": 0.9241,
-   "p_intercept": 0.1371,
-   "p_perceive": 0.4684,
-   "limiting": "p_complete",
+   "value": 0.077,
+   "p_real": 0.8193,
+   "p_complete": 0.9727,
+   "p_control": 0.9527,
+   "p_intercept": 0.1158,
+   "p_perceive": 0.555,
+   "limiting": "p_intercept",
    "available_s": 0,
    "n": 1,
    "xy": [
-    30.45,
-    28.47
+    40.75,
+    38.79
    ],
    "target": [
-    21.45,
-    26.47
+    41.57,
+    43.29
    ],
-   "note": "available 0.1 s, not taken · p_complete 0.73"
+   "note": "available 0.1 s, not taken · p_intercept 0.88"
   },
   {
    "run": "before",
-   "t": 83.08,
-   "key": "one_v_one_dribble",
-   "player": 12,
-   "team": "B",
+   "t": 39.12,
+   "key": "switch_of_play",
+   "player": 5,
+   "team": "A",
    "taken": true,
-   "value": 0.049,
-   "p_real": 0.4942,
-   "p_complete": 0.7226,
-   "p_control": 0.9001,
-   "p_intercept": 0.2402,
-   "p_perceive": 0.38,
+   "value": 0.03,
+   "p_real": 0.8628,
+   "p_complete": 0.9408,
+   "p_control": 0.9183,
+   "p_intercept": 0.0014,
+   "p_perceive": 0.5043,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    40.75,
+    38.79
+   ],
+   "target": [
+    32.13,
+    20.48
+   ],
+   "note": "taken · p_real 0.86"
+  },
+  {
+   "run": "before",
+   "t": 39.12,
+   "key": "third_man_run",
+   "player": 5,
+   "team": "A",
+   "taken": false,
+   "value": 0.154,
+   "p_real": 0.9133,
+   "p_complete": 0.9598,
+   "p_control": 0.9516,
+   "p_intercept": 0,
+   "p_perceive": 0.5326,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    40.75,
+    38.79
+   ],
+   "target": [
+    51.9,
+    34.48
+   ],
+   "note": "available 0.1 s, not taken · p_control 0.95"
+  },
+  {
+   "run": "before",
+   "t": 40.96,
+   "key": "driving_run_into_space",
+   "player": 11,
+   "team": "A",
+   "taken": false,
+   "value": 0.077,
+   "p_real": 0.658,
+   "p_complete": 0.7803,
+   "p_control": 0.9416,
+   "p_intercept": 0.1044,
+   "p_perceive": 0.7981,
    "limiting": "p_complete",
    "available_s": 0,
    "n": 1,
    "xy": [
-    30.45,
-    28.47
+    32.86,
+    20.48
    ],
    "target": [
-    24.45,
-    30.97
+    41.86,
+    18.48
    ],
-   "note": "taken · p_real 0.49"
+   "note": "available 0.1 s, not taken · p_complete 0.78"
   },
   {
    "run": "before",
-   "t": 85.32,
+   "t": 40.96,
+   "key": "third_man_run",
+   "player": 11,
+   "team": "A",
+   "taken": true,
+   "value": 0.13,
+   "p_real": 0.8743,
+   "p_complete": 0.9616,
+   "p_control": 0.9133,
+   "p_intercept": 0.0045,
+   "p_perceive": 0.7726,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    32.86,
+    20.48
+   ],
+   "target": [
+    52.83,
+    24.45
+   ],
+   "note": "taken · p_real 0.87"
+  },
+  {
+   "run": "before",
+   "t": 43.6,
+   "key": "driving_run_into_space",
+   "player": 2,
+   "team": "A",
+   "taken": false,
+   "value": 0.077,
+   "p_real": 0.6618,
+   "p_complete": 0.8368,
+   "p_control": 0.8989,
+   "p_intercept": 0.1202,
+   "p_perceive": 0.7793,
+   "limiting": "p_complete",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    54.81,
+    24.45
+   ],
+   "target": [
+    63.81,
+    22.45
+   ],
+   "note": "available 0.1 s, not taken · p_complete 0.84"
+  },
+  {
+   "run": "before",
+   "t": 43.6,
    "key": "give_and_go",
    "player": 2,
    "team": "A",
    "taken": true,
-   "value": 0.085,
-   "p_real": 0.8958,
-   "p_complete": 0.9669,
-   "p_control": 0.9265,
+   "value": 0.112,
+   "p_real": 0.9367,
+   "p_complete": 0.9895,
+   "p_control": 0.9466,
    "p_intercept": 0,
-   "p_perceive": 0.5497,
+   "p_perceive": 0.7871,
    "limiting": "p_control",
    "available_s": 0,
    "n": 1,
    "xy": [
-    26.33,
-    30.97
+    54.81,
+    24.45
    ],
    "target": [
-    28.15,
-    28.73
+    60.52,
+    25.77
    ],
-   "note": "taken · p_real 0.90"
+   "note": "taken · p_real 0.94"
   },
   {
    "run": "before",
-   "t": 85.32,
+   "t": 43.6,
    "key": "third_man_run",
    "player": 2,
    "team": "A",
    "taken": false,
-   "value": 0.088,
-   "p_real": 0.8887,
-   "p_complete": 0.9558,
-   "p_control": 0.9298,
+   "value": 0.116,
+   "p_real": 0.9357,
+   "p_complete": 0.9859,
+   "p_control": 0.9491,
    "p_intercept": 0,
-   "p_perceive": 0.5497,
+   "p_perceive": 0.7871,
    "limiting": "p_control",
    "available_s": 0,
    "n": 1,
    "xy": [
-    26.33,
-    30.97
+    54.81,
+    24.45
    ],
    "target": [
-    28.15,
-    28.73
+    60.52,
+    25.77
+   ],
+   "note": "available 0.1 s, not taken · p_control 0.95"
+  },
+  {
+   "run": "before",
+   "t": 43.6,
+   "key": "through_ball_timing_run",
+   "player": 2,
+   "team": "A",
+   "taken": false,
+   "value": 0.122,
+   "p_real": 0.907,
+   "p_complete": 0.9744,
+   "p_control": 0.9309,
+   "p_intercept": 0,
+   "p_perceive": 0.7756,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    54.81,
+    24.45
+   ],
+   "target": [
+    65.52,
+    25.77
    ],
    "note": "available 0.1 s, not taken · p_control 0.93"
   },
   {
    "run": "before",
-   "t": 86.48,
-   "key": "line_splitting_pass",
-   "player": 11,
+   "t": 44.8,
+   "key": "driving_run_into_space",
+   "player": 7,
    "team": "A",
-   "taken": true,
-   "value": 0.062,
-   "p_real": 0.7198,
-   "p_complete": 0.9413,
-   "p_control": 0.9364,
-   "p_intercept": 0.1834,
-   "p_perceive": 0.658,
-   "limiting": "p_intercept",
+   "taken": false,
+   "value": 0.081,
+   "p_real": 0.6058,
+   "p_complete": 0.7504,
+   "p_control": 0.935,
+   "p_intercept": 0.1365,
+   "p_perceive": 0.7243,
+   "limiting": "p_complete",
    "available_s": 0,
    "n": 1,
    "xy": [
-    28.93,
-    28.73
+    61.11,
+    25.77
    ],
    "target": [
-    42.51,
-    15.11
+    70.11,
+    23.77
    ],
-   "note": "taken · p_real 0.72"
+   "note": "available 0.1 s, not taken · p_complete 0.75"
   },
   {
    "run": "before",
-   "t": 86.48,
-   "key": "line_splitting_pass",
-   "player": 11,
+   "t": 44.8,
+   "key": "give_and_go",
+   "player": 7,
    "team": "A",
    "taken": false,
-   "value": 0.067,
-   "p_real": 0.7552,
-   "p_complete": 0.9163,
-   "p_control": 0.8245,
-   "p_intercept": 0.0005,
-   "p_perceive": 0.6586,
+   "value": 0.134,
+   "p_real": 0.8923,
+   "p_complete": 0.9913,
+   "p_control": 0.9001,
+   "p_intercept": 0,
+   "p_perceive": 0.7327,
    "limiting": "p_control",
    "available_s": 0,
    "n": 1,
    "xy": [
-    28.93,
-    28.73
+    61.11,
+    25.77
    ],
    "target": [
-    42.55,
-    50.88
+    56.07,
+    22.37
+   ],
+   "note": "available 0.1 s, not taken · p_control 0.90"
+  },
+  {
+   "run": "before",
+   "t": 44.8,
+   "key": "switch_of_play",
+   "player": 7,
+   "team": "A",
+   "taken": true,
+   "value": 0.045,
+   "p_real": 0.4578,
+   "p_complete": 0.8737,
+   "p_control": 0.5629,
+   "p_intercept": 0.0691,
+   "p_perceive": 0.6868,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    61.11,
+    25.77
+   ],
+   "target": [
+    77.8,
+    50.14
+   ],
+   "note": "taken · p_real 0.46"
+  },
+  {
+   "run": "before",
+   "t": 47.32,
+   "key": "driving_run_into_space",
+   "player": 8,
+   "team": "A",
+   "taken": true,
+   "value": 0.142,
+   "p_real": 0.5653,
+   "p_complete": 0.8346,
+   "p_control": 0.7592,
+   "p_intercept": 0.1079,
+   "p_perceive": 0.4651,
+   "limiting": "p_control",
+   "available_s": 2.8,
+   "n": 2,
+   "xy": [
+    91.38,
+    51.99
+   ],
+   "target": [
+    98,
+    53.99
+   ],
+   "note": "taken · p_real 0.57"
+  },
+  {
+   "run": "before",
+   "t": 52.44,
+   "key": "one_v_one_dribble",
+   "player": 8,
+   "team": "A",
+   "taken": true,
+   "value": 0.095,
+   "p_real": 0.4323,
+   "p_complete": 0.8301,
+   "p_control": 0.69,
+   "p_intercept": 0.2452,
+   "p_perceive": 0.4354,
+   "limiting": "p_control",
+   "available_s": 1.4,
+   "n": 2,
+   "xy": [
+    99.35,
+    53.07
+   ],
+   "target": [
+    98,
+    55.57
+   ],
+   "note": "taken · p_real 0.43"
+  },
+  {
+   "run": "before",
+   "t": 55.04,
+   "key": "switch_of_play",
+   "player": 8,
+   "team": "A",
+   "taken": true,
+   "value": 0.014,
+   "p_real": 0.348,
+   "p_complete": 0.5849,
+   "p_control": 0.6024,
+   "p_intercept": 0.0122,
+   "p_perceive": 0.1573,
+   "limiting": "p_complete",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    97.42,
+    48.12
+   ],
+   "target": [
+    43.95,
+    19.46
+   ],
+   "note": "taken · p_real 0.35"
+  },
+  {
+   "run": "before",
+   "t": 59,
+   "key": "driving_run_into_space",
+   "player": 11,
+   "team": "A",
+   "taken": true,
+   "value": 0.096,
+   "p_real": 0.6512,
+   "p_complete": 0.78,
+   "p_control": 0.9394,
+   "p_intercept": 0.1113,
+   "p_perceive": 0.7977,
+   "limiting": "p_complete",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    45.16,
+    19.46
+   ],
+   "target": [
+    54.16,
+    17.46
+   ],
+   "note": "taken · p_real 0.65"
+  },
+  {
+   "run": "before",
+   "t": 59,
+   "key": "give_and_go",
+   "player": 11,
+   "team": "A",
+   "taken": false,
+   "value": 0.166,
+   "p_real": 0.8967,
+   "p_complete": 0.9829,
+   "p_control": 0.9167,
+   "p_intercept": 0.0048,
+   "p_perceive": 0.7882,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    45.16,
+    19.46
+   ],
+   "target": [
+    58.2,
+    16.03
+   ],
+   "note": "available 0.1 s, not taken · p_control 0.92"
+  },
+  {
+   "run": "before",
+   "t": 59,
+   "key": "third_man_run",
+   "player": 11,
+   "team": "A",
+   "taken": false,
+   "value": 0.172,
+   "p_real": 0.8948,
+   "p_complete": 0.977,
+   "p_control": 0.9205,
+   "p_intercept": 0.005,
+   "p_perceive": 0.7882,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    45.16,
+    19.46
+   ],
+   "target": [
+    58.2,
+    16.03
+   ],
+   "note": "available 0.1 s, not taken · p_control 0.92"
+  },
+  {
+   "run": "before",
+   "t": 59,
+   "key": "through_ball_timing_run",
+   "player": 11,
+   "team": "A",
+   "taken": false,
+   "value": 0.097,
+   "p_real": 0.6293,
+   "p_complete": 0.7887,
+   "p_control": 0.8044,
+   "p_intercept": 0.0082,
+   "p_perceive": 0.7681,
+   "limiting": "p_complete",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    45.16,
+    19.46
+   ],
+   "target": [
+    88.66,
+    16.32
+   ],
+   "note": "available 0.1 s, not taken · p_complete 0.79"
+  },
+  {
+   "run": "before",
+   "t": 62.12,
+   "key": "driving_run_into_space",
+   "player": 2,
+   "team": "A",
+   "taken": false,
+   "value": 0.132,
+   "p_real": 0.5895,
+   "p_complete": 0.7421,
+   "p_control": 0.8998,
+   "p_intercept": 0.1171,
+   "p_perceive": 0.3469,
+   "limiting": "p_complete",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    54.69,
+    17.46
+   ],
+   "target": [
+    63.69,
+    15.46
+   ],
+   "note": "available 0.1 s, not taken · p_complete 0.74"
+  },
+  {
+   "run": "before",
+   "t": 65.08,
+   "key": "line_splitting_pass",
+   "player": 2,
+   "team": "A",
+   "taken": true,
+   "value": 0.016,
+   "p_real": 0.353,
+   "p_complete": 0.7259,
+   "p_control": 0.5719,
+   "p_intercept": 0.1498,
+   "p_perceive": 0.3021,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    59.64,
+    17.46
+   ],
+   "target": [
+    77.7,
+    48.4
+   ],
+   "note": "taken · p_real 0.35"
+  },
+  {
+   "run": "before",
+   "t": 68.2,
+   "key": "driving_run_into_space",
+   "player": 8,
+   "team": "A",
+   "taken": true,
+   "value": 0.07,
+   "p_real": 0.5535,
+   "p_complete": 0.8152,
+   "p_control": 0.7603,
+   "p_intercept": 0.107,
+   "p_perceive": 0.4463,
+   "limiting": "p_control",
+   "available_s": 2.8,
+   "n": 2,
+   "xy": [
+    78.51,
+    48.4
+   ],
+   "target": [
+    87.51,
+    46.4
+   ],
+   "note": "taken · p_real 0.55"
+  },
+  {
+   "run": "before",
+   "t": 73.88,
+   "key": "one_v_one_dribble",
+   "player": 8,
+   "team": "A",
+   "taken": true,
+   "value": 0.021,
+   "p_real": 0.3558,
+   "p_complete": 0.7787,
+   "p_control": 0.6389,
+   "p_intercept": 0.2849,
+   "p_perceive": 0.1339,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    98.79,
+    46.72
+   ],
+   "target": [
+    98,
+    49.22
+   ],
+   "note": "taken · p_real 0.36"
+  },
+  {
+   "run": "before",
+   "t": 75.56,
+   "key": "switch_of_play",
+   "player": 8,
+   "team": "A",
+   "taken": true,
+   "value": 0.011,
+   "p_real": 0.3427,
+   "p_complete": 0.56,
+   "p_control": 0.6185,
+   "p_intercept": 0.0105,
+   "p_perceive": 0.1351,
+   "limiting": "p_complete",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    96.94,
+    45.08
+   ],
+   "target": [
+    43.88,
+    18.61
+   ],
+   "note": "taken · p_real 0.34"
+  },
+  {
+   "run": "before",
+   "t": 78.8,
+   "key": "line_splitting_pass",
+   "player": 10,
+   "team": "A",
+   "taken": true,
+   "value": 0.006,
+   "p_real": 0.2644,
+   "p_complete": 0.3577,
+   "p_control": 0.8116,
+   "p_intercept": 0.089,
+   "p_perceive": 0.2223,
+   "limiting": "p_complete",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    46.25,
+    45.92
+   ],
+   "target": [
+    84.15,
+    18.51
+   ],
+   "note": "taken · p_real 0.26"
+  },
+  {
+   "run": "before",
+   "t": 78.8,
+   "key": "third_man_run",
+   "player": 10,
+   "team": "A",
+   "taken": false,
+   "value": 0.137,
+   "p_real": 0.8638,
+   "p_complete": 0.9058,
+   "p_control": 0.9632,
+   "p_intercept": 0.01,
+   "p_perceive": 0.3708,
+   "limiting": "p_complete",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    46.25,
+    45.92
+   ],
+   "target": [
+    60.08,
+    54.58
+   ],
+   "note": "available 0.1 s, not taken · p_complete 0.91"
+  },
+  {
+   "run": "before",
+   "t": 82.88,
+   "key": "driving_run_into_space",
+   "player": 7,
+   "team": "A",
+   "taken": false,
+   "value": 0.132,
+   "p_real": 0.6588,
+   "p_complete": 0.7753,
+   "p_control": 0.9428,
+   "p_intercept": 0.0988,
+   "p_perceive": 0.7618,
+   "limiting": "p_complete",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    74.21,
+    7.46
+   ],
+   "target": [
+    83.21,
+    5.46
+   ],
+   "note": "available 0.1 s, not taken · p_complete 0.78"
+  },
+  {
+   "run": "before",
+   "t": 82.88,
+   "key": "switch_of_play",
+   "player": 7,
+   "team": "A",
+   "taken": false,
+   "value": 0.117,
+   "p_real": 0.7721,
+   "p_complete": 0.9545,
+   "p_control": 0.8232,
+   "p_intercept": 0.0173,
+   "p_perceive": 0.7288,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    74.21,
+    7.46
+   ],
+   "target": [
+    57.7,
+    47.62
    ],
    "note": "available 0.1 s, not taken · p_control 0.82"
   },
   {
    "run": "before",
-   "t": 86.48,
-   "key": "third_man_run",
-   "player": 11,
-   "team": "A",
-   "taken": false,
-   "value": 0.067,
-   "p_real": 0.7638,
-   "p_complete": 0.9465,
-   "p_control": 0.9421,
-   "p_intercept": 0.1435,
-   "p_perceive": 0.658,
-   "limiting": "p_intercept",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    28.93,
-    28.73
-   ],
-   "target": [
-    42.51,
-    15.11
-   ],
-   "note": "available 0.1 s, not taken · p_intercept 0.86"
-  },
-  {
-   "run": "before",
-   "t": 88.4,
-   "key": "driving_run_into_space",
-   "player": 5,
-   "team": "A",
-   "taken": false,
-   "value": 0.198,
-   "p_real": 0.7363,
-   "p_complete": 0.8738,
-   "p_control": 0.9355,
-   "p_intercept": 0.0993,
-   "p_perceive": 0.6717,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    42.94,
-    15.11
-   ],
-   "target": [
-    51.94,
-    13.11
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.87"
-  },
-  {
-   "run": "before",
-   "t": 88.4,
+   "t": 82.88,
    "key": "through_ball_timing_run",
-   "player": 5,
+   "player": 7,
    "team": "A",
    "taken": true,
-   "value": 0.126,
-   "p_real": 0.7114,
-   "p_complete": 0.9131,
-   "p_control": 0.7803,
-   "p_intercept": 0.0015,
-   "p_perceive": 0.6321,
+   "value": 0.038,
+   "p_real": 0.3165,
+   "p_complete": 0.8491,
+   "p_control": 0.4432,
+   "p_intercept": 0.1591,
+   "p_perceive": 0.6931,
    "limiting": "p_control",
    "available_s": 0,
    "n": 1,
    "xy": [
-    42.94,
-    15.11
+    74.21,
+    7.46
    ],
    "target": [
-    73.44,
-    13.22
+    86.35,
+    47.61
    ],
-   "note": "taken · p_real 0.71"
+   "note": "taken · p_real 0.32"
   },
   {
-   "run": "after",
-   "t": 2.52,
-   "key": "one_v_one_dribble",
-   "player": 5,
+   "run": "before",
+   "t": 86.56,
+   "key": "driving_run_into_space",
+   "player": 8,
    "team": "A",
    "taken": true,
-   "value": 0.102,
-   "p_real": 0.6336,
-   "p_complete": 0.8351,
-   "p_control": 0.9232,
-   "p_intercept": 0.1781,
-   "p_perceive": 0.2675,
-   "limiting": "p_intercept",
+   "value": 0.137,
+   "p_real": 0.5695,
+   "p_complete": 0.8296,
+   "p_control": 0.7626,
+   "p_intercept": 0.0997,
+   "p_perceive": 0.4813,
+   "limiting": "p_control",
    "available_s": 0,
    "n": 1,
    "xy": [
-    56.12,
+    88.42,
+    47.5
+   ],
+   "target": [
+    97.42,
+    49.5
+   ],
+   "note": "taken · p_real 0.57"
+  },
+  {
+   "run": "before",
+   "t": 89.68,
+   "key": "driving_run_into_space",
+   "player": 8,
+   "team": "A",
+   "taken": false,
+   "value": 0.111,
+   "p_real": 0.5398,
+   "p_complete": 0.8552,
+   "p_control": 0.7306,
+   "p_intercept": 0.1362,
+   "p_perceive": 0.4635,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    99.23,
+    47.83
+   ],
+   "target": [
+    98,
+    49.83
+   ],
+   "note": "available 0.1 s, not taken · p_control 0.73"
+  },
+  {
+   "run": "after",
+   "t": 3.6,
+   "key": "driving_run_into_space",
+   "player": 7,
+   "team": "A",
+   "taken": false,
+   "value": 0.098,
+   "p_real": 0.5811,
+   "p_complete": 0.6964,
+   "p_control": 0.9364,
+   "p_intercept": 0.1089,
+   "p_perceive": 0.3834,
+   "limiting": "p_complete",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    57.75,
     34
    ],
    "target": [
-    62.12,
-    36.5
+    66.75,
+    32
    ],
-   "note": "taken · p_real 0.63"
+   "note": "available 0.1 s, not taken · p_complete 0.70"
   },
   {
    "run": "after",
-   "t": 4.8,
-   "key": "driving_run_into_space",
-   "player": 5,
-   "team": "A",
-   "taken": false,
-   "value": 0.09,
-   "p_real": 0.7258,
-   "p_complete": 0.8508,
-   "p_control": 0.9511,
-   "p_intercept": 0.103,
-   "p_perceive": 0.3926,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    65.94,
-    36.05
-   ],
-   "target": [
-    74.94,
-    38.05
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.85"
-  },
-  {
-   "run": "after",
-   "t": 4.8,
-   "key": "through_ball_timing_run",
-   "player": 5,
+   "t": 3.6,
+   "key": "switch_of_play",
+   "player": 7,
    "team": "A",
    "taken": true,
-   "value": 0.036,
-   "p_real": 0.8737,
-   "p_complete": 0.9741,
-   "p_control": 0.8969,
+   "value": 0.106,
+   "p_real": 0.8034,
+   "p_complete": 0.9369,
+   "p_control": 0.8575,
    "p_intercept": 0,
-   "p_perceive": 0.3054,
+   "p_perceive": 0.3451,
    "limiting": "p_control",
    "available_s": 0,
    "n": 1,
    "xy": [
-    65.94,
-    36.05
+    57.75,
+    34
    ],
    "target": [
-    72.51,
-    54.04
+    60.17,
+    12.76
    ],
-   "note": "taken · p_real 0.87"
+   "note": "taken · p_real 0.80"
   },
   {
    "run": "after",
-   "t": 6.76,
+   "t": 5.72,
    "key": "driving_run_into_space",
-   "player": 10,
+   "player": 5,
    "team": "A",
    "taken": false,
-   "value": 0.118,
-   "p_real": 0.6743,
-   "p_complete": 0.8029,
-   "p_control": 0.9342,
-   "p_intercept": 0.1011,
-   "p_perceive": 0.4431,
+   "value": 0.123,
+   "p_real": 0.6195,
+   "p_complete": 0.815,
+   "p_control": 0.8846,
+   "p_intercept": 0.1406,
+   "p_perceive": 0.5531,
    "limiting": "p_complete",
    "available_s": 0,
    "n": 1,
    "xy": [
-    73.2,
-    54.04
+    61.66,
+    12.76
    ],
    "target": [
-    82.2,
-    56.04
+    70.66,
+    10.76
    ],
-   "note": "available 0.1 s, not taken · p_complete 0.80"
+   "note": "available 0.1 s, not taken · p_complete 0.81"
   },
   {
    "run": "after",
-   "t": 6.76,
-   "key": "one_v_one_dribble",
-   "player": 10,
-   "team": "A",
-   "taken": false,
-   "value": 0.079,
-   "p_real": 0.6282,
-   "p_complete": 0.7985,
-   "p_control": 0.9226,
-   "p_intercept": 0.1474,
-   "p_perceive": 0.4523,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    73.2,
-    54.04
-   ],
-   "target": [
-    79.2,
-    56.54
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.80"
-  },
-  {
-   "run": "after",
-   "t": 6.76,
-   "key": "through_ball_timing_run",
-   "player": 10,
+   "t": 5.72,
+   "key": "switch_of_play",
+   "player": 5,
    "team": "A",
    "taken": true,
-   "value": 0.016,
-   "p_real": 0.5442,
-   "p_complete": 0.8848,
-   "p_control": 0.6951,
-   "p_intercept": 0.1151,
-   "p_perceive": 0.3088,
+   "value": 0.039,
+   "p_real": 0.4343,
+   "p_complete": 0.8532,
+   "p_control": 0.5319,
+   "p_intercept": 0.043,
+   "p_perceive": 0.5313,
    "limiting": "p_control",
    "available_s": 0,
    "n": 1,
    "xy": [
-    73.2,
-    54.04
+    61.66,
+    12.76
    ],
    "target": [
-    79.24,
-    16.6
+    68.66,
+    52.24
    ],
-   "note": "taken · p_real 0.54"
+   "note": "taken · p_real 0.43"
   },
   {
    "run": "after",
-   "t": 10.12,
+   "t": 9,
    "key": "driving_run_into_space",
-   "player": 16,
+   "player": 8,
    "team": "A",
    "taken": true,
-   "value": 0.175,
-   "p_real": 0.6209,
-   "p_complete": 0.7951,
-   "p_control": 0.8763,
-   "p_intercept": 0.1089,
-   "p_perceive": 0.6555,
-   "limiting": "p_complete",
-   "available_s": 2.7,
-   "n": 2,
+   "value": 0.135,
+   "p_real": 0.6165,
+   "p_complete": 0.834,
+   "p_control": 0.8338,
+   "p_intercept": 0.1135,
+   "p_perceive": 0.4568,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
    "xy": [
-    80.68,
-    16.6
+    70.91,
+    52.24
    ],
    "target": [
-    89.68,
-    18.6
+    79.91,
+    50.24
    ],
    "note": "taken · p_real 0.62"
   },
   {
    "run": "after",
-   "t": 10.12,
-   "key": "through_ball_timing_run",
-   "player": 16,
-   "team": "A",
-   "taken": false,
-   "value": 0.096,
-   "p_real": 0.6921,
-   "p_complete": 0.9147,
-   "p_control": 0.8533,
-   "p_intercept": 0.1133,
-   "p_perceive": 0.6151,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    80.68,
-    16.6
-   ],
-   "target": [
-    89.13,
-    49.39
-   ],
-   "note": "available 0.1 s, not taken · p_control 0.85"
-  },
-  {
-   "run": "after",
-   "t": 12.84,
+   "t": 11.96,
    "key": "one_v_one_dribble",
-   "player": 16,
-   "team": "A",
-   "taken": false,
-   "value": 0.072,
-   "p_real": 0.5238,
-   "p_complete": 0.7564,
-   "p_control": 0.8445,
-   "p_intercept": 0.18,
-   "p_perceive": 0.4369,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    92.01,
-    19.23
-   ],
-   "target": [
-    98,
-    21.73
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.76"
-  },
-  {
-   "run": "after",
-   "t": 15,
-   "key": "shot",
-   "player": 16,
-   "team": "A",
-   "taken": true,
-   "value": 0.007,
-   "p_real": 0.0771,
-   "p_complete": 0.6316,
-   "p_control": 0.1809,
-   "p_intercept": 0.3248,
-   "p_perceive": 0.3043,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    98.86,
-    19.84
-   ],
-   "target": [
-    105,
-    34
-   ],
-   "note": "taken · p_real 0.08"
-  },
-  {
-   "run": "after",
-   "t": 16.6,
-   "key": "driving_run_into_space",
    "player": 13,
    "team": "B",
    "taken": false,
-   "value": 0.111,
-   "p_real": 0.6715,
-   "p_complete": 0.8064,
-   "p_control": 0.9329,
-   "p_intercept": 0.1074,
-   "p_perceive": 0.8063,
+   "value": 0.069,
+   "p_real": 0.5822,
+   "p_complete": 0.7905,
+   "p_control": 0.9196,
+   "p_intercept": 0.1991,
+   "p_perceive": 0.5798,
    "limiting": "p_complete",
    "available_s": 0,
    "n": 1,
    "xy": [
-    100.05,
-    28.54
+    83.04,
+    50.38
    ],
    "target": [
-    91.05,
-    26.54
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.81"
-  },
-  {
-   "run": "after",
-   "t": 16.6,
-   "key": "line_splitting_pass",
-   "player": 13,
-   "team": "B",
-   "taken": false,
-   "value": 0.212,
-   "p_real": 0.8718,
-   "p_complete": 0.9736,
-   "p_control": 0.9396,
-   "p_intercept": 0.0471,
-   "p_perceive": 0.7984,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    100.05,
-    28.54
-   ],
-   "target": [
-    87.61,
-    25.19
-   ],
-   "note": "available 0.1 s, not taken · p_control 0.94"
-  },
-  {
-   "run": "after",
-   "t": 16.6,
-   "key": "switch_of_play",
-   "player": 13,
-   "team": "B",
-   "taken": false,
-   "value": 0.107,
-   "p_real": 0.6546,
-   "p_complete": 0.8805,
-   "p_control": 0.7452,
-   "p_intercept": 0.0024,
-   "p_perceive": 0.7777,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    100.05,
-    28.54
-   ],
-   "target": [
-    78.69,
-    45.47
-   ],
-   "note": "available 0.1 s, not taken · p_control 0.75"
-  },
-  {
-   "run": "after",
-   "t": 16.6,
-   "key": "through_ball_timing_run",
-   "player": 13,
-   "team": "B",
-   "taken": true,
-   "value": 0.031,
-   "p_real": 0.3255,
-   "p_complete": 0.5507,
-   "p_control": 0.5915,
-   "p_intercept": 0.0007,
-   "p_perceive": 0.6561,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    100.05,
-    28.54
-   ],
-   "target": [
-    46.59,
-    32.04
-   ],
-   "note": "taken · p_real 0.33"
-  },
-  {
-   "run": "after",
-   "t": 20.68,
-   "key": "give_and_go",
-   "player": 15,
-   "team": "A",
-   "taken": false,
-   "value": 0.143,
-   "p_real": 0.9226,
-   "p_complete": 0.9604,
-   "p_control": 0.9606,
-   "p_intercept": 0,
-   "p_perceive": 0.7097,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    47.87,
-    32.04
-   ],
-   "target": [
-    56.03,
-    23.02
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.96"
-  },
-  {
-   "run": "after",
-   "t": 20.68,
-   "key": "line_splitting_pass",
-   "player": 15,
-   "team": "A",
-   "taken": true,
-   "value": 0.014,
-   "p_real": 0.2721,
-   "p_complete": 0.4758,
-   "p_control": 0.6774,
-   "p_intercept": 0.1558,
-   "p_perceive": 0.5586,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    47.87,
-    32.04
-   ],
-   "target": [
-    88.38,
-    24.24
-   ],
-   "note": "taken · p_real 0.27"
-  },
-  {
-   "run": "after",
-   "t": 20.68,
-   "key": "third_man_run",
-   "player": 15,
-   "team": "A",
-   "taken": false,
-   "value": 0.15,
-   "p_real": 0.9117,
-   "p_complete": 0.9472,
-   "p_control": 0.9625,
-   "p_intercept": 0,
-   "p_perceive": 0.7097,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    47.87,
-    32.04
-   ],
-   "target": [
-    56.03,
-    23.02
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.95"
-  },
-  {
-   "run": "after",
-   "t": 24.36,
-   "key": "driving_run_into_space",
-   "player": 16,
-   "team": "A",
-   "taken": true,
-   "value": 0.239,
-   "p_real": 0.6091,
-   "p_complete": 0.8025,
-   "p_control": 0.8686,
-   "p_intercept": 0.1261,
-   "p_perceive": 0.6646,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    89.5,
-    25.36
-   ],
-   "target": [
-    98,
-    23.36
-   ],
-   "note": "taken · p_real 0.61"
-  },
-  {
-   "run": "after",
-   "t": 27.08,
-   "key": "driving_run_into_space",
-   "player": 16,
-   "team": "A",
-   "taken": false,
-   "value": 0.098,
-   "p_real": 0.5759,
-   "p_complete": 0.8068,
-   "p_control": 0.8379,
-   "p_intercept": 0.1481,
-   "p_perceive": 0.5046,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    99.87,
-    24.82
-   ],
-   "target": [
-    98,
-    22.82
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.81"
-  },
-  {
-   "run": "after",
-   "t": 27.08,
-   "key": "one_v_one_dribble",
-   "player": 16,
-   "team": "A",
-   "taken": false,
-   "value": 0.061,
-   "p_real": 0.5089,
-   "p_complete": 0.7794,
-   "p_control": 0.8205,
-   "p_intercept": 0.2042,
-   "p_perceive": 0.5033,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    99.87,
-    24.82
-   ],
-   "target": [
-    98,
-    22.32
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.78"
-  },
-  {
-   "run": "after",
-   "t": 27.08,
-   "key": "shot",
-   "player": 16,
-   "team": "A",
-   "taken": true,
-   "value": 0.014,
-   "p_real": 0.1629,
-   "p_complete": 0.7139,
-   "p_control": 0.3048,
-   "p_intercept": 0.2515,
-   "p_perceive": 0.4255,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    99.87,
-    24.82
-   ],
-   "target": [
-    105,
-    34
-   ],
-   "note": "taken · p_real 0.16"
-  },
-  {
-   "run": "after",
-   "t": 28.2,
-   "key": "driving_run_into_space",
-   "player": 13,
-   "team": "B",
-   "taken": false,
-   "value": 0.063,
-   "p_real": 0.6622,
-   "p_complete": 0.7988,
-   "p_control": 0.9317,
-   "p_intercept": 0.1103,
-   "p_perceive": 0.7954,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    101.64,
-    29.96
-   ],
-   "target": [
-    92.64,
-    27.96
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.80"
-  },
-  {
-   "run": "after",
-   "t": 28.2,
-   "key": "line_splitting_pass",
-   "player": 13,
-   "team": "B",
-   "taken": true,
-   "value": 0.133,
-   "p_real": 0.8978,
-   "p_complete": 0.9575,
-   "p_control": 0.9377,
-   "p_intercept": 0.0001,
-   "p_perceive": 0.7724,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    101.64,
-    29.96
-   ],
-   "target": [
-    82.69,
-    27.18
-   ],
-   "note": "taken · p_real 0.90"
-  },
-  {
-   "run": "after",
-   "t": 30.44,
-   "key": "driving_run_into_space",
-   "player": 4,
-   "team": "B",
-   "taken": false,
-   "value": 0.245,
-   "p_real": 0.7117,
-   "p_complete": 0.8497,
-   "p_control": 0.9353,
-   "p_intercept": 0.1045,
-   "p_perceive": 0.5124,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    81.71,
-    27.18
-   ],
-   "target": [
-    72.71,
-    25.18
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.85"
-  },
-  {
-   "run": "after",
-   "t": 31.92,
-   "key": "driving_run_into_space",
-   "player": 4,
-   "team": "B",
-   "taken": true,
-   "value": 0.202,
-   "p_real": 0.7067,
-   "p_complete": 0.8415,
-   "p_control": 0.9351,
-   "p_intercept": 0.1019,
-   "p_perceive": 0.4899,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    79.06,
-    27.18
-   ],
-   "target": [
-    70.06,
-    25.18
-   ],
-   "note": "taken · p_real 0.71"
-  },
-  {
-   "run": "after",
-   "t": 35.12,
-   "key": "driving_run_into_space",
-   "player": 4,
-   "team": "B",
-   "taken": true,
-   "value": 0.142,
-   "p_real": 0.6669,
-   "p_complete": 0.8143,
-   "p_control": 0.9293,
-   "p_intercept": 0.1187,
-   "p_perceive": 0.4122,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    66.04,
-    25.31
-   ],
-   "target": [
-    57.04,
-    23.31
-   ],
-   "note": "taken · p_real 0.67"
-  },
-  {
-   "run": "after",
-   "t": 35.12,
-   "key": "one_v_one_dribble",
-   "player": 4,
-   "team": "B",
-   "taken": false,
-   "value": 0.091,
-   "p_real": 0.634,
-   "p_complete": 0.8101,
-   "p_control": 0.9179,
-   "p_intercept": 0.1474,
-   "p_perceive": 0.4212,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    66.04,
-    25.31
-   ],
-   "target": [
-    60.04,
-    22.81
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.81"
-  },
-  {
-   "run": "after",
-   "t": 38,
-   "key": "driving_run_into_space",
-   "player": 5,
-   "team": "A",
-   "taken": false,
-   "value": 0.219,
-   "p_real": 0.7445,
-   "p_complete": 0.8724,
-   "p_control": 0.9524,
-   "p_intercept": 0.1039,
-   "p_perceive": 0.6255,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    59.52,
-    25.03
-   ],
-   "target": [
-    68.52,
-    23.03
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.87"
-  },
-  {
-   "run": "after",
-   "t": 38,
-   "key": "one_v_one_dribble",
-   "player": 5,
-   "team": "A",
-   "taken": false,
-   "value": 0.139,
-   "p_real": 0.7015,
-   "p_complete": 0.8693,
-   "p_control": 0.9451,
-   "p_intercept": 0.1461,
-   "p_perceive": 0.6342,
-   "limiting": "p_intercept",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    59.52,
-    25.03
-   ],
-   "target": [
-    65.52,
-    27.53
-   ],
-   "note": "available 0.1 s, not taken · p_intercept 0.85"
-  },
-  {
-   "run": "after",
-   "t": 38,
-   "key": "switch_of_play",
-   "player": 5,
-   "team": "A",
-   "taken": true,
-   "value": 0.025,
-   "p_real": 0.8444,
-   "p_complete": 0.9748,
-   "p_control": 0.8663,
-   "p_intercept": 0,
-   "p_perceive": 0.5823,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    59.52,
-    25.03
-   ],
-   "target": [
-    49.3,
-    46.43
-   ],
-   "note": "taken · p_real 0.84"
-  },
-  {
-   "run": "after",
-   "t": 39.88,
-   "key": "driving_run_into_space",
-   "player": 8,
-   "team": "A",
-   "taken": false,
-   "value": 0.14,
-   "p_real": 0.6703,
-   "p_complete": 0.8149,
-   "p_control": 0.915,
-   "p_intercept": 0.1012,
-   "p_perceive": 0.6518,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    49.89,
-    46.43
-   ],
-   "target": [
-    58.89,
-    44.43
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.81"
-  },
-  {
-   "run": "after",
-   "t": 39.88,
-   "key": "line_splitting_pass",
-   "player": 8,
-   "team": "A",
-   "taken": false,
-   "value": 0.112,
-   "p_real": 0.8003,
-   "p_complete": 0.9658,
-   "p_control": 0.9323,
-   "p_intercept": 0.1112,
-   "p_perceive": 0.6069,
-   "limiting": "p_intercept",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    49.89,
-    46.43
-   ],
-   "target": [
-    61.69,
-    23.86
-   ],
-   "note": "available 0.1 s, not taken · p_intercept 0.89"
-  },
-  {
-   "run": "after",
-   "t": 39.88,
-   "key": "switch_of_play",
-   "player": 8,
-   "team": "A",
-   "taken": true,
-   "value": 0.036,
-   "p_real": 0.507,
-   "p_complete": 0.9127,
-   "p_control": 0.5894,
-   "p_intercept": 0.0576,
-   "p_perceive": 0.6113,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    49.89,
-    46.43
-   ],
-   "target": [
-    30.88,
-    16.27
-   ],
-   "note": "taken · p_real 0.51"
-  },
-  {
-   "run": "after",
-   "t": 42.28,
-   "key": "line_splitting_pass",
-   "player": 2,
-   "team": "A",
-   "taken": true,
-   "value": 0.058,
-   "p_real": 0.5815,
-   "p_complete": 0.7886,
-   "p_control": 0.8259,
-   "p_intercept": 0.1072,
-   "p_perceive": 0.6731,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    31.36,
-    16.27
-   ],
-   "target": [
-    45.41,
-    49.22
-   ],
-   "note": "taken · p_real 0.58"
-  },
-  {
-   "run": "after",
-   "t": 42.28,
-   "key": "third_man_run",
-   "player": 2,
-   "team": "A",
-   "taken": false,
-   "value": 0.117,
-   "p_real": 0.8628,
-   "p_complete": 0.9094,
-   "p_control": 0.9496,
-   "p_intercept": 0.001,
-   "p_perceive": 0.6731,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    31.36,
-    16.27
-   ],
-   "target": [
-    54.17,
-    19.18
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.91"
-  },
-  {
-   "run": "after",
-   "t": 45.84,
-   "key": "driving_run_into_space",
-   "player": 10,
-   "team": "A",
-   "taken": false,
-   "value": 0.119,
-   "p_real": 0.682,
-   "p_complete": 0.8178,
-   "p_control": 0.9315,
-   "p_intercept": 0.1047,
-   "p_perceive": 0.4858,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    62.25,
-    38.84
-   ],
-   "target": [
-    71.25,
-    36.84
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.82"
-  },
-  {
-   "run": "after",
-   "t": 45.84,
-   "key": "line_splitting_pass",
-   "player": 10,
-   "team": "A",
-   "taken": true,
-   "value": 0.03,
-   "p_real": 0.6082,
-   "p_complete": 0.9346,
-   "p_control": 0.8152,
-   "p_intercept": 0.2017,
-   "p_perceive": 0.3609,
-   "limiting": "p_intercept",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    62.25,
-    38.84
-   ],
-   "target": [
-    75.02,
-    15.99
-   ],
-   "note": "taken · p_real 0.61"
-  },
-  {
-   "run": "after",
-   "t": 45.84,
-   "key": "through_ball_timing_run",
-   "player": 10,
-   "team": "A",
-   "taken": false,
-   "value": 0.078,
-   "p_real": 0.6747,
-   "p_complete": 0.922,
-   "p_control": 0.7818,
-   "p_intercept": 0.064,
-   "p_perceive": 0.4425,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    62.25,
-    38.84
-   ],
-   "target": [
-    80.02,
-    15.99
-   ],
-   "note": "available 0.1 s, not taken · p_control 0.78"
-  },
-  {
-   "run": "after",
-   "t": 48.28,
-   "key": "driving_run_into_space",
-   "player": 16,
-   "team": "A",
-   "taken": true,
-   "value": 0.316,
-   "p_real": 0.6285,
-   "p_complete": 0.798,
-   "p_control": 0.8787,
-   "p_intercept": 0.1037,
-   "p_perceive": 0.6611,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    75.51,
-    15.99
-   ],
-   "target": [
-    84.51,
-    13.99
-   ],
-   "note": "taken · p_real 0.63"
-  },
-  {
-   "run": "after",
-   "t": 50.96,
-   "key": "driving_run_into_space",
-   "player": 16,
-   "team": "A",
-   "taken": false,
-   "value": 0.194,
-   "p_real": 0.6146,
-   "p_complete": 0.7842,
-   "p_control": 0.8771,
-   "p_intercept": 0.1065,
-   "p_perceive": 0.634,
-   "limiting": "p_complete",
-   "available_s": 4.6,
-   "n": 3,
-   "xy": [
-    85.98,
-    14.24
-   ],
-   "target": [
-    94.98,
-    12.24
-   ],
-   "note": "available 4.6 s, not taken · p_complete 0.78"
-  },
-  {
-   "run": "after",
-   "t": 50.96,
-   "key": "one_v_one_dribble",
-   "player": 16,
-   "team": "A",
-   "taken": true,
-   "value": 0.106,
-   "p_real": 0.5603,
-   "p_complete": 0.7795,
-   "p_control": 0.8577,
-   "p_intercept": 0.162,
-   "p_perceive": 0.6426,
-   "limiting": "p_complete",
-   "available_s": 4.6,
-   "n": 3,
-   "xy": [
-    85.98,
-    14.24
-   ],
-   "target": [
-    91.98,
-    11.74
-   ],
-   "note": "taken · p_real 0.56"
-  },
-  {
-   "run": "after",
-   "t": 52.88,
-   "key": "one_v_one_dribble",
-   "player": 16,
-   "team": "A",
-   "taken": false,
-   "value": 0.1,
-   "p_real": 0.5424,
-   "p_complete": 0.7859,
-   "p_control": 0.8508,
-   "p_intercept": 0.1888,
-   "p_perceive": 0.5638,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    94.35,
-    12.08
-   ],
-   "target": [
-    98,
-    9.58
+    77.04,
+    52.88
    ],
    "note": "available 0.1 s, not taken · p_complete 0.79"
   },
   {
    "run": "after",
-   "t": 57.4,
-   "key": "driving_run_into_space",
-   "player": 9,
-   "team": "B",
-   "taken": false,
-   "value": 0.106,
-   "p_real": 0.5969,
-   "p_complete": 0.8143,
-   "p_control": 0.8146,
-   "p_intercept": 0.1002,
-   "p_perceive": 0.8328,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    96.78,
-    8.58
-   ],
-   "target": [
-    87.78,
-    6.58
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.81"
-  },
-  {
-   "run": "after",
-   "t": 57.4,
-   "key": "give_and_go",
-   "player": 9,
-   "team": "B",
-   "taken": true,
-   "value": 0.11,
-   "p_real": 0.8477,
-   "p_complete": 0.9678,
-   "p_control": 0.876,
-   "p_intercept": 0,
-   "p_perceive": 0.8358,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    96.78,
-    8.58
-   ],
-   "target": [
-    93.73,
-    15.53
-   ],
-   "note": "taken · p_real 0.85"
-  },
-  {
-   "run": "after",
-   "t": 57.4,
-   "key": "third_man_run",
-   "player": 9,
-   "team": "B",
-   "taken": false,
-   "value": 0.114,
-   "p_real": 0.8434,
-   "p_complete": 0.957,
-   "p_control": 0.8813,
-   "p_intercept": 0,
-   "p_perceive": 0.8358,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    96.78,
-    8.58
-   ],
-   "target": [
-    93.73,
-    15.53
-   ],
-   "note": "available 0.1 s, not taken · p_control 0.88"
-  },
-  {
-   "run": "after",
-   "t": 58.8,
-   "key": "driving_run_into_space",
-   "player": 3,
-   "team": "B",
-   "taken": true,
-   "value": 0.03,
-   "p_real": 0.5088,
-   "p_complete": 0.7033,
-   "p_control": 0.8503,
-   "p_intercept": 0.1492,
-   "p_perceive": 0.4197,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    93.1,
-    15.53
-   ],
-   "target": [
-    84.1,
-    13.53
-   ],
-   "note": "taken · p_real 0.51"
-  },
-  {
-   "run": "after",
-   "t": 58.8,
-   "key": "give_and_go",
-   "player": 3,
-   "team": "B",
-   "taken": false,
-   "value": 0.07,
-   "p_real": 0.7878,
-   "p_complete": 0.9732,
-   "p_control": 0.8095,
-   "p_intercept": 0,
-   "p_perceive": 0.4355,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    93.1,
-    15.53
-   ],
-   "target": [
-    93.05,
-    11.05
-   ],
-   "note": "available 0.1 s, not taken · p_control 0.81"
-  },
-  {
-   "run": "after",
-   "t": 58.8,
-   "key": "third_man_run",
-   "player": 3,
-   "team": "B",
-   "taken": false,
-   "value": 0.085,
-   "p_real": 0.7357,
-   "p_complete": 0.8115,
-   "p_control": 0.9116,
-   "p_intercept": 0.0054,
-   "p_perceive": 0.378,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    93.1,
-    15.53
-   ],
-   "target": [
-    68.2,
-    29.42
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.81"
-  },
-  {
-   "run": "after",
-   "t": 62.12,
-   "key": "driving_run_into_space",
-   "player": 5,
-   "team": "A",
-   "taken": false,
-   "value": 0.198,
-   "p_real": 0.7043,
-   "p_complete": 0.845,
-   "p_control": 0.9474,
-   "p_intercept": 0.1203,
-   "p_perceive": 0.4032,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    85.37,
-    13.53
-   ],
-   "target": [
-    94.37,
-    11.53
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.84"
-  },
-  {
-   "run": "after",
-   "t": 62.12,
-   "key": "shot",
-   "player": 5,
-   "team": "A",
-   "taken": true,
-   "value": 0.002,
-   "p_real": 0.0636,
-   "p_complete": 0.6046,
-   "p_control": 0.1765,
-   "p_intercept": 0.4043,
-   "p_perceive": 0.2609,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    85.37,
-    13.53
-   ],
-   "target": [
-    105,
-    34
-   ],
-   "note": "taken · p_real 0.06"
-  },
-  {
-   "run": "after",
-   "t": 64.52,
-   "key": "driving_run_into_space",
-   "player": 13,
-   "team": "B",
-   "taken": false,
-   "value": 0.114,
-   "p_real": 0.6849,
-   "p_complete": 0.8201,
-   "p_control": 0.9338,
-   "p_intercept": 0.1056,
-   "p_perceive": 0.8256,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    98.85,
-    41.41
-   ],
-   "target": [
-    89.85,
-    39.41
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.82"
-  },
-  {
-   "run": "after",
-   "t": 64.52,
-   "key": "line_splitting_pass",
-   "player": 13,
-   "team": "B",
-   "taken": true,
-   "value": 0.063,
-   "p_real": 0.4249,
-   "p_complete": 0.6293,
-   "p_control": 0.6979,
-   "p_intercept": 0.0324,
-   "p_perceive": 0.7991,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    98.85,
-    41.41
-   ],
-   "target": [
-    46.57,
-    33.77
-   ],
-   "note": "taken · p_real 0.42"
-  },
-  {
-   "run": "after",
-   "t": 64.52,
-   "key": "third_man_run",
-   "player": 13,
-   "team": "B",
-   "taken": false,
-   "value": 0.092,
-   "p_real": 0.6515,
-   "p_complete": 0.9403,
-   "p_control": 0.6929,
-   "p_intercept": 0,
-   "p_perceive": 0.7241,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    98.85,
-    41.41
-   ],
-   "target": [
-    89.93,
-    16.64
-   ],
-   "note": "available 0.1 s, not taken · p_control 0.69"
-  },
-  {
-   "run": "after",
-   "t": 68.4,
-   "key": "driving_run_into_space",
-   "player": 8,
-   "team": "A",
-   "taken": false,
-   "value": 0.12,
-   "p_real": 0.6767,
-   "p_complete": 0.8177,
-   "p_control": 0.9178,
-   "p_intercept": 0.0982,
-   "p_perceive": 0.6577,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    61.27,
-    63.51
-   ],
-   "target": [
-    70.27,
-    65.51
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.82"
-  },
-  {
-   "run": "after",
-   "t": 68.4,
+   "t": 13.36,
    "key": "switch_of_play",
-   "player": 8,
-   "team": "A",
-   "taken": true,
-   "value": 0.013,
-   "p_real": 0.4631,
-   "p_complete": 0.8299,
-   "p_control": 0.621,
-   "p_intercept": 0.1013,
-   "p_perceive": 0.3935,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    61.27,
-    63.51
-   ],
-   "target": [
-    69.19,
-    22.04
-   ],
-   "note": "taken · p_real 0.46"
-  },
-  {
-   "run": "after",
-   "t": 68.4,
-   "key": "through_ball_timing_run",
-   "player": 8,
-   "team": "A",
-   "taken": false,
-   "value": 0.088,
-   "p_real": 0.7132,
-   "p_complete": 0.9071,
-   "p_control": 0.7876,
-   "p_intercept": 0.0017,
-   "p_perceive": 0.6175,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 2,
-   "xy": [
-    61.27,
-    63.51
-   ],
-   "target": [
-    90.98,
-    30.8
-   ],
-   "note": "available 0.1 s, not taken · p_control 0.79"
-  },
-  {
-   "run": "after",
-   "t": 71.24,
-   "key": "give_and_go",
-   "player": 16,
-   "team": "A",
-   "taken": false,
-   "value": 0.064,
-   "p_real": 0.8294,
-   "p_complete": 0.9828,
-   "p_control": 0.9402,
-   "p_intercept": 0.1025,
-   "p_perceive": 0.653,
-   "limiting": "p_intercept",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    69.75,
-    22.04
-   ],
-   "target": [
-    75.97,
-    26.06
-   ],
-   "note": "available 0.1 s, not taken · p_intercept 0.90"
-  },
-  {
-   "run": "after",
-   "t": 71.24,
-   "key": "line_splitting_pass",
-   "player": 16,
-   "team": "A",
-   "taken": true,
-   "value": 0.092,
-   "p_real": 0.7563,
-   "p_complete": 0.9217,
-   "p_control": 0.8906,
-   "p_intercept": 0.0787,
-   "p_perceive": 0.6066,
-   "limiting": "p_control",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    69.75,
-    22.04
-   ],
-   "target": [
-    84.27,
-    50.01
-   ],
-   "note": "taken · p_real 0.76"
-  },
-  {
-   "run": "after",
-   "t": 71.24,
-   "key": "line_splitting_pass",
-   "player": 16,
-   "team": "A",
-   "taken": false,
-   "value": 0.064,
-   "p_real": 0.7869,
-   "p_complete": 0.9746,
-   "p_control": 0.9374,
-   "p_intercept": 0.1386,
-   "p_perceive": 0.653,
-   "limiting": "p_intercept",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    69.75,
-    22.04
-   ],
-   "target": [
-    75.97,
-    26.06
-   ],
-   "note": "available 0.1 s, not taken · p_intercept 0.86"
-  },
-  {
-   "run": "after",
-   "t": 71.24,
-   "key": "third_man_run",
-   "player": 16,
-   "team": "A",
-   "taken": false,
-   "value": 0.068,
-   "p_real": 0.8213,
-   "p_complete": 0.9769,
-   "p_control": 0.943,
-   "p_intercept": 0.1085,
-   "p_perceive": 0.653,
-   "limiting": "p_intercept",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    69.75,
-    22.04
-   ],
-   "target": [
-    75.97,
-    26.06
-   ],
-   "note": "available 0.1 s, not taken · p_intercept 0.89"
-  },
-  {
-   "run": "after",
-   "t": 71.24,
-   "key": "through_ball_timing_run",
-   "player": 16,
-   "team": "A",
-   "taken": false,
-   "value": 0.061,
-   "p_real": 0.7259,
-   "p_complete": 0.9532,
-   "p_control": 0.9269,
-   "p_intercept": 0.1784,
-   "p_perceive": 0.5614,
-   "limiting": "p_intercept",
-   "available_s": 0,
-   "n": 2,
-   "xy": [
-    69.75,
-    22.04
-   ],
-   "target": [
-    80.97,
-    26.06
-   ],
-   "note": "available 0.1 s, not taken · p_intercept 0.82"
-  },
-  {
-   "run": "after",
-   "t": 73.44,
-   "key": "third_man_run",
-   "player": 3,
+   "player": 13,
    "team": "B",
    "taken": true,
-   "value": 0.031,
-   "p_real": 0.6873,
-   "p_complete": 0.9437,
-   "p_control": 0.7283,
+   "value": 0.156,
+   "p_real": 0.6085,
+   "p_complete": 0.9234,
+   "p_control": 0.6589,
    "p_intercept": 0,
-   "p_perceive": 0.2377,
+   "p_perceive": 0.5294,
    "limiting": "p_control",
    "available_s": 0,
    "n": 1,
    "xy": [
-    77.97,
-    31.12
+    84.62,
+    50.38
    ],
    "target": [
-    71.83,
-    24.79
+    78.78,
+    22.26
    ],
-   "note": "taken · p_real 0.69"
+   "note": "taken · p_real 0.61"
   },
   {
    "run": "after",
-   "t": 75.24,
+   "t": 15.92,
    "key": "driving_run_into_space",
    "player": 9,
    "team": "B",
+   "taken": true,
+   "value": 0.059,
+   "p_real": 0.5465,
+   "p_complete": 0.7958,
+   "p_control": 0.8075,
+   "p_intercept": 0.1494,
+   "p_perceive": 0.5989,
+   "limiting": "p_complete",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    77.26,
+    22.26
+   ],
+   "target": [
+    68.26,
+    24.26
+   ],
+   "note": "taken · p_real 0.55"
+  },
+  {
+   "run": "after",
+   "t": 15.92,
+   "key": "line_splitting_pass",
+   "player": 9,
+   "team": "B",
    "taken": false,
-   "value": 0.103,
-   "p_real": 0.5427,
-   "p_complete": 0.7601,
-   "p_control": 0.8063,
+   "value": 0.064,
+   "p_real": 0.5893,
+   "p_complete": 0.8663,
+   "p_control": 0.7683,
    "p_intercept": 0.1146,
-   "p_perceive": 0.628,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    69.88,
-    24.79
-   ],
-   "target": [
-    60.88,
-    22.79
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.76"
-  },
-  {
-   "run": "after",
-   "t": 75.24,
-   "key": "give_and_go",
-   "player": 9,
-   "team": "B",
-   "taken": true,
-   "value": 0.048,
-   "p_real": 0.6304,
-   "p_complete": 0.8995,
-   "p_control": 0.8621,
-   "p_intercept": 0.1871,
-   "p_perceive": 0.5452,
-   "limiting": "p_intercept",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    69.88,
-    24.79
-   ],
-   "target": [
-    77.13,
-    34.47
-   ],
-   "note": "taken · p_real 0.63"
-  },
-  {
-   "run": "after",
-   "t": 75.24,
-   "key": "third_man_run",
-   "player": 9,
-   "team": "B",
-   "taken": false,
-   "value": 0.141,
-   "p_real": 0.8829,
-   "p_complete": 0.9371,
-   "p_control": 0.9421,
-   "p_intercept": 0,
-   "p_perceive": 0.6145,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    69.88,
-    24.79
-   ],
-   "target": [
-    61.85,
-    35.57
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.94"
-  },
-  {
-   "run": "after",
-   "t": 76.52,
-   "key": "driving_run_into_space",
-   "player": 5,
-   "team": "A",
-   "taken": true,
-   "value": 0.309,
-   "p_real": 0.7472,
-   "p_complete": 0.8707,
-   "p_control": 0.9526,
-   "p_intercept": 0.0991,
-   "p_perceive": 0.6252,
-   "limiting": "p_complete",
-   "available_s": 2.6,
-   "n": 2,
-   "xy": [
-    73.27,
-    25.75
-   ],
-   "target": [
-    82.27,
-    23.75
-   ],
-   "note": "taken · p_real 0.75"
-  },
-  {
-   "run": "after",
-   "t": 81.48,
-   "key": "driving_run_into_space",
-   "player": 5,
-   "team": "A",
-   "taken": false,
-   "value": 0.251,
-   "p_real": 0.7418,
-   "p_complete": 0.8927,
-   "p_control": 0.9434,
-   "p_intercept": 0.1192,
-   "p_perceive": 0.6132,
-   "limiting": "p_intercept",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    96.43,
-    22.42
-   ],
-   "target": [
-    98,
-    20.42
-   ],
-   "note": "available 0.1 s, not taken · p_intercept 0.88"
-  },
-  {
-   "run": "after",
-   "t": 81.48,
-   "key": "give_and_go",
-   "player": 5,
-   "team": "A",
-   "taken": true,
-   "value": 0.03,
-   "p_real": 0.7402,
-   "p_complete": 0.983,
-   "p_control": 0.8788,
-   "p_intercept": 0.1431,
-   "p_perceive": 0.4791,
-   "limiting": "p_intercept",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    96.43,
-    22.42
-   ],
-   "target": [
-    84.69,
-    15.55
-   ],
-   "note": "taken · p_real 0.74"
-  },
-  {
-   "run": "after",
-   "t": 83.08,
-   "key": "driving_run_into_space",
-   "player": 16,
-   "team": "A",
-   "taken": false,
-   "value": 0.12,
-   "p_real": 0.5855,
-   "p_complete": 0.7941,
-   "p_control": 0.8563,
-   "p_intercept": 0.139,
-   "p_perceive": 0.6535,
-   "limiting": "p_complete",
-   "available_s": 0,
-   "n": 1,
-   "xy": [
-    85.01,
-    15.55
-   ],
-   "target": [
-    94.01,
-    13.55
-   ],
-   "note": "available 0.1 s, not taken · p_complete 0.79"
-  },
-  {
-   "run": "after",
-   "t": 83.08,
-   "key": "line_splitting_pass",
-   "player": 16,
-   "team": "A",
-   "taken": true,
-   "value": 0.063,
-   "p_real": 0.7843,
-   "p_complete": 0.9427,
-   "p_control": 0.8853,
-   "p_intercept": 0.0602,
-   "p_perceive": 0.6131,
+   "p_perceive": 0.7198,
    "limiting": "p_control",
    "available_s": 0,
    "n": 1,
    "xy": [
-    85.01,
-    15.55
+    77.26,
+    22.26
    ],
    "target": [
-    88,
-    48.33
+    64.39,
+    33.69
    ],
-   "note": "taken · p_real 0.78"
+   "note": "available 0.1 s, not taken · p_control 0.77"
   },
   {
    "run": "after",
-   "t": 83.08,
-   "key": "through_ball_timing_run",
-   "player": 16,
-   "team": "A",
+   "t": 15.92,
+   "key": "switch_of_play",
+   "player": 9,
+   "team": "B",
    "taken": false,
-   "value": 0.081,
-   "p_real": 0.7197,
-   "p_complete": 0.9144,
-   "p_control": 0.8581,
-   "p_intercept": 0.0827,
-   "p_perceive": 0.6131,
+   "value": 0.066,
+   "p_real": 0.7344,
+   "p_complete": 0.8966,
+   "p_control": 0.8607,
+   "p_intercept": 0.0483,
+   "p_perceive": 0.7067,
    "limiting": "p_control",
    "available_s": 0,
    "n": 1,
    "xy": [
-    85.01,
-    15.55
+    77.26,
+    22.26
    ],
    "target": [
-    93,
-    48.33
+    87.02,
+    50.05
    ],
    "note": "available 0.1 s, not taken · p_control 0.86"
   },
   {
    "run": "after",
-   "t": 85.84,
-   "key": "driving_run_into_space",
-   "player": 10,
-   "team": "A",
-   "taken": true,
-   "value": 0.172,
-   "p_real": 0.694,
-   "p_complete": 0.8297,
-   "p_control": 0.9346,
-   "p_intercept": 0.1051,
-   "p_perceive": 0.5151,
-   "limiting": "p_complete",
-   "available_s": 2.9,
-   "n": 2,
+   "t": 15.92,
+   "key": "third_man_run",
+   "player": 9,
+   "team": "B",
+   "taken": false,
+   "value": 0.07,
+   "p_real": 0.6275,
+   "p_complete": 0.8775,
+   "p_control": 0.7856,
+   "p_intercept": 0.0897,
+   "p_perceive": 0.7198,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
    "xy": [
-    88.41,
-    48.33
+    77.26,
+    22.26
    ],
    "target": [
-    97.41,
-    46.33
+    64.39,
+    33.69
    ],
-   "note": "taken · p_real 0.69"
+   "note": "available 0.1 s, not taken · p_control 0.79"
   },
   {
    "run": "after",
-   "t": 88.72,
-   "key": "one_v_one_dribble",
-   "player": 10,
-   "team": "A",
-   "taken": false,
-   "value": 0.068,
-   "p_real": 0.5986,
-   "p_complete": 0.806,
-   "p_control": 0.9084,
-   "p_intercept": 0.1825,
-   "p_perceive": 0.3939,
+   "t": 19.16,
+   "key": "switch_of_play",
+   "player": 9,
+   "team": "B",
+   "taken": true,
+   "value": 0.031,
+   "p_real": 0.7132,
+   "p_complete": 0.8577,
+   "p_control": 0.8596,
+   "p_intercept": 0.0327,
+   "p_perceive": 0.4143,
    "limiting": "p_complete",
    "available_s": 0,
    "n": 1,
    "xy": [
-    99.06,
-    44.4
+    64.05,
+    24.13
+   ],
+   "target": [
+    82.28,
+    49.85
+   ],
+   "note": "taken · p_real 0.71"
+  },
+  {
+   "run": "after",
+   "t": 21.4,
+   "key": "driving_run_into_space",
+   "player": 13,
+   "team": "B",
+   "taken": false,
+   "value": 0.119,
+   "p_real": 0.6789,
+   "p_complete": 0.8371,
+   "p_control": 0.9322,
+   "p_intercept": 0.13,
+   "p_perceive": 0.8485,
+   "limiting": "p_complete",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    81.88,
+    49.85
+   ],
+   "target": [
+    72.88,
+    47.85
+   ],
+   "note": "available 0.1 s, not taken · p_complete 0.84"
+  },
+  {
+   "run": "after",
+   "t": 21.4,
+   "key": "line_splitting_pass",
+   "player": 13,
+   "team": "B",
+   "taken": true,
+   "value": 0.039,
+   "p_real": 0.561,
+   "p_complete": 0.8348,
+   "p_control": 0.7874,
+   "p_intercept": 0.1464,
+   "p_perceive": 0.6497,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    81.88,
+    49.85
+   ],
+   "target": [
+    35.98,
+    35.37
+   ],
+   "note": "taken · p_real 0.56"
+  },
+  {
+   "run": "after",
+   "t": 21.4,
+   "key": "line_splitting_pass",
+   "player": 13,
+   "team": "B",
+   "taken": false,
+   "value": 0.073,
+   "p_real": 0.6126,
+   "p_complete": 0.9395,
+   "p_control": 0.6751,
+   "p_intercept": 0.0341,
+   "p_perceive": 0.8247,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    81.88,
+    49.85
+   ],
+   "target": [
+    62.55,
+    35.98
+   ],
+   "note": "available 0.1 s, not taken · p_control 0.68"
+  },
+  {
+   "run": "after",
+   "t": 21.4,
+   "key": "third_man_run",
+   "player": 13,
+   "team": "B",
+   "taken": false,
+   "value": 0.079,
+   "p_real": 0.6407,
+   "p_complete": 0.945,
+   "p_control": 0.6966,
+   "p_intercept": 0.0267,
+   "p_perceive": 0.8247,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    81.88,
+    49.85
+   ],
+   "target": [
+    62.55,
+    35.98
+   ],
+   "note": "available 0.1 s, not taken · p_control 0.70"
+  },
+  {
+   "run": "after",
+   "t": 25.36,
+   "key": "driving_run_into_space",
+   "player": 3,
+   "team": "B",
+   "taken": false,
+   "value": 0.114,
+   "p_real": 0.7068,
+   "p_complete": 0.8236,
+   "p_control": 0.9545,
+   "p_intercept": 0.101,
+   "p_perceive": 0.3079,
+   "limiting": "p_complete",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    35.04,
+    35.37
+   ],
+   "target": [
+    26.04,
+    37.37
+   ],
+   "note": "available 0.1 s, not taken · p_complete 0.82"
+  },
+  {
+   "run": "after",
+   "t": 25.36,
+   "key": "one_v_one_dribble",
+   "player": 3,
+   "team": "B",
+   "taken": true,
+   "value": 0.071,
+   "p_real": 0.661,
+   "p_complete": 0.8196,
+   "p_control": 0.9457,
+   "p_intercept": 0.1471,
+   "p_perceive": 0.3158,
+   "limiting": "p_complete",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    35.04,
+    35.37
+   ],
+   "target": [
+    29.04,
+    32.87
+   ],
+   "note": "taken · p_real 0.66"
+  },
+  {
+   "run": "after",
+   "t": 28.12,
+   "key": "give_and_go",
+   "player": 10,
+   "team": "A",
+   "taken": true,
+   "value": 0.021,
+   "p_real": 0.7546,
+   "p_complete": 0.9416,
+   "p_control": 0.938,
+   "p_intercept": 0.1456,
+   "p_perceive": 0.2073,
+   "limiting": "p_intercept",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    26.39,
+    32.68
+   ],
+   "target": [
+    31.2,
+    38.54
+   ],
+   "note": "taken · p_real 0.75"
+  },
+  {
+   "run": "after",
+   "t": 29.92,
+   "key": "driving_run_into_space",
+   "player": 2,
+   "team": "A",
+   "taken": false,
+   "value": 0.089,
+   "p_real": 0.6557,
+   "p_complete": 0.7973,
+   "p_control": 0.9358,
+   "p_intercept": 0.1211,
+   "p_perceive": 0.4998,
+   "limiting": "p_complete",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    32.95,
+    38.54
+   ],
+   "target": [
+    41.95,
+    40.54
+   ],
+   "note": "available 0.1 s, not taken · p_complete 0.80"
+  },
+  {
+   "run": "after",
+   "t": 29.92,
+   "key": "one_v_one_dribble",
+   "player": 2,
+   "team": "A",
+   "taken": false,
+   "value": 0.073,
+   "p_real": 0.5878,
+   "p_complete": 0.7928,
+   "p_control": 0.9211,
+   "p_intercept": 0.195,
+   "p_perceive": 0.5188,
+   "limiting": "p_complete",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    32.95,
+    38.54
+   ],
+   "target": [
+    38.95,
+    41.04
+   ],
+   "note": "available 0.1 s, not taken · p_complete 0.79"
+  },
+  {
+   "run": "after",
+   "t": 29.92,
+   "key": "third_man_run",
+   "player": 2,
+   "team": "A",
+   "taken": false,
+   "value": 0.105,
+   "p_real": 0.9507,
+   "p_complete": 0.9799,
+   "p_control": 0.9702,
+   "p_intercept": 0,
+   "p_perceive": 0.5132,
+   "limiting": "p_control",
+   "available_s": 1.6,
+   "n": 2,
+   "xy": [
+    36.73,
+    38.54
+   ],
+   "target": [
+    45.55,
+    52.6
+   ],
+   "note": "available 1.6 s, not taken · p_control 0.97"
+  },
+  {
+   "run": "after",
+   "t": 31.56,
+   "key": "driving_run_into_space",
+   "player": 2,
+   "team": "A",
+   "taken": true,
+   "value": 0.075,
+   "p_real": 0.6622,
+   "p_complete": 0.7873,
+   "p_control": 0.9375,
+   "p_intercept": 0.1028,
+   "p_perceive": 0.5383,
+   "limiting": "p_complete",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    36.73,
+    38.54
+   ],
+   "target": [
+    45.73,
+    40.54
+   ],
+   "note": "taken · p_real 0.66"
+  },
+  {
+   "run": "after",
+   "t": 35.12,
+   "key": "give_and_go",
+   "player": 2,
+   "team": "A",
+   "taken": false,
+   "value": 0.068,
+   "p_real": 0.9541,
+   "p_complete": 0.987,
+   "p_control": 0.9669,
+   "p_intercept": 0.0003,
+   "p_perceive": 0.3711,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    49.38,
+    40.44
+   ],
+   "target": [
+    49.63,
+    53.44
+   ],
+   "note": "available 0.1 s, not taken · p_control 0.97"
+  },
+  {
+   "run": "after",
+   "t": 35.12,
+   "key": "line_splitting_pass",
+   "player": 2,
+   "team": "A",
+   "taken": true,
+   "value": 0.02,
+   "p_real": 0.454,
+   "p_complete": 0.798,
+   "p_control": 0.7997,
+   "p_intercept": 0.2885,
+   "p_perceive": 0.3419,
+   "limiting": "p_intercept",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    49.38,
+    40.44
+   ],
+   "target": [
+    73.87,
+    17.36
+   ],
+   "note": "taken · p_real 0.45"
+  },
+  {
+   "run": "after",
+   "t": 37.96,
+   "key": "driving_run_into_space",
+   "player": 5,
+   "team": "A",
+   "taken": false,
+   "value": 0.113,
+   "p_real": 0.6498,
+   "p_complete": 0.8044,
+   "p_control": 0.9015,
+   "p_intercept": 0.1039,
+   "p_perceive": 0.5446,
+   "limiting": "p_complete",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    74.38,
+    17.36
+   ],
+   "target": [
+    83.38,
+    15.36
+   ],
+   "note": "available 0.1 s, not taken · p_complete 0.80"
+  },
+  {
+   "run": "after",
+   "t": 37.96,
+   "key": "one_v_one_dribble",
+   "player": 5,
+   "team": "A",
+   "taken": false,
+   "value": 0.071,
+   "p_real": 0.5977,
+   "p_complete": 0.8,
+   "p_control": 0.885,
+   "p_intercept": 0.1557,
+   "p_perceive": 0.5538,
+   "limiting": "p_complete",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    74.38,
+    17.36
+   ],
+   "target": [
+    80.38,
+    14.86
+   ],
+   "note": "available 0.1 s, not taken · p_complete 0.80"
+  },
+  {
+   "run": "after",
+   "t": 37.96,
+   "key": "through_ball_timing_run",
+   "player": 5,
+   "team": "A",
+   "taken": true,
+   "value": 0.088,
+   "p_real": 0.5882,
+   "p_complete": 0.8786,
+   "p_control": 0.6729,
+   "p_intercept": 0.0052,
+   "p_perceive": 0.5012,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    74.38,
+    17.36
+   ],
+   "target": [
+    86.05,
+    49.62
+   ],
+   "note": "taken · p_real 0.59"
+  },
+  {
+   "run": "after",
+   "t": 40.8,
+   "key": "driving_run_into_space",
+   "player": 8,
+   "team": "A",
+   "taken": true,
+   "value": 0.183,
+   "p_real": 0.6388,
+   "p_complete": 0.8446,
+   "p_control": 0.8391,
+   "p_intercept": 0.0987,
+   "p_perceive": 0.4847,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    86.95,
+    49.62
+   ],
+   "target": [
+    95.95,
+    51.62
+   ],
+   "note": "taken · p_real 0.64"
+  },
+  {
+   "run": "after",
+   "t": 43.44,
+   "key": "driving_run_into_space",
+   "player": 8,
+   "team": "A",
+   "taken": false,
+   "value": 0.155,
+   "p_real": 0.6489,
+   "p_complete": 0.879,
+   "p_control": 0.8315,
+   "p_intercept": 0.1122,
+   "p_perceive": 0.497,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    97.53,
+    51.06
    ],
    "target": [
     98,
-    46.9
+    53.06
+   ],
+   "note": "available 0.1 s, not taken · p_control 0.83"
+  },
+  {
+   "run": "after",
+   "t": 43.44,
+   "key": "switch_of_play",
+   "player": 8,
+   "team": "A",
+   "taken": true,
+   "value": 0.043,
+   "p_real": 0.6758,
+   "p_complete": 0.8898,
+   "p_control": 0.7686,
+   "p_intercept": 0.0118,
+   "p_perceive": 0.43,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    97.53,
+    51.06
+   ],
+   "target": [
+    88.83,
+    19.23
+   ],
+   "note": "taken · p_real 0.68"
+  },
+  {
+   "run": "after",
+   "t": 45.88,
+   "key": "driving_run_into_space",
+   "player": 5,
+   "team": "A",
+   "taken": false,
+   "value": 0.147,
+   "p_real": 0.6704,
+   "p_complete": 0.8267,
+   "p_control": 0.901,
+   "p_intercept": 0.1,
+   "p_perceive": 0.5963,
+   "limiting": "p_complete",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    89.49,
+    20.08
+   ],
+   "target": [
+    98,
+    22.08
+   ],
+   "note": "available 0.1 s, not taken · p_complete 0.83"
+  },
+  {
+   "run": "after",
+   "t": 45.88,
+   "key": "through_ball_timing_run",
+   "player": 5,
+   "team": "A",
+   "taken": true,
+   "value": 0.064,
+   "p_real": 0.4981,
+   "p_complete": 0.8919,
+   "p_control": 0.6489,
+   "p_intercept": 0.1394,
+   "p_perceive": 0.5502,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    89.49,
+    20.08
+   ],
+   "target": [
+    97.69,
+    50.98
+   ],
+   "note": "taken · p_real 0.50"
+  },
+  {
+   "run": "after",
+   "t": 48.4,
+   "key": "driving_run_into_space",
+   "player": 8,
+   "team": "A",
+   "taken": false,
+   "value": 0.161,
+   "p_real": 0.6388,
+   "p_complete": 0.8789,
+   "p_control": 0.827,
+   "p_intercept": 0.1212,
+   "p_perceive": 0.498,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    97.26,
+    50.43
+   ],
+   "target": [
+    98,
+    48.43
+   ],
+   "note": "available 0.1 s, not taken · p_control 0.83"
+  },
+  {
+   "run": "after",
+   "t": 48.4,
+   "key": "shot",
+   "player": 8,
+   "team": "A",
+   "taken": true,
+   "value": 0.002,
+   "p_real": 0.0424,
+   "p_complete": 0.638,
+   "p_control": 0.0741,
+   "p_intercept": 0.1029,
+   "p_perceive": 0.4439,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    97.26,
+    50.43
+   ],
+   "target": [
+    105,
+    34
+   ],
+   "note": "taken · p_real 0.04"
+  },
+  {
+   "run": "after",
+   "t": 49.92,
+   "key": "give_and_go",
+   "player": 4,
+   "team": "B",
+   "taken": true,
+   "value": 0.074,
+   "p_real": 0.7501,
+   "p_complete": 0.9574,
+   "p_control": 0.7835,
+   "p_intercept": 0,
+   "p_perceive": 0.4449,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    103.93,
+    33.82
+   ],
+   "target": [
+    96.79,
+    34.99
+   ],
+   "note": "taken · p_real 0.75"
+  },
+  {
+   "run": "after",
+   "t": 49.92,
+   "key": "third_man_run",
+   "player": 4,
+   "team": "B",
+   "taken": false,
+   "value": 0.08,
+   "p_real": 0.7469,
+   "p_complete": 0.9433,
+   "p_control": 0.7918,
+   "p_intercept": 0,
+   "p_perceive": 0.4449,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    103.93,
+    33.82
+   ],
+   "target": [
+    96.79,
+    34.99
+   ],
+   "note": "available 0.1 s, not taken · p_control 0.79"
+  },
+  {
+   "run": "after",
+   "t": 51.2,
+   "key": "driving_run_into_space",
+   "player": 12,
+   "team": "B",
+   "taken": false,
+   "value": 0.13,
+   "p_real": 0.5864,
+   "p_complete": 0.865,
+   "p_control": 0.7562,
+   "p_intercept": 0.1035,
+   "p_perceive": 0.6336,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    96.13,
+    34.99
+   ],
+   "target": [
+    87.13,
+    36.99
+   ],
+   "note": "available 0.1 s, not taken · p_control 0.76"
+  },
+  {
+   "run": "after",
+   "t": 52.6,
+   "key": "driving_run_into_space",
+   "player": 12,
+   "team": "B",
+   "taken": true,
+   "value": 0.089,
+   "p_real": 0.5648,
+   "p_complete": 0.8448,
+   "p_control": 0.7492,
+   "p_intercept": 0.1077,
+   "p_perceive": 0.5782,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    94.15,
+    34.99
+   ],
+   "target": [
+    85.15,
+    36.99
+   ],
+   "note": "taken · p_real 0.56"
+  },
+  {
+   "run": "after",
+   "t": 52.6,
+   "key": "one_v_one_dribble",
+   "player": 12,
+   "team": "B",
+   "taken": false,
+   "value": 0.063,
+   "p_real": 0.5009,
+   "p_complete": 0.8412,
+   "p_control": 0.7079,
+   "p_intercept": 0.1588,
+   "p_perceive": 0.5872,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    94.15,
+    34.99
+   ],
+   "target": [
+    88.15,
+    32.49
+   ],
+   "note": "available 0.1 s, not taken · p_control 0.71"
+  },
+  {
+   "run": "after",
+   "t": 55,
+   "key": "driving_run_into_space",
+   "player": 12,
+   "team": "B",
+   "taken": false,
+   "value": 0.095,
+   "p_real": 0.5596,
+   "p_complete": 0.83,
+   "p_control": 0.7531,
+   "p_intercept": 0.1048,
+   "p_perceive": 0.4138,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    82.73,
+    36.8
+   ],
+   "target": [
+    73.73,
+    38.8
+   ],
+   "note": "available 0.1 s, not taken · p_control 0.75"
+  },
+  {
+   "run": "after",
+   "t": 55,
+   "key": "one_v_one_dribble",
+   "player": 12,
+   "team": "B",
+   "taken": true,
+   "value": 0.067,
+   "p_real": 0.4978,
+   "p_complete": 0.8261,
+   "p_control": 0.7156,
+   "p_intercept": 0.1579,
+   "p_perceive": 0.4228,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    82.73,
+    36.8
+   ],
+   "target": [
+    76.73,
+    39.3
+   ],
+   "note": "taken · p_real 0.50"
+  },
+  {
+   "run": "after",
+   "t": 57.36,
+   "key": "driving_run_into_space",
+   "player": 12,
+   "team": "B",
+   "taken": true,
+   "value": 0.071,
+   "p_real": 0.553,
+   "p_complete": 0.8255,
+   "p_control": 0.7494,
+   "p_intercept": 0.1061,
+   "p_perceive": 0.3541,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    72.9,
+    38.85
+   ],
+   "target": [
+    63.9,
+    40.85
+   ],
+   "note": "taken · p_real 0.55"
+  },
+  {
+   "run": "after",
+   "t": 60.2,
+   "key": "driving_run_into_space",
+   "player": 12,
+   "team": "B",
+   "taken": false,
+   "value": 0.088,
+   "p_real": 0.545,
+   "p_complete": 0.8302,
+   "p_control": 0.7324,
+   "p_intercept": 0.1037,
+   "p_perceive": 0.3871,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    59.33,
+    40.66
+   ],
+   "target": [
+    50.33,
+    42.66
+   ],
+   "note": "available 0.1 s, not taken · p_control 0.73"
+  },
+  {
+   "run": "after",
+   "t": 60.2,
+   "key": "one_v_one_dribble",
+   "player": 12,
+   "team": "B",
+   "taken": true,
+   "value": 0.062,
+   "p_real": 0.4844,
+   "p_complete": 0.8263,
+   "p_control": 0.6978,
+   "p_intercept": 0.1599,
+   "p_perceive": 0.396,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    59.33,
+    40.66
+   ],
+   "target": [
+    53.33,
+    43.16
+   ],
+   "note": "taken · p_real 0.48"
+  },
+  {
+   "run": "after",
+   "t": 63.92,
+   "key": "through_ball_timing_run",
+   "player": 12,
+   "team": "B",
+   "taken": true,
+   "value": 0.029,
+   "p_real": 0.5954,
+   "p_complete": 0.7269,
+   "p_control": 0.9342,
+   "p_intercept": 0.1232,
+   "p_perceive": 0.2198,
+   "limiting": "p_complete",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    45.35,
+    42.71
+   ],
+   "target": [
+    22.5,
+    35.91
+   ],
+   "note": "taken · p_real 0.60"
+  },
+  {
+   "run": "after",
+   "t": 66.44,
+   "key": "driving_run_into_space",
+   "player": 3,
+   "team": "B",
+   "taken": true,
+   "value": 0.193,
+   "p_real": 0.7187,
+   "p_complete": 0.852,
+   "p_control": 0.9539,
+   "p_intercept": 0.1157,
+   "p_perceive": 0.5097,
+   "limiting": "p_complete",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    20.2,
+    36.86
+   ],
+   "target": [
+    11.2,
+    38.86
+   ],
+   "note": "taken · p_real 0.72"
+  },
+  {
+   "run": "after",
+   "t": 70.2,
+   "key": "shot",
+   "player": 3,
+   "team": "B",
+   "taken": true,
+   "value": 0.09,
+   "p_real": 0.4956,
+   "p_complete": 0.8072,
+   "p_control": 0.8436,
+   "p_intercept": 0.2721,
+   "p_perceive": 0.2128,
+   "limiting": "p_intercept",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    10.76,
+    36.83
+   ],
+   "target": [
+    0,
+    34
+   ],
+   "note": "taken · p_real 0.50"
+  },
+  {
+   "run": "after",
+   "t": 75.56,
+   "key": "line_splitting_pass",
+   "player": 7,
+   "team": "A",
+   "taken": false,
+   "value": 0.124,
+   "p_real": 0.7664,
+   "p_complete": 0.9352,
+   "p_control": 0.8195,
+   "p_intercept": 0,
+   "p_perceive": 0.3989,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    52.82,
+    34
+   ],
+   "target": [
+    60.96,
+    54.98
+   ],
+   "note": "available 0.1 s, not taken · p_control 0.82"
+  },
+  {
+   "run": "after",
+   "t": 75.56,
+   "key": "switch_of_play",
+   "player": 7,
+   "team": "A",
+   "taken": true,
+   "value": 0.111,
+   "p_real": 0.7974,
+   "p_complete": 0.9357,
+   "p_control": 0.8522,
+   "p_intercept": 0,
+   "p_perceive": 0.4007,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    52.82,
+    34
+   ],
+   "target": [
+    59.41,
+    12.64
+   ],
+   "note": "taken · p_real 0.80"
+  },
+  {
+   "run": "after",
+   "t": 77.36,
+   "key": "line_splitting_pass",
+   "player": 5,
+   "team": "A",
+   "taken": false,
+   "value": 0.104,
+   "p_real": 0.6062,
+   "p_complete": 0.9174,
+   "p_control": 0.6848,
+   "p_intercept": 0.0352,
+   "p_perceive": 0.532,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    63.07,
+    18
+   ],
+   "target": [
+    66.84,
+    53.13
+   ],
+   "note": "available 0.1 s, not taken · p_control 0.68"
+  },
+  {
+   "run": "after",
+   "t": 77.36,
+   "key": "switch_of_play",
+   "player": 5,
+   "team": "A",
+   "taken": false,
+   "value": 0.063,
+   "p_real": 0.5303,
+   "p_complete": 0.8917,
+   "p_control": 0.6049,
+   "p_intercept": 0.0168,
+   "p_perceive": 0.532,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    63.07,
+    18
+   ],
+   "target": [
+    66.84,
+    53.13
+   ],
+   "note": "available 0.1 s, not taken · p_control 0.60"
+  },
+  {
+   "run": "after",
+   "t": 77.36,
+   "key": "through_ball_timing_run",
+   "player": 5,
+   "team": "A",
+   "taken": true,
+   "value": 0.053,
+   "p_real": 0.422,
+   "p_complete": 0.8554,
+   "p_control": 0.5932,
+   "p_intercept": 0.1684,
+   "p_perceive": 0.473,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    63.07,
+    18
+   ],
+   "target": [
+    71.84,
+    53.13
+   ],
+   "note": "taken · p_real 0.42"
+  },
+  {
+   "run": "after",
+   "t": 80,
+   "key": "driving_run_into_space",
+   "player": 13,
+   "team": "B",
+   "taken": false,
+   "value": 0.188,
+   "p_real": 0.6825,
+   "p_complete": 0.8114,
+   "p_control": 0.9372,
+   "p_intercept": 0.1025,
+   "p_perceive": 0.7837,
+   "limiting": "p_complete",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    73.6,
+    49.29
+   ],
+   "target": [
+    64.6,
+    47.29
    ],
    "note": "available 0.1 s, not taken · p_complete 0.81"
+  },
+  {
+   "run": "after",
+   "t": 80,
+   "key": "one_v_one_dribble",
+   "player": 13,
+   "team": "B",
+   "taken": false,
+   "value": 0.144,
+   "p_real": 0.627,
+   "p_complete": 0.8072,
+   "p_control": 0.9274,
+   "p_intercept": 0.1624,
+   "p_perceive": 0.7899,
+   "limiting": "p_complete",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    73.6,
+    49.29
+   ],
+   "target": [
+    67.6,
+    46.79
+   ],
+   "note": "available 0.1 s, not taken · p_complete 0.81"
+  },
+  {
+   "run": "after",
+   "t": 80,
+   "key": "switch_of_play",
+   "player": 13,
+   "team": "B",
+   "taken": true,
+   "value": 0.057,
+   "p_real": 0.5649,
+   "p_complete": 0.9349,
+   "p_control": 0.6042,
+   "p_intercept": 0,
+   "p_perceive": 0.6668,
+   "limiting": "p_control",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    73.6,
+    49.29
+   ],
+   "target": [
+    67.62,
+    20.54
+   ],
+   "note": "taken · p_real 0.56"
+  },
+  {
+   "run": "after",
+   "t": 82.2,
+   "key": "driving_run_into_space",
+   "player": 9,
+   "team": "B",
+   "taken": true,
+   "value": 0.065,
+   "p_real": 0.5501,
+   "p_complete": 0.7502,
+   "p_control": 0.8228,
+   "p_intercept": 0.1088,
+   "p_perceive": 0.5208,
+   "limiting": "p_complete",
+   "available_s": 2.8,
+   "n": 2,
+   "xy": [
+    56.12,
+    22.38
+   ],
+   "target": [
+    47.12,
+    20.38
+   ],
+   "note": "taken · p_real 0.55"
+  },
+  {
+   "run": "after",
+   "t": 82.2,
+   "key": "line_splitting_pass",
+   "player": 9,
+   "team": "B",
+   "taken": false,
+   "value": 0.084,
+   "p_real": 0.8587,
+   "p_complete": 0.9387,
+   "p_control": 0.9548,
+   "p_intercept": 0.0419,
+   "p_perceive": 0.4724,
+   "limiting": "p_complete",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    67.05,
+    20.54
+   ],
+   "target": [
+    54.85,
+    30.39
+   ],
+   "note": "available 0.1 s, not taken · p_complete 0.94"
+  },
+  {
+   "run": "after",
+   "t": 84.96,
+   "key": "through_ball_timing_run",
+   "player": 9,
+   "team": "B",
+   "taken": false,
+   "value": 0.089,
+   "p_real": 0.8623,
+   "p_complete": 0.9192,
+   "p_control": 0.9389,
+   "p_intercept": 0.0009,
+   "p_perceive": 0.4972,
+   "limiting": "p_complete",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    56.12,
+    22.38
+   ],
+   "target": [
+    42.27,
+    30.7
+   ],
+   "note": "available 0.1 s, not taken · p_complete 0.92"
+  },
+  {
+   "run": "after",
+   "t": 89.32,
+   "key": "line_splitting_pass",
+   "player": 5,
+   "team": "A",
+   "taken": true,
+   "value": 0.064,
+   "p_real": 0.7184,
+   "p_complete": 0.9193,
+   "p_control": 0.9466,
+   "p_intercept": 0.1745,
+   "p_perceive": 0.1862,
+   "limiting": "p_intercept",
+   "available_s": 0,
+   "n": 1,
+   "xy": [
+    44.25,
+    20.37
+   ],
+   "target": [
+    48.36,
+    48.5
+   ],
+   "note": "taken · p_real 0.72"
   }
  ],
  "unlocked": [
   {
-   "key": "line_splitting_pass",
-   "player": 11,
-   "before": 60,
-   "after": 146,
-   "per_run_before": 0.15,
-   "per_run_after": 0.365,
-   "was_available_not_taken": 89,
-   "limiting_before": "p_control",
-   "n_seeds": 400,
-   "driver": "Coordination +12.6 pts"
-  },
-  {
    "key": "driving_run_into_space",
-   "player": 15,
-   "before": 28,
-   "after": 83,
-   "per_run_before": 0.07,
-   "per_run_after": 0.208,
-   "was_available_not_taken": 17,
-   "limiting_before": "p_control",
-   "n_seeds": 400,
-   "driver": "Coordination +12.6 pts"
-  },
-  {
-   "key": "line_splitting_pass",
-   "player": 15,
-   "before": 42,
-   "after": 97,
-   "per_run_before": 0.105,
-   "per_run_after": 0.243,
-   "was_available_not_taken": 48,
+   "player": 5,
+   "before": 40,
+   "after": 586,
+   "per_run_before": 0.1,
+   "per_run_after": 1.465,
+   "was_available_not_taken": 45,
    "limiting_before": "p_complete",
    "n_seeds": 400,
-   "driver": "Coordination +12.6 pts"
+   "driver": "Coordination +12.5 pts"
   },
   {
    "key": "shot",
-   "player": 16,
-   "before": 202,
-   "after": 246,
-   "per_run_before": 0.505,
-   "per_run_after": 0.615,
-   "was_available_not_taken": 9,
-   "limiting_before": "p_complete",
-   "n_seeds": 400,
-   "driver": "Sharpest turn +3 deg"
-  },
-  {
-   "key": "give_and_go",
-   "player": 15,
-   "before": 12,
-   "after": 45,
-   "per_run_before": 0.03,
-   "per_run_after": 0.113,
-   "was_available_not_taken": 40,
-   "limiting_before": "p_control",
-   "n_seeds": 400,
-   "driver": "Coordination +12.6 pts"
-  },
-  {
-   "key": "switch_of_play",
-   "player": 15,
-   "before": 12,
-   "after": 45,
-   "per_run_before": 0.03,
-   "per_run_after": 0.113,
-   "was_available_not_taken": 14,
-   "limiting_before": "p_complete",
-   "n_seeds": 400,
-   "driver": "Coordination +12.6 pts"
-  },
-  {
-   "key": "one_v_one_dribble",
-   "player": 15,
-   "before": 9,
-   "after": 31,
-   "per_run_before": 0.023,
-   "per_run_after": 0.078,
-   "was_available_not_taken": 2,
-   "limiting_before": "p_control",
-   "n_seeds": 400,
-   "driver": "Coordination +12.6 pts"
-  },
-  {
-   "key": "one_v_one_dribble",
-   "player": 11,
-   "before": 5,
-   "after": 26,
-   "per_run_before": 0.013,
-   "per_run_after": 0.065,
-   "was_available_not_taken": 19,
-   "limiting_before": "p_complete",
-   "n_seeds": 400,
-   "driver": "Coordination +12.6 pts"
-  },
-  {
-   "key": "switch_of_play",
    "player": 5,
-   "before": 116,
-   "after": 137,
-   "per_run_before": 0.29,
-   "per_run_after": 0.343,
-   "was_available_not_taken": 30,
-   "limiting_before": "p_control",
+   "before": 0,
+   "after": 235,
+   "per_run_before": 0,
+   "per_run_after": 0.588,
+   "was_available_not_taken": 0,
+   "limiting_before": "p_complete",
    "n_seeds": 400,
-   "driver": "Coordination +12.6 pts"
-  },
-  {
-   "key": "third_man_run",
-   "player": 15,
-   "before": 34,
-   "after": 55,
-   "per_run_before": 0.085,
-   "per_run_after": 0.138,
-   "was_available_not_taken": 64,
-   "limiting_before": "p_control",
-   "n_seeds": 400,
-   "driver": "Coordination +12.6 pts"
+   "driver": "Coordination +12.5 pts"
   },
   {
    "key": "through_ball_timing_run",
-   "player": 15,
-   "before": 19,
-   "after": 38,
-   "per_run_before": 0.048,
-   "per_run_after": 0.095,
-   "was_available_not_taken": 7,
-   "limiting_before": "p_complete",
-   "n_seeds": 400,
-   "driver": "Coordination +12.6 pts"
-  },
-  {
-   "key": "one_v_one_dribble",
    "player": 5,
-   "before": 338,
-   "after": 352,
-   "per_run_before": 0.845,
-   "per_run_after": 0.88,
-   "was_available_not_taken": 320,
-   "limiting_before": "p_complete",
-   "n_seeds": 400,
-   "driver": "Coordination +12.6 pts"
-  },
-  {
-   "key": "switch_of_play",
-   "player": 16,
-   "before": 105,
-   "after": 119,
-   "per_run_before": 0.263,
-   "per_run_after": 0.298,
-   "was_available_not_taken": 51,
-   "limiting_before": "p_control",
-   "n_seeds": 400,
-   "driver": "Sharpest turn +3 deg"
-  },
-  {
-   "key": "through_ball_timing_run",
-   "player": 8,
-   "before": 96,
-   "after": 108,
-   "per_run_before": 0.24,
-   "per_run_after": 0.27,
-   "was_available_not_taken": 126,
-   "limiting_before": "p_control",
-   "n_seeds": 400,
-   "driver": "Coordination +12.6 pts"
-  },
-  {
-   "key": "through_ball_timing_run",
-   "player": 10,
-   "before": 147,
-   "after": 159,
-   "per_run_before": 0.368,
-   "per_run_after": 0.398,
-   "was_available_not_taken": 108,
-   "limiting_before": "p_control",
-   "n_seeds": 400,
-   "driver": "Sharpest turn +3 deg"
-  },
-  {
-   "key": "give_and_go",
-   "player": 7,
-   "before": 15,
-   "after": 24,
-   "per_run_before": 0.038,
-   "per_run_after": 0.06,
-   "was_available_not_taken": 48,
-   "limiting_before": "p_control",
-   "n_seeds": 400,
-   "driver": "Coordination +12.6 pts"
-  },
-  {
-   "key": "switch_of_play",
-   "player": 10,
-   "before": 160,
-   "after": 169,
-   "per_run_before": 0.4,
-   "per_run_after": 0.423,
-   "was_available_not_taken": 5,
-   "limiting_before": "p_control",
-   "n_seeds": 400,
-   "driver": "Sharpest turn +3 deg"
-  },
-  {
-   "key": "line_splitting_pass",
-   "player": 5,
-   "before": 161,
-   "after": 169,
-   "per_run_before": 0.403,
-   "per_run_after": 0.423,
-   "was_available_not_taken": 152,
-   "limiting_before": "p_control",
-   "n_seeds": 400,
-   "driver": "Coordination +12.6 pts"
-  },
-  {
-   "key": "switch_of_play",
-   "player": 11,
    "before": 23,
-   "after": 31,
+   "after": 191,
    "per_run_before": 0.058,
-   "per_run_after": 0.078,
-   "was_available_not_taken": 25,
+   "per_run_after": 0.478,
+   "was_available_not_taken": 6,
    "limiting_before": "p_control",
    "n_seeds": 400,
-   "driver": "Coordination +12.6 pts"
+   "driver": "Coordination +12.5 pts"
+  },
+  {
+   "key": "switch_of_play",
+   "player": 5,
+   "before": 19,
+   "after": 156,
+   "per_run_before": 0.048,
+   "per_run_after": 0.39,
+   "was_available_not_taken": 4,
+   "limiting_before": "p_control",
+   "n_seeds": 400,
+   "driver": "Coordination +12.5 pts"
+  },
+  {
+   "key": "one_v_one_dribble",
+   "player": 5,
+   "before": 10,
+   "after": 137,
+   "per_run_before": 0.025,
+   "per_run_after": 0.343,
+   "was_available_not_taken": 1,
+   "limiting_before": "p_complete",
+   "n_seeds": 400,
+   "driver": "Coordination +12.5 pts"
+  },
+  {
+   "key": "line_splitting_pass",
+   "player": 7,
+   "before": 114,
+   "after": 181,
+   "per_run_before": 0.285,
+   "per_run_after": 0.453,
+   "was_available_not_taken": 181,
+   "limiting_before": "p_control",
+   "n_seeds": 400,
+   "driver": "Sharpest turn +12 deg"
+  },
+  {
+   "key": "line_splitting_pass",
+   "player": 5,
+   "before": 66,
+   "after": 110,
+   "per_run_before": 0.165,
+   "per_run_after": 0.275,
+   "was_available_not_taken": 33,
+   "limiting_before": "p_control",
+   "n_seeds": 400,
+   "driver": "Coordination +12.5 pts"
   },
   {
    "key": "driving_run_into_space",
-   "player": 5,
-   "before": 420,
-   "after": 427,
-   "per_run_before": 1.05,
-   "per_run_after": 1.068,
-   "was_available_not_taken": 616,
-   "limiting_before": "p_complete",
+   "player": 8,
+   "before": 512,
+   "after": 542,
+   "per_run_before": 1.28,
+   "per_run_after": 1.355,
+   "was_available_not_taken": 561,
+   "limiting_before": "p_control",
    "n_seeds": 400,
-   "driver": "Coordination +12.6 pts"
+   "driver": "Coordination +12.5 pts"
   },
   {
-   "key": "shot",
-   "player": 5,
-   "before": 87,
-   "after": 94,
-   "per_run_before": 0.218,
-   "per_run_after": 0.235,
-   "was_available_not_taken": 9,
+   "key": "third_man_run",
+   "player": 7,
+   "before": 4,
+   "after": 28,
+   "per_run_before": 0.01,
+   "per_run_after": 0.07,
+   "was_available_not_taken": 6,
+   "limiting_before": "p_control",
+   "n_seeds": 400,
+   "driver": "Sharpest turn +12 deg"
+  },
+  {
+   "key": "driving_run_into_space",
+   "player": 10,
+   "before": 36,
+   "after": 58,
+   "per_run_before": 0.09,
+   "per_run_after": 0.145,
+   "was_available_not_taken": 1,
    "limiting_before": "p_complete",
    "n_seeds": 400,
-   "driver": "Coordination +12.6 pts"
+   "driver": "Coordination +12.5 pts"
   },
   {
    "key": "third_man_run",
    "player": 10,
-   "before": 1,
-   "after": 7,
-   "per_run_before": 0.003,
-   "per_run_after": 0.018,
-   "was_available_not_taken": 2,
-   "limiting_before": "p_control",
+   "before": 60,
+   "after": 78,
+   "per_run_before": 0.15,
+   "per_run_after": 0.195,
+   "was_available_not_taken": 70,
+   "limiting_before": "p_complete",
    "n_seeds": 400,
-   "driver": "Sharpest turn +3 deg"
-  },
-  {
-   "key": "give_and_go",
-   "player": 10,
-   "before": 41,
-   "after": 46,
-   "per_run_before": 0.103,
-   "per_run_after": 0.115,
-   "was_available_not_taken": 51,
-   "limiting_before": "p_control",
-   "n_seeds": 400,
-   "driver": "Sharpest turn +3 deg"
+   "driver": "Coordination +12.5 pts"
   },
   {
    "key": "give_and_go",
    "player": 5,
-   "before": 50,
-   "after": 53,
-   "per_run_before": 0.125,
-   "per_run_after": 0.133,
+   "before": 28,
+   "after": 44,
+   "per_run_before": 0.07,
+   "per_run_after": 0.11,
    "was_available_not_taken": 60,
    "limiting_before": "p_control",
    "n_seeds": 400,
-   "driver": "Coordination +12.6 pts"
+   "driver": "Coordination +12.5 pts"
+  },
+  {
+   "key": "third_man_run",
+   "player": 2,
+   "before": 25,
+   "after": 40,
+   "per_run_before": 0.063,
+   "per_run_after": 0.1,
+   "was_available_not_taken": 70,
+   "limiting_before": "p_control",
+   "n_seeds": 400,
+   "driver": "Coordination +12.5 pts"
+  },
+  {
+   "key": "line_splitting_pass",
+   "player": 8,
+   "before": 67,
+   "after": 78,
+   "per_run_before": 0.168,
+   "per_run_after": 0.195,
+   "was_available_not_taken": 31,
+   "limiting_before": "p_complete",
+   "n_seeds": 400,
+   "driver": "Coordination +12.5 pts"
+  },
+  {
+   "key": "one_v_one_dribble",
+   "player": 10,
+   "before": 20,
+   "after": 31,
+   "per_run_before": 0.05,
+   "per_run_after": 0.078,
+   "was_available_not_taken": 0,
+   "limiting_before": "p_complete",
+   "n_seeds": 400,
+   "driver": "Coordination +12.5 pts"
   },
   {
    "key": "shot",
    "player": 8,
-   "before": 8,
-   "after": 11,
-   "per_run_before": 0.02,
-   "per_run_after": 0.028,
-   "was_available_not_taken": 0,
+   "before": 172,
+   "after": 182,
+   "per_run_before": 0.43,
+   "per_run_after": 0.455,
+   "was_available_not_taken": 10,
    "limiting_before": "p_complete",
    "n_seeds": 400,
-   "driver": "Coordination +12.6 pts"
+   "driver": "Coordination +12.5 pts"
   },
   {
-   "key": "shot",
-   "player": 15,
-   "before": 0,
-   "after": 1,
-   "per_run_before": 0,
-   "per_run_after": 0.003,
-   "was_available_not_taken": 0,
-   "limiting_before": "p_complete",
+   "key": "line_splitting_pass",
+   "player": 11,
+   "before": 53,
+   "after": 60,
+   "per_run_before": 0.133,
+   "per_run_after": 0.15,
+   "was_available_not_taken": 111,
+   "limiting_before": "p_control",
    "n_seeds": 400,
-   "driver": "Coordination +12.6 pts"
+   "driver": "Coordination +12.5 pts"
   },
   {
    "key": "third_man_run",
-   "player": 16,
-   "before": 9,
-   "after": 10,
-   "per_run_before": 0.023,
-   "per_run_after": 0.025,
-   "was_available_not_taken": 11,
+   "player": 11,
+   "before": 36,
+   "after": 43,
+   "per_run_before": 0.09,
+   "per_run_after": 0.108,
+   "was_available_not_taken": 161,
    "limiting_before": "p_control",
    "n_seeds": 400,
-   "driver": "Sharpest turn +3 deg"
+   "driver": "Coordination +12.5 pts"
+  },
+  {
+   "key": "through_ball_timing_run",
+   "player": 10,
+   "before": 30,
+   "after": 37,
+   "per_run_before": 0.075,
+   "per_run_after": 0.093,
+   "was_available_not_taken": 3,
+   "limiting_before": "p_complete",
+   "n_seeds": 400,
+   "driver": "Coordination +12.5 pts"
+  },
+  {
+   "key": "switch_of_play",
+   "player": 16,
+   "before": 32,
+   "after": 38,
+   "per_run_before": 0.08,
+   "per_run_after": 0.095,
+   "was_available_not_taken": 5,
+   "limiting_before": "p_complete",
+   "n_seeds": 400,
+   "driver": "Sharpest turn +12 deg"
+  },
+  {
+   "key": "give_and_go",
+   "player": 16,
+   "before": 10,
+   "after": 15,
+   "per_run_before": 0.025,
+   "per_run_after": 0.038,
+   "was_available_not_taken": 20,
+   "limiting_before": "p_control",
+   "n_seeds": 400,
+   "driver": "Explosiveness +9 pts"
+  },
+  {
+   "key": "driving_run_into_space",
+   "player": 16,
+   "before": 29,
+   "after": 33,
+   "per_run_before": 0.073,
+   "per_run_after": 0.083,
+   "was_available_not_taken": 74,
+   "limiting_before": "p_complete",
+   "n_seeds": 400,
+   "driver": "Sharpest turn +12 deg"
+  },
+  {
+   "key": "line_splitting_pass",
+   "player": 16,
+   "before": 186,
+   "after": 190,
+   "per_run_before": 0.465,
+   "per_run_after": 0.475,
+   "was_available_not_taken": 167,
+   "limiting_before": "p_complete",
+   "n_seeds": 400,
+   "driver": "Sharpest turn +12 deg"
+  },
+  {
+   "key": "through_ball_timing_run",
+   "player": 7,
+   "before": 193,
+   "after": 195,
+   "per_run_before": 0.483,
+   "per_run_after": 0.488,
+   "was_available_not_taken": 249,
+   "limiting_before": "p_control",
+   "n_seeds": 400,
+   "driver": "Sharpest turn +12 deg"
+  },
+  {
+   "key": "third_man_run",
+   "player": 15,
+   "before": 16,
+   "after": 17,
+   "per_run_before": 0.04,
+   "per_run_after": 0.043,
+   "was_available_not_taken": 30,
+   "limiting_before": "p_control",
+   "n_seeds": 400,
+   "driver": "Coordination +12.5 pts"
   }
  ],
  "ensemble": {
@@ -4137,91 +3359,91 @@
   "note": "per-affordance taken / available-but-not-taken counts across the paired ensemble, team A",
   "before": {
    "one_v_one_dribble": {
-    "taken": 857,
-    "missed": 705
-   },
-   "driving_run_into_space": {
-    "taken": 1806,
-    "missed": 2261
-   },
-   "line_splitting_pass": {
-    "taken": 736,
-    "missed": 772
-   },
-   "through_ball_timing_run": {
-    "taken": 783,
-    "missed": 787
-   },
-   "give_and_go": {
-    "taken": 295,
-    "missed": 560
+    "taken": 672,
+    "missed": 585
    },
    "switch_of_play": {
-    "taken": 573,
-    "missed": 264
+    "taken": 887,
+    "missed": 719
+   },
+   "driving_run_into_space": {
+    "taken": 1671,
+    "missed": 2309
+   },
+   "through_ball_timing_run": {
+    "taken": 845,
+    "missed": 816
+   },
+   "line_splitting_pass": {
+    "taken": 906,
+    "missed": 920
    },
    "third_man_run": {
-    "taken": 205,
-    "missed": 485
+    "taken": 244,
+    "missed": 512
+   },
+   "give_and_go": {
+    "taken": 305,
+    "missed": 590
    },
    "shot": {
-    "taken": 546,
-    "missed": 22
+    "taken": 441,
+    "missed": 35
    }
   },
   "after": {
    "one_v_one_dribble": {
-    "taken": 848,
-    "missed": 887
+    "taken": 601,
+    "missed": 475
+   },
+   "switch_of_play": {
+    "taken": 763,
+    "missed": 645
    },
    "driving_run_into_space": {
-    "taken": 1750,
-    "missed": 2397
+    "taken": 1735,
+    "missed": 2115
    },
-   "shot": {
-    "taken": 587,
-    "missed": 24
+   "line_splitting_pass": {
+    "taken": 882,
+    "missed": 965
    },
    "give_and_go": {
     "taken": 278,
-    "missed": 590
-   },
-   "line_splitting_pass": {
-    "taken": 732,
-    "missed": 887
-   },
-   "switch_of_play": {
-    "taken": 607,
-    "missed": 324
-   },
-   "third_man_run": {
-    "taken": 178,
-    "missed": 524
+    "missed": 536
    },
    "through_ball_timing_run": {
-    "taken": 785,
-    "missed": 869
+    "taken": 780,
+    "missed": 689
+   },
+   "shot": {
+    "taken": 437,
+    "missed": 6
+   },
+   "third_man_run": {
+    "taken": 247,
+    "missed": 501
    }
   }
  },
  "summary": {
   "note": "showcase counts are for the single sampled possession; the ensemble block is the claim",
   "before": {
-   "taken": 32,
-   "available_not_taken": 38
+   "taken": 26,
+   "available_not_taken": 28
   },
   "after": {
-   "taken": 30,
-   "available_not_taken": 43
+   "taken": 29,
+   "available_not_taken": 31
   },
   "ensemble": {
    "n_seeds": 400,
-   "before_taken_per_run": 14.5025,
-   "before_missed_per_run": 14.64,
-   "after_taken_per_run": 14.4125,
-   "after_missed_per_run": 16.255,
-   "unlocked_per_run": 1.3225,
-   "unlocked_pairs": 27
+   "before_taken_per_run": 14.9275,
+   "before_missed_per_run": 16.215,
+   "after_taken_per_run": 14.3075,
+   "after_missed_per_run": 14.83,
+   "unlocked_per_run": 3.81,
+   "unlocked_pairs": 25
   }
  }
 }

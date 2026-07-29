@@ -279,6 +279,13 @@ def evaluate_H(H: np.ndarray, frame_bgr: np.ndarray,
     return res
 
 
+# A homography with no landmark correspondences of its own can satisfy every image
+# criterion and still be a carry that has quietly drifted in a direction the visible
+# paint does not constrain. Two of the six pieces of evidence are simply missing, so
+# it is not allowed to report full confidence.
+IMAGE_ONLY_CONF_CAP = 0.95
+
+
 def image_conf(res: Dict[str, Any]) -> float:
     """Confidence from image evidence only, for a homography with no landmarks."""
     terms = res.get("terms") or {}
@@ -289,7 +296,21 @@ def image_conf(res: Dict[str, Any]) -> float:
         c = min(c, 0.15)
     if int(res.get("n_paint_px", 0)) < 400:
         c = min(c, 0.45)
-    return float(c)
+    return float(min(c, IMAGE_ONLY_CONF_CAP))
+
+
+def image_limiting(res: Dict[str, Any]) -> str:
+    """Which of the image-only criteria is the weakest (for diagnostics)."""
+    terms = res.get("terms") or {}
+    have = {k: terms[k] for k in IMAGE_CRITERIA if k in terms}
+    if not res.get("goal_mouth_ok", True):
+        return "goal_mouth"
+    if int(res.get("n_paint_px", 0)) < 400:
+        return "evidence"
+    if not have:
+        return "no_evidence"
+    k = min(have, key=have.get)
+    return k if have[k] < IMAGE_ONLY_CONF_CAP else "image_only_cap"
 
 
 def fit_and_validate(frame_bgr: np.ndarray, kps: Dict[int, Tuple[float, float, float]],
@@ -503,6 +524,7 @@ class PnLCalibrator:
                     c = image_conf(prop)
                     prop["conf"] = round(float(c * (0.985 ** (self._chain + 1))), 3)
                     prop["verified"] = bool(prop["conf"] >= VERIFY_CONF)
+                    prop["limiting"] = image_limiting(prop)
                     prop["chain_len"] = self._chain + 1
 
         cands = [c for c in (direct, prop) if c is not None]
@@ -511,7 +533,14 @@ class PnLCalibrator:
             self._prev_H = None
             self._chain = 0
             return None
-        best = max(cands, key=lambda c: c["conf"])
+        # Re-anchor whenever the direct fit clears the gate, even if a carried
+        # homography happens to score higher on the four image criteria: the direct
+        # fit is the only one with landmark evidence, and letting the carry win would
+        # let the chain drift indefinitely without ever being pinned down again.
+        if direct is not None and direct["conf"] >= self.anchor_conf:
+            best = direct
+        else:
+            best = max(cands, key=lambda c: c["conf"])
         if best["method"] == "propagated":
             self._chain += 1
         else:
@@ -562,6 +591,8 @@ def package(res: Dict[str, Any]) -> Dict[str, Any]:
         "paint_err_p90_px": float(res.get("paint_err_p90_px", float("nan"))),
         "paint_explained": float(res.get("paint_explained", 0.0)),
         "model_cover": float(res.get("model_cover", 0.0)),
+        "paint_support": float(res.get("paint_support", 0.0)),
+        "n_model_samples": int(res.get("n_model_samples", 0)),
         "turf_iou": float(res.get("turf_iou", 0.0)),
         "loo_err_px": (float(loo) if loo is not None and math.isfinite(loo) else None),
         "goal_mouth_m": res.get("goal_mouth_m"),

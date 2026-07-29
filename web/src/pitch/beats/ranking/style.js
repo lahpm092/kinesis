@@ -209,6 +209,12 @@ const CSS = `
   filter: sepia(0.35) saturate(0.85) contrast(1.03);
 }
 .rnk-face .glyph { line-height: 1; font-size: clamp(9px, calc(var(--rh, 34px) * 0.34), 17px); }
+/* nothing to frame — the colophon says why, so the frame itself goes away */
+.rnk-frame.is-faceless .rnk-face { border: 0; background: none; box-shadow: none; }
+.rnk-frame.is-faceless .rnk-card-face {
+  border: 0; background: none; box-shadow: none;
+  width: clamp(40px, 3.2vw, 52px); aspect-ratio: 1;
+}
 .rnk-id { min-width: 0; display: flex; align-items: baseline; gap: 8px; }
 .rnk-id .g { line-height: 1; font-size: clamp(8px, calc(var(--rh, 34px) * 0.26), 13px); }
 .rnk-id .n {

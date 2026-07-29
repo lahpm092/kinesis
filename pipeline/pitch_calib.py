@@ -572,17 +572,18 @@ class PrecomputedHomographies:
     def __len__(self) -> int:
         return len(self.rows)
 
-    def lookup(self, frame_bgr: np.ndarray) -> Optional[Dict[str, Any]]:
+    def lookup(self, frame_bgr: np.ndarray,
+               count: bool = True) -> Optional[Dict[str, Any]]:
         s = np.asarray(frame_signature(frame_bgr), np.float32)
         if s.size != self.sigs.shape[1]:
-            self.n_miss += 1
+            self.n_miss += count
             return None
         d = np.abs(self.sigs - s[None, :]).mean(axis=1)
         j = int(np.argmin(d))
         if float(d[j]) > self.max_mad:
-            self.n_miss += 1
+            self.n_miss += count
             return None
-        self.n_hit += 1
+        self.n_hit += count
         return self.rows[j]
 
 
@@ -1030,16 +1031,9 @@ class Calibrator:
                           file=sys.stderr)
 
         # 2. PnLCalib live
-        if self.table is None and backend in ("auto", "pnlcalib"):
-            try:
-                import pnl_calib
-                if os.path.isfile(pnl_calib.DEFAULT_KP) and \
-                        os.path.isfile(pnl_calib.DEFAULT_LINES):
-                    self.pnl = pnl_calib.PnLCalibrator()
-                    self.backend = "pnlcalib"
-            except Exception as exc:                             # noqa: BLE001
-                print(f"[pitch_calib] PnLCalib backend unavailable: {exc}",
-                      file=sys.stderr)
+        self._allow_pnl = backend in ("auto", "pnlcalib")
+        if self.table is None and self._allow_pnl:
+            self._ensure_pnl()
 
         # 3. legacy roboflow landmarks (measured dead end; kept for reproducibility)
         if self.table is None and self.pnl is None:
@@ -1058,6 +1052,23 @@ class Calibrator:
         self._prev_H: Optional[np.ndarray] = None
         self._prev_conf: float = 0.0
         self._chain_len: int = 0
+
+    def _ensure_pnl(self):
+        """Load the live PnLCalib backend on demand (530 MB of weights)."""
+        if self.pnl is not None or not getattr(self, "_allow_pnl", False):
+            return self.pnl
+        try:
+            import pnl_calib
+            if os.path.isfile(pnl_calib.DEFAULT_KP) and \
+                    os.path.isfile(pnl_calib.DEFAULT_LINES):
+                self.pnl = pnl_calib.PnLCalibrator()
+                if self.backend == "legacy":
+                    self.backend = "pnlcalib"
+        except Exception as exc:                                 # noqa: BLE001
+            print(f"[pitch_calib] PnLCalib backend unavailable: {exc}",
+                  file=sys.stderr)
+            self._allow_pnl = False
+        return self.pnl
 
     # ---------------- direct, stateless fit ----------------------------------------
 
@@ -1403,14 +1414,20 @@ class Calibrator:
             return None
         if self.table is not None:
             row = self.table.lookup(frame_bgr)
-            if row is None or not row.get("H"):
-                return None
-            out = {k: v for k, v in row.items() if k != "sig"}
-            out.setdefault("method", "precomputed")
-            out.setdefault("reproj_err_px", out.get("paint_err_px", float("nan")))
-            return out
+            if row is not None:
+                if not row.get("H"):
+                    return None          # the table says this frame has no fit
+                out = {k: v for k, v in row.items() if k != "sig"}
+                out.setdefault("method", "precomputed")
+                out.setdefault("reproj_err_px", out.get("paint_err_px", float("nan")))
+                return out
+            # Frame not covered by the table (a different clip): fit it live rather
+            # than silently returning the nearest unrelated homography.
+            self._ensure_pnl()
         if self.pnl is not None:
             return self.pnl.homography(frame_bgr)
+        if self.model is None and self.table is not None:
+            return None
         h, w = frame_bgr.shape[:2]
         turf = turf_mask(frame_bgr)
         lmask = line_mask(frame_bgr, turf)
@@ -1532,10 +1549,13 @@ class Calibrator:
         Stateful per-frame calibration with cut detection and temporal propagation.
         Same return contract as `homography`, plus "cut" and "chain_len".
         """
-        if self.table is not None:
+        if self.table is not None and \
+                self.table.lookup(frame_bgr, count=False) is not None:
             # The table was already produced by a temporal pass (keyframe fits, LK
             # propagation, cut resets), so there is nothing left to smooth.
             return self.homography(frame_bgr)
+        if self.table is not None:
+            self._ensure_pnl()
         if self.pnl is not None:
             return self.pnl.update(frame_bgr)
         h, w = frame_bgr.shape[:2]

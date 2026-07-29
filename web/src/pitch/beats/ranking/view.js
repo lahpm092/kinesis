@@ -109,6 +109,10 @@ export function createRankingView(ctx) {
 
   const urlOf = (p) => (ctx.data && ctx.data.url ? ctx.data.url(p) : `/pitch/${p}`);
   const focus = focusOf(model);
+  // No crop cleared the acceptance threshold, so there is no photograph to
+  // frame: drop the empty plate rather than print thirteen blank frames.
+  const anyFace = model.players.some((p) => p.face);
+  frame.classList.toggle('is-faceless', !anyFace);
 
   // ------------------------------------------------------------ the plate --
   const led = h('div', 'rnk-led');
@@ -437,9 +441,15 @@ export function createRankingView(ctx) {
       note.appendChild(h('div', null, model.projectionNote));
     }
     if (model.hasProjection && model.unprojected) {
-      note.appendChild(h('div', null,
+      note.appendChild(h('div', 'is-limit',
         `${model.unprojected} of ${model.n} players carry no prescription — `
         + 'their projected column is blank, not flat'));
+    }
+    // Say how much the projection actually moves, so the reshuffle on screen
+    // can never be read as bigger than the numbers behind it.
+    if (model.hasProjection && model.moved != null) {
+      note.appendChild(h('div', null,
+        `${model.moved} of ${model.n} ranks move under the projection`));
     }
     for (const l of model.limits.slice(0, 3)) {
       note.appendChild(h('div', 'is-limit', l));

@@ -235,15 +235,34 @@ def main() -> None:
     cal = pk.PnLCalibrator(anchor_conf=args.min_conf)
     log(f"PnLCalib loaded on {cal.model.device} in {time.time()-t:.1f}s")
 
-    rows, kps_per_frame = [], []
+    # Two passes. A window often opens mid-move, with the first frames too
+    # under-constrained to fit on their own; running the carry backwards as well as
+    # forwards means an anchor anywhere in a shot reaches every frame of that shot.
+    def one_pass(order):
+        cal.reset()
+        got, kp = {}, {}
+        for i in order:
+            img = cache.bgr(i)
+            try:
+                got[i] = cal.update(img)
+            except Exception as exc:                              # noqa: BLE001
+                log(f"  frame {i}: calibration raised {type(exc).__name__}: {exc}")
+                got[i] = None
+            kp[i] = dict(cal.last_kps)
+        return got, kp
+
     t_cal = time.time()
+    fwd, kps_per_frame = one_pass(range(N))
+    rev, _ = one_pass(range(N - 1, -1, -1))
+
+    rows = []
+    n_rev = 0
     for i in range(N):
+        a, b = fwd[i], rev[i]
+        out = a
+        if b is not None and (a is None or b["conf"] > a["conf"]):
+            out, n_rev = b, n_rev + (a is None or a["conf"] < args.min_conf)
         img = cache.bgr(i)
-        try:
-            out = cal.update(img)
-        except Exception as exc:                                  # noqa: BLE001
-            log(f"  frame {i}: calibration raised {type(exc).__name__}: {exc}")
-            out = None
         row = pk.row_from(out, f"f{i:05d}", img.shape[:2],
                           {"i": i, "t": round(i / fps_a, 4),
                            "src_t": round(t0 + i / fps_a, 4)})
@@ -253,8 +272,8 @@ def main() -> None:
             row["verified"] = bool(row.get("conf", 0.0) >= args.min_conf)
         row["sig"] = pc.frame_signature(img)
         rows.append(row)
-        kps_per_frame.append(dict(cal.last_kps))
     dt_cal = time.time() - t_cal
+    log(f"reverse pass supplied {n_rev} frame(s) the forward pass could not")
     n_direct = sum(1 for r in rows if r["verified"]
                    and str(r.get("method", "")).startswith("pnlcalib"))
     n_carry = sum(1 for r in rows if r["verified"] and r.get("method") == "propagated")
@@ -265,24 +284,25 @@ def main() -> None:
     smoothed, n_before = smooth_homographies(rows, N, args.smooth)
     log(f"smoothing: window {int(args.smooth)|1} frames, {n_before} fitted -> "
         f"{len(smoothed)} candidates after interpolation across gaps")
+    n_kept_raw = 0
 
     # Smoothing moves every matrix, so nothing may keep the confidence it was
     # scored with. Re-measure each smoothed homography against its own frame --
     # paint residual, paint explained, model cover, turf IoU and the 7.32 m goal
     # mouth -- and re-apply the gate. Frames with no landmarks of their own
     # (carried or interpolated) are judged on the image criteria alone.
-    n_interp = 0
+    n_interp = n_kept_raw = 0
     for r in rows:
         i = r["i"]
+        raw_H = r.get("H")
+        raw_conf = float(r.get("conf", 0.0))
+        was_direct = str(r.get("method", "")).startswith("pnlcalib")
         H = smoothed.get(i)
         if H is None:
-            r["H"] = None
-            r["verified"] = False
-            if r.get("conf", 0.0) >= args.min_conf:
-                r["limiting"] = "dropped_by_smoothing"
+            r["H"] = raw_H if raw_conf >= args.min_conf else None
+            r["verified"] = bool(r["H"] is not None)
             continue
         img = cache.bgr(i)
-        was_direct = str(r.get("method", "")).startswith("pnlcalib")
         ev = pk.evaluate_H(H, img, kps=kps_per_frame[i],
                            inliers=int(r.get("inliers", 0)),
                            loo_err_px=r.get("loo_err_px"),
@@ -290,16 +310,25 @@ def main() -> None:
                                    "interpolated" if not r.get("verified") else
                                    "propagated+smoothed"))
         conf = ev["conf"] if was_direct else pk.image_conf(ev)
+        limiting = ev.get("limiting") if was_direct else pk.image_limiting(ev)
+        # Smoothing exists to kill jitter, not to buy accuracy. If the smoothed
+        # matrix no longer clears the gate on this frame's own paint but the
+        # unsmoothed one did, keep the unsmoothed one.
+        if conf < args.min_conf <= raw_conf and raw_H is not None:
+            r["limiting"] = "kept_unsmoothed"
+            r["verified"] = True
+            n_kept_raw += 1
+            continue
         if not r.get("verified") and conf >= args.min_conf:
             n_interp += 1
         p = pk.package({**ev, "conf": conf})
         for k, v in p.items():
-            if k not in ("terms",):
+            if k != "terms":
                 r[k] = v
         r["terms"] = ev["terms"]
         r["conf"] = round(float(conf), 3)
         r["verified"] = bool(conf >= args.min_conf)
-        r["limiting"] = ev.get("limiting")
+        r["limiting"] = limiting
         if not r["verified"]:
             r["H"] = None
     if qc is not None:
@@ -371,6 +400,7 @@ def main() -> None:
         "frames_ok": proj.n_ok, "frames_tried": proj.n_try,
         "frames_direct": n_direct, "frames_carried": n_carry,
         "frames_interpolated": n_interp,
+        "frames_kept_unsmoothed": n_kept_raw,
         "frames_verified_after_smoothing": sum(1 for r in rows if r["verified"]),
         "mean_conf": (round(proj.conf_sum / proj.n_ok, 3) if proj.n_ok else None),
         "paint_err_px": s.get("paint_err_px"),
