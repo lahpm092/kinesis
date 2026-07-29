@@ -1,7 +1,7 @@
 # KINESIS — investor deck
 
 A fork of [KINESIS](https://github.com/lahpm092/kinesis) that adds a keyboard-driven,
-eleven-beat investor presentation and a **parameterised pipeline that runs on arbitrary
+twelve-beat investor presentation and a **parameterised pipeline that runs on arbitrary
 broadcast footage** — the original scripts were hardcoded to two specific matches.
 
 **To present it, read [`PRESENTING.md`](PRESENTING.md).** One page, one key.
@@ -37,7 +37,8 @@ Everything on screen in beats I–VI and the measured column of XI is computed f
 | VIII | Training | **55 flags, 204 work units**, real `taxonomy-v2` identifiers |
 | IX | Before / after | Completion **+0.094 [+0.070, +0.117]**, z = 7.87 |
 | X | Parallel search | **2627 sims/s** across 8 workers, 61/63 cells resolved |
-| XI | Ranking | 13 tracked players, ranked on measurement |
+| XI | Ranking and value | 13 tracked players ranked on measurement; the value curve is the deck's one stated assumption |
+| XII | Close | The chain counted from its own files — 226 segments, 4550 keypoints, 44 133 simulations |
 
 ## The pipeline
 
@@ -75,6 +76,16 @@ This is the part worth reading before you present it.
   shot volume do, strongly. The cause is traceable: `finish` carries only 30 % of its fit
   weight while the joint-kinematic channels are unpopulated. That is a falsifiable prediction,
   not a hedge.
+- **The value curve is an assumption, and the only one.** Beat XI prices ability as
+  `value(o) = €1.0 m × 2 ^ ((o − 50) ÷ 8)` and prints that equation above the figures it
+  produces. No transfer data is loaded anywhere in this repository. The shape — convexity —
+  is the claim; the anchor is a placeholder, and every percentage the stage reports is
+  independent of it. The measured column of that stage is `+0.31 %`; the `+1 / +3 / +5 pts`
+  columns beside it are a sensitivity, labelled as one.
+- **Detector outliers are dropped, not drawn.** RTMPose returns 47 of 4550 keypoints that no
+  body could hold — a neighbour's boot at the edge of the crop. Beat IV rejects a bone longer
+  than 2.6× its own median over the clip and reports the count on the specimen panel; what is
+  dropped is a missing limb, never a guessed one.
 - **No player's face is claimed.** 17 portrait-grade crops were mined from the close-ups the
   cutter discards, but none could be honestly associated with a tracked player — the nearest
   is 158 s from the tracked window. Ranked players show the team glyph.
@@ -87,7 +98,7 @@ This is the part worth reading before you present it.
 | File | |
 |---|---|
 | [`PRESENTING.md`](PRESENTING.md) | how to drive the deck, and the answers to hard questions |
-| [`docs/PITCH_PLAN.md`](docs/PITCH_PLAN.md) | the eleven beats and their stages |
+| [`docs/PITCH_PLAN.md`](docs/PITCH_PLAN.md) | the beats and their stages |
 | [`docs/PITCH_COPY.md`](docs/PITCH_COPY.md) | every word on screen, and the honesty requirements |
 | [`docs/PITCH_DATA_CONTRACT.md`](docs/PITCH_DATA_CONTRACT.md) | the JSON schemas |
 | [`docs/CALIBRATION.md`](docs/CALIBRATION.md) | how we know where the players are, and where we do not |

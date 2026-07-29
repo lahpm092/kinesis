@@ -113,7 +113,9 @@ export function create(ctx) {
   function build() {
     const sim = ctx.data.sim;
     const aff = ctx.data.affordances;
-    const run = runOf(sim, 'before') || (sim.runs && sim.runs[0]);
+    // always via runOf: it is what makes the pieces' paths continuous
+    const run = runOf(sim, 'before')
+      || (sim.runs && sim.runs[0] && runOf(sim, sim.runs[0].id));
     if (!runOk(run)) throw new Error('sim.json carries no usable run');
 
     const board = new Board(root);

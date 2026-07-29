@@ -133,10 +133,12 @@ Stats: `<n>` simulations · `<n>` sims/s · `+<x.xx>` goal difference
 |---|---|---|
 | 1 | THE SQUAD | Every tracked player, ranked on what was measured. |
 | 2 | THE EVIDENCE | Each rank opens into the numbers underneath it. |
-| 3 | PRESCRIBED | Fifty-four flags raised. Two hundred work units prescribed. |
-| 4 | — | One broadcast feed in. A ranked, coached squad out. |
+| 3 | PROJECTED | Where personalized training would move them. |
+| 4 | THE ASSET | A better athlete is a more valuable one, and the club owns the difference. |
+| 5 | — | One broadcast feed in. A ranked, coached, valued squad out. |
 
-Stats: `<n>` players ranked · `<n>` flags raised · `<n>` work units
+Stats: `<n>` players ranked · `<n>` flags raised · `<n>` work units ·
+`+<x.xx> %` squad book, projected · `+<n> %` per point of overall
 
 **Honesty requirement for this beat.** Lead stage 3 with the **prescription**, which is
 substantial and real — 54 flags across 13 athletes, 201 work units, 0 interference warnings,
@@ -151,8 +153,37 @@ short. The machinery is the claim; the number will follow more footage.
 Rank movement and score movement are separate: a player's score can stay flat while their
 rank falls because someone else climbed past them. Show both, never conflate them.
 
+**Honesty requirement for stage 4 — the only assumption in the deck.** Ability is priced by a
+stated curve, `value(o) = €1.0 m × 2 ^ ((o − 50) ÷ 8)`, and that equation is rendered *above*
+every figure it produces. No transfer data is loaded anywhere in this repository and none may
+be implied. The **shape** — value convex in ability — is the claim; the **anchor** is a
+placeholder a club replaces with its own book, and the stage must lead with the percentages,
+which are independent of it.
+
+The measured column (`+0.31 %`) and the sensitivity columns (`+1 / +3 / +5 pts`) sit on the
+same strip on purpose and must stay labelled apart: the first is what this window projected,
+the others are what a uniform gain would be worth. The word *forecast* is not available to
+this stage.
+
+## Beat XII — Close · dark
+
+| # | Eyebrow | Line |
+|---|---|---|
+| 1 | THE CHAIN | One broadcast feed. No sensors, no vests, nothing asked of the athletes. |
+| 2 | WHAT IT LEAVES | A ranked squad, a coached plan and a priced asset — out of footage the club already owns. |
+
+Stats: `<n>` broadcast feed · `<n>` athletes measured · `<n>` simulations
+
+**Honesty requirement for this beat.** It makes no new claim: every link of the chain is
+COUNTED at runtime from the file the beat that showed it was drawn from, and a link whose file
+has not been written prints an em dash and names the file. A broken chain is more useful to an
+investor than a decorative one. Stage 2 names the three registers — measured, simulated,
+projected — and which beats carried each, so the deck ends on its own discipline.
+
 ## Provenance chips (mandatory)
 
 - Beats VII, IX, X render `SIMULATED`.
-- Any post-training column in VIII, IX, XI renders `PROJECTED`.
-- Beats I–VI and the measured columns of XI render nothing — measurement is the default.
+- Any post-training column in VIII, IX, XI renders `PROJECTED`, including the value stage —
+  the score it prices is a projection and the curve is an assumption.
+- Beats I–VI, the measured columns of XI, and XII render nothing — XII counts what the other
+  beats already showed and adds no claim of its own.

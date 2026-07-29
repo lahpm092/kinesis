@@ -147,18 +147,73 @@ export function buildTracks(raw) {
   const times = frames.map((f, k) => (f.t == null ? k / fpsA : f.t));
   const dur = clip.dur || (times[times.length - 1] + 1 / fpsA);
 
-  /** clip time -> frame slot (nearest) */
-  function indexAt(time) {
-    const t = num(time) || 0;
+  /** clip time -> the slot at or before it, or -1 when t precedes the first */
+  function slotBefore(t) {
+    if (t <= times[0]) return 0;
     let lo = 0;
     let hi = times.length - 1;
-    if (t <= times[0]) return 0;
     if (t >= times[hi]) return hi;
     while (lo < hi - 1) {
       const m = (lo + hi) >> 1;
       if (times[m] <= t) lo = m; else hi = m;
     }
-    return t - times[lo] <= times[hi] - t ? lo : hi;
+    return lo;
+  }
+
+  /**
+   * clip time -> FRACTIONAL frame slot.
+   *
+   * The masks are computed at `fps_analysis`, which is well below the clip's
+   * own frame rate — 8 against 25 in the current file. Snapping each video
+   * frame to the nearest analysis slot therefore holds a mask still for three
+   * video frames and then jumps it, which reads on screen as the overlay
+   * lagging the footage. Everything downstream of here interpolates between
+   * the two bracketing slots instead, so a mask moves every video frame.
+   *
+   * Interpolation is a rendering decision and nothing else: the measured
+   * contours are what the pipeline wrote, and every slot still lands on its own
+   * measurement exactly.
+   */
+  function indexFloat(time) {
+    const t = num(time) || 0;
+    const k = slotBefore(t);
+    if (k >= times.length - 1) return times.length - 1;
+    const span = times[k + 1] - times[k];
+    if (!(span > 0)) return k;
+    return k + Math.max(0, Math.min(1, (t - times[k]) / span));
+  }
+
+  /** clip time -> frame slot (nearest) */
+  function indexAt(time) {
+    return Math.round(indexFloat(time));
+  }
+
+  const lerp = (a, b, s) => a + (b - a) * s;
+
+  /**
+   * An object as it stands BETWEEN two analysis slots: box, foot point and
+   * pitch position carried linearly across the gap. Returns the measured
+   * object itself when the two slots coincide or when only one of them holds
+   * this track — a track that appears or disappears does so on its own frame,
+   * never fading in from a position it was never measured at.
+   */
+  function objectAtF(id, f) {
+    const rec = byId.get(id);
+    if (!rec) return null;
+    const k0 = Math.floor(f);
+    const s = f - k0;
+    const a = rec.byFrame.get(frames[k0] ? frames[k0].i : k0) || null;
+    if (s <= 1e-4 || k0 + 1 >= frames.length) return a;
+    const b = rec.byFrame.get(frames[k0 + 1].i) || null;
+    if (!a || !b) return a;
+    const box = a.bbox && b.bbox
+      ? [lerp(a.bbox[0], b.bbox[0], s), lerp(a.bbox[1], b.bbox[1], s),
+        lerp(a.bbox[2], b.bbox[2], s), lerp(a.bbox[3], b.bbox[3], s)]
+      : a.bbox;
+    const pit = a.pitch && b.pitch
+      ? [lerp(a.pitch[0], b.pitch[0], s), lerp(a.pitch[1], b.pitch[1], s)]
+      : a.pitch;
+    return { id: a.id, cls: a.cls, team: a.team, score: a.score, bbox: box, poly: a.poly, pitch: pit };
   }
 
   // ---- the pitch model, fitted from the file's own correspondences ------
@@ -295,8 +350,21 @@ export function buildTracks(raw) {
     projected,
     nullTail,
     indexAt,
+    indexFloat,
     objectsAt(i) { const f = frames[i]; return f ? f.objects : []; },
     objectFor(id, i) { const rec = byId.get(id); return rec ? rec.byFrame.get(frames[i] ? frames[i].i : i) || null : null; },
+    objectAtF,
+    /** every object present at the slot at or before `f`, carried to `f` */
+    objectsAtF(f) {
+      const base = frames[Math.floor(f)];
+      if (!base) return [];
+      const out = [];
+      for (const o of base.objects) {
+        const q = objectAtF(o.id, f);
+        if (q) out.push(q);
+      }
+      return out;
+    },
   };
 }
 

@@ -327,10 +327,28 @@ export function create(ctx) {
       a.dur = Math.max(1, dur);
     }
 
+    // ---- the clip's own clock -------------------------------------------
+    // `currentTime` is sampled whenever the rAF happens to run, which is not
+    // when the browser last handed a frame to the compositor: read that way it
+    // drifts against the picture by up to a frame, and the overlay reads as
+    // trailing the footage. `requestVideoFrameCallback` reports the media
+    // timestamp OF THE FRAME NOW ON SCREEN, which is exactly what the masks
+    // have to be registered to. Where it is unavailable we fall back to
+    // currentTime, and with no film at all to a wall clock.
     const bootT = performance.now();
+    let frameT = null;
+    if (typeof video.requestVideoFrameCallback === 'function') {
+      const onFrame = (now, md) => {
+        if (life.dead) return;
+        frameT = typeof md.mediaTime === 'number' ? md.mediaTime : video.currentTime;
+        try { video.requestVideoFrameCallback(onFrame); } catch (_) { /* torn down */ }
+      };
+      try { video.requestVideoFrameCallback(onFrame); } catch (_) { /* ignore */ }
+      life.add(() => { frameT = null; });
+    }
     function clipTime() {
       if (filmOk && video.readyState >= 2 && Number.isFinite(video.duration) && video.duration > 0) {
-        return video.currentTime % video.duration;
+        return (frameT != null ? frameT : video.currentTime) % video.duration;
       }
       return ((performance.now() - bootT) / 1000) % Math.max(0.1, M.dur);
     }
@@ -364,9 +382,10 @@ export function create(ctx) {
         const a = A[k];
         a.v = a.from + (a.to - a.from) * easeOut((now - a.t0) / a.dur);
       }
-      const i = M.indexAt(clipTime());
+      const f = M.indexFloat(clipTime());
+      const i = Math.round(f);
       overlay.draw({
-        i,
+        f,
         reveal: A.reveal.v,
         project: A.project.v,
         focus: cur === 1 ? focus : null,

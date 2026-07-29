@@ -37,6 +37,7 @@ const BEAT_LOADERS = [
   () => import('./beats/09_delta.js'),
   () => import('./beats/10_search.js'),
   () => import('./beats/11_ranking.js'),
+  () => import('./beats/12_close.js'),
 ];
 
 const clamp = (v, lo, hi) => (v < lo ? lo : v > hi ? hi : v);
@@ -346,7 +347,7 @@ export function createDeck({ root, stage: stageEl }) {
       if (chrome && chrome.isIndexOpen()) {
         if (k === 'Escape' || k === 'Enter') { e.preventDefault(); chrome.toggleIndex(false); return; }
         const jump = '123456789'.indexOf(k) >= 0 ? '123456789'.indexOf(k)
-          : k === '0' ? 9 : k === '-' ? 10 : -1;
+          : k === '0' ? 9 : k === '-' ? 10 : k === '=' ? 11 : -1;
         if (jump >= 0 && jump < beats.length) {
           e.preventDefault(); chrome.toggleIndex(false); nav.goto(jump, 0); return;
         }

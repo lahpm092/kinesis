@@ -13,6 +13,7 @@ import { EASE, lifetime } from '../../beat.js';
 import { ensureStyle } from './style.js';
 import {
   readRoster, focusOf, fmtNum, fmtDelta, teamGlyph, tier, TIER_COLOR,
+  valueBook, fmtM, fmtMDelta, VALUE,
 } from './model.js';
 
 const CHUNK = 8;          // metric rows per evidence column
@@ -109,6 +110,8 @@ export function createRankingView(ctx) {
 
   const urlOf = (p) => (ctx.data && ctx.data.url ? ctx.data.url(p) : `/pitch/${p}`);
   const focus = focusOf(model);
+  const book = model.hasProjection ? valueBook(model) : null;
+  const ASSET = 3;         // the stage that reads ability as an asset
   // No crop cleared the acceptance threshold, so there is no photograph to
   // frame: drop the empty plate rather than print thirteen blank frames.
   const anyFace = model.players.some((p) => p.face);
@@ -319,7 +322,87 @@ export function createRankingView(ctx) {
     wrap.style.minHeight = '0';
     wrap.style.flex = '1';
 
-    if (stage === 1 || stage === 2) {
+    if (stage === ASSET) {
+      // ---- ability, priced ------------------------------------------------
+      // The chain the room has to be able to follow: a measured deficit buys a
+      // prescribed block, the block moves a metric, the metric moves the
+      // score, and the score moves what the player is worth to whoever owns
+      // the registration. Every link but the last is measured or projected
+      // from measurement; the last is a stated curve, printed here beside its
+      // own output so nobody has to take it on trust.
+      wrap.appendChild(h('div', 'rnk-k', 'The asset'));
+      if (!book) {
+        wrap.appendChild(h('div', 'rnk-how-t',
+          'No projection was written, so there is nothing to price.'));
+      } else {
+        const eq = h('div', 'rnk-eq');
+        eq.innerHTML = `value(o) = <em>${VALUE.currency}${VALUE.anchorM.toFixed(1)} m</em>`
+          + ` × 2 ^ ((o − ${VALUE.anchorOverall}) ÷ <em>${VALUE.doublePts}</em>)`;
+        wrap.appendChild(eq);
+        wrap.appendChild(h('div', 'rnk-how-t',
+          `An assumption, stated: value doubles every ${VALUE.doublePts} points of overall, `
+          + `anchored at ${VALUE.currency}${VALUE.anchorM.toFixed(1)} m for a player at ${VALUE.anchorOverall}. `
+          + 'No transfer data enters this deck. Substitute your own book — every '
+          + 'percentage below is independent of the anchor.'));
+
+        // the squad book, measured against projected
+        const vals = h('div', 'rnk-val');
+        const vrow = (k, html, dTxt, gain, cls) => {
+          const r = h('div', `rnk-vrow${cls ? ` ${cls}` : ''}`);
+          r.appendChild(h('span', null, k));
+          const b = h('b');
+          b.innerHTML = html;
+          r.appendChild(b);
+          const d = h('div', `d${gain ? ' is-gain' : ''}`, dTxt);
+          r.appendChild(d);
+          return r;
+        };
+        // two decimals here on purpose: at one, a real uplift on a squad this
+        // size rounds away and the row reads as "nothing happened"
+        vals.appendChild(vrow(
+          `squad book · ${book.n} players`,
+          `<s>${fmtM(book.before, 2)}</s> → ${fmtM(book.after, 2)}`,
+          book.pct != null ? `${fmtDelta(book.pct, 2)} %` : '—',
+          book.delta > 0, 'is-total',
+        ));
+        for (const m of book.movers.slice(0, 3)) {
+          vals.appendChild(vrow(
+            `№ ${m.p.label} · ${fmtNum(m.p.overall)} → ${fmtNum(m.p.overallAfter)}`,
+            `<s>${fmtM(m.before)}</s> → ${fmtM(m.after)}`,
+            fmtMDelta(m.delta), m.delta > 0,
+          ));
+        }
+        if (!book.movers.length) {
+          vals.appendChild(h('div', 'rnk-how-t',
+            'On this window no player\'s projected score clears a whole point, '
+            + 'so no individual line moves.'));
+        }
+        wrap.appendChild(vals);
+
+        // what a point is worth — the measured figure beside the leverage
+        const sens = h('div', 'rnk-sens');
+        const cell = (k, v, m, obs) => {
+          const c = h('div', `c${obs ? ' is-obs' : ''}`);
+          c.append(h('div', 'k', k), h('div', 'v', v), h('div', 'm', m));
+          return c;
+        };
+        sens.appendChild(cell(
+          `measured ${model.meanGain != null ? fmtDelta(model.meanGain, 2) : '—'} pts`,
+          book.pct != null ? `${fmtDelta(book.pct, 2)} %` : '—',
+          fmtMDelta(book.delta), true,
+        ));
+        for (const s of book.sensitivity) {
+          sens.appendChild(cell(`at +${s.pts} pts`, `+${s.pct.toFixed(0)} %`, fmtMDelta(s.deltaM)));
+        }
+        wrap.appendChild(sens);
+        wrap.appendChild(h('div', 'rnk-how-t',
+          'The first column is what this window of footage projected. The other three '
+          + 'are a sensitivity, not a forecast: what a uniform gain of that size would be '
+          + 'worth on this squad, on the curve above. They are the reason to keep '
+          + 'measuring — a club banks the difference when it sells, and keeps a better '
+          + 'squad when it does not.'));
+      }
+    } else if (stage === 1 || stage === 2) {
       const p = focus;
       wrap.appendChild(h('div', 'rnk-k', stage === 1 ? 'The evidence' : 'Projected'));
       const card = h('div', 'rnk-card');
@@ -474,9 +557,9 @@ export function createRankingView(ctx) {
   }
 
   function setFoot(stage) {
-    footNote.textContent = stage >= 2 && model.hasProjection
-      ? 'measured → projected'
-      : 'tier over the 0–100 score · S 90 · A 82 · B 74 · C 66';
+    footNote.textContent = stage === ASSET && book ? 'ability → value · stated curve'
+      : stage >= 2 && model.hasProjection ? 'measured → projected'
+        : 'tier over the 0–100 score · S 90 · A 82 · B 74 · C 66';
   }
 
   // -------------------------------------------------------------- staging --
@@ -498,9 +581,22 @@ export function createRankingView(ctx) {
       u: 'pts', k: 'mean projected gain',
     };
     const promoted = { v: model.promoted, u: '', k: 'promoted' };
+    // anchor-free: the percentage a uniform point of overall is worth on this
+    // squad, which is the figure the asset stage is actually about
+    const lever = {
+      v: book ? `+${book.sensitivity[0].pct.toFixed(0)}` : null,
+      u: '%', k: 'per point of overall',
+    };
     if (i === 0) ctx.deck.annotate({ stats: [players] });
     else if (i === 2) ctx.deck.annotate({ stats: [gain, promoted] });
-    else if (i === 3) ctx.deck.annotate({ stats: [players, gain, promoted] });
+    else if (i === ASSET) {
+      ctx.deck.annotate({
+        stats: [
+          { v: book && book.pct != null ? fmtDelta(book.pct, 2) : null, u: '%', k: 'squad book, projected' },
+          lever,
+        ],
+      });
+    } else if (i === 4) ctx.deck.annotate({ stats: [players, gain, lever] });
   }
 
   function toStage(i, immediate) {

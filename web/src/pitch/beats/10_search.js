@@ -25,7 +25,9 @@ import { opponentModel, decodeStrategy, noiseFloor } from '../sim/island.js';
 import { SearchPool, workerCount } from '../sim/pool.js';
 import { installSimCss } from './sim/style.js';
 import { Board, Pieces, Ball, TEAM_HEX, SAGE, FAIL, rectOutline } from './sim/board.js';
-import { scrim, pollFor, nOrDash, intOrDash, signed, expo } from './sim/data.js';
+import {
+  scrim, pollFor, nOrDash, intOrDash, signed, expo, smoothKernelRun,
+} from './sim/data.js';
 
 export const meta = {
   id: 'search',
@@ -621,7 +623,9 @@ export function create(ctx) {
       strategyA: decodeStrategy(z), strategyB: b.opp.strategy,
       record: true, light: true, focusTeam: 'A',
     });
-    b.answerRun = k.run();
+    // the live run gets the same treatment sim.json's runs get through runOf:
+    // the kernel's hand-over re-seats are run through rather than jumped
+    b.answerRun = smoothKernelRun(k.run());
     b.answerStrategy = decodeStrategy(z);
     b.answerCho = new Choreo(b.answerRun);
     b.best = best;
@@ -783,10 +787,19 @@ export function create(ctx) {
         const t = cho.dilate(u);
         const ags = b.answerRun.agents;
         const fps = b.answerRun.fps;
-        const f = clamp(Math.round(t * fps), 0, b.answerRun.frames - 1);
+        // between two emitted frames, not snapped to the nearer of them: the
+        // sim runs at 12.5 Hz and the plate at 60
+        const ff = clamp(t * fps, 0, b.answerRun.frames - 1);
+        const f0 = Math.floor(ff);
+        const f1 = Math.min(b.answerRun.frames - 1, f0 + 1);
+        const fs = ff - f0;
         for (let i = 0; i < ags.length; i++) {
           const it = b.aPieces.byId.get(ags[i].id);
-          if (it) it.g.position.set(ags[i].xy[f * 2], 0, ags[i].xy[f * 2 + 1]);
+          if (!it) continue;
+          const xy = ags[i].xy;
+          const x = xy[f0 * 2] + (xy[f1 * 2] - xy[f0 * 2]) * fs;
+          const y = xy[f0 * 2 + 1] + (xy[f1 * 2 + 1] - xy[f0 * 2 + 1]) * fs;
+          it.g.position.set(x, 0, y);
         }
         const s = cho.ballAt(t);
         if (s.mode === 'held' && s.held != null) {

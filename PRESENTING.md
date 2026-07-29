@@ -28,13 +28,13 @@ cd ../dist && python3 -m http.server 8080     # → http://localhost:8080/pitch.
 | ↓ / PageDown | Next beat (skip the rest of this one) |
 | ↑ / PageUp | Previous beat |
 | Space | Replay the current animation |
-| Esc | Beat index — then `1`–`9`, `0`, `-` to jump, or click |
+| Esc | Beat index — then `1`–`9`, `0`, `-`, `=` to jump, or click |
 | Home / End | First stage / last stage |
 | `f` | Fullscreen |
 
 *(Verified against `web/src/pitch/deck.js` — these are the real bindings, not aspirational ones.)*
 
-Eleven beats, about thirty-four steps. Every step plays an animation and then **holds on a
+Twelve beats, forty steps. Every step plays an animation and then **holds on a
 stable frame indefinitely** — you can talk over it for as long as you like. Nothing is on a
 timer, nothing needs a mouse, and nothing advances on its own.
 
@@ -55,7 +55,8 @@ you resume exactly where you were.
 | VIII | Training | The measurement names the limitation; the limitation selects real methods. |
 | IX | Before / after | Training moves the measurement, and the measurement moves the outcome. |
 | X | Parallel search | **The investor beat.** Strategy against *this* opponent, searched faster than a season could test. |
-| XI | Ranking | One feed in. A ranked, coached, valued squad out. |
+| XI | Ranking and value | Every player ranked on measurement; then what a point of ability is worth, on a curve printed beside it. |
+| XII | Close | The whole chain, counted from its own files. One feed in, a ranked, coached, priced squad out. |
 
 ## Say this, not that
 
@@ -66,6 +67,11 @@ you resume exactly where you were.
 - Beats I–VI and the measured column of XI are measurements from the actual footage. That
   distinction is the whole credibility of the pitch — protect it.
 - If someone asks how a number was produced, beat VI answers it. Go back to it.
+- **Beat XI's value stage is the deck's only assumption, and it is printed on the plate.**
+  Say it before they do: "value doubles every eight points of overall, anchored at €1 m at
+  50 — no transfer data is in this deck." Lead with the **percentage**, which does not depend
+  on the anchor; the € figures are an illustration at it. The `+0.31 %` column is what this
+  window actually projected; the `+1 / +3 / +5 pts` columns are a sensitivity, not a forecast.
 
 ## If something asks a hard question
 
@@ -79,6 +85,10 @@ you resume exactly where you were.
   projection is the argument for the measurement.
 - *"What about the players you didn't rank?"* — Tracks below the quality threshold are shown
   as such rather than scored. We would rather show a gap than a guess.
+- *"Where does the euro figure come from?"* — From an assumption we print on the same screen,
+  not from transfer data. The shape is the claim: value is convex in ability, modelled as
+  doubling every eight points. The anchor is a placeholder — substitute your own book and
+  every percentage on that plate is unchanged.
 
 ## If something breaks
 

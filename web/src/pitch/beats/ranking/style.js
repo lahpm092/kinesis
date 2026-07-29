@@ -72,6 +72,50 @@ const CSS = `
 }
 .rnk-tier.is-empty .rnk-tier-n { color: var(--ink-3); opacity: 0.5; }
 
+/* ---------------- the asset ledger (stage 4) ---------------- */
+.rnk-val { border-top: 1px solid var(--hair); }
+.rnk-vrow {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 6px 16px; align-items: baseline;
+  padding: 7px 0; border-bottom: 1px solid var(--hair);
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ink-3);
+}
+.rnk-vrow b {
+  font-family: var(--serif); font-weight: 400; font-size: 15px; letter-spacing: 0;
+  font-variant-numeric: tabular-nums; color: var(--ink); text-transform: none;
+}
+.rnk-vrow b s { text-decoration: none; color: var(--ink-3); }
+.rnk-vrow .d { font-family: var(--mono); font-size: 10px; color: var(--ink-3);
+  min-width: 84px; text-align: right; text-transform: none; letter-spacing: 0.04em; }
+.rnk-vrow .d.is-gain { color: var(--sage); }
+.rnk-vrow.is-total { border-bottom: 0; }
+.rnk-vrow.is-total b { font-size: 19px; }
+.rnk-eq {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em;
+  color: var(--ink-2); padding: 7px 0 2px;
+}
+.rnk-eq em { font-style: normal; color: var(--sienna); }
+.rnk-sens {
+  display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr);
+  border-top: 1px solid var(--hair); border-bottom: 1px solid var(--hair);
+}
+.rnk-sens .c { padding: 9px 0 12px; border-left: 1px solid var(--hair); }
+.rnk-sens .c:first-child { border-left: 0; }
+.rnk-sens .c.is-obs .v { color: var(--sienna); }
+.rnk-sens .k {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px;
+}
+.rnk-sens .v {
+  font-family: var(--serif); font-size: 22px; font-variant-numeric: tabular-nums;
+  line-height: 1; color: var(--sage);
+}
+.rnk-sens .m {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.06em;
+  color: var(--ink-3); margin-top: 4px;
+}
+
 .rnk-how { border-bottom: 1px solid var(--hair); padding-bottom: 12px; }
 .rnk-how-k {
   font-family: var(--mono); font-size: 9px; letter-spacing: 0.24em;

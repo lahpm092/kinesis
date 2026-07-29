@@ -29,6 +29,96 @@ export const ANGLE_KEYS = ['hipL', 'hipR', 'kneeL', 'kneeR', 'ankleL', 'ankleR']
 const num = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : null);
 const arr = (v) => (Array.isArray(v) ? v : []);
 
+/** the confidence floor every consumer draws at — kept here so the gate below
+ *  and `pose2d.js` cannot drift apart */
+export const KP_CONF = 0.25;
+
+/** a bone longer than this multiple of its own median is not a bone */
+const BONE_MAX = 2.6;
+
+/**
+ * Reject anatomically impossible keypoints.
+ *
+ * RTMPose occasionally hands back a foot or an ankle belonging to a different
+ * body — a neighbouring player, or a boot at the edge of the crop — with a
+ * confidence high enough to clear the floor. Drawn, it becomes a metre-long
+ * bone shooting out of the figure: on frame 78 of the current file the left
+ * big toe sits 358 px ABOVE the left ankle, so the foot is drawn level with
+ * the chest. Nothing downstream can tell that from a real limb.
+ *
+ * The test is the skeleton's own geometry, not a hand-picked rule: every bone
+ * has a median length over the clip, and a bone measuring more than BONE_MAX
+ * times its own median in one frame did not happen. When a bone fails, the
+ * endpoint that fails the MOST of its bones is the one that moved — dropped,
+ * and the test re-run, until the figure is consistent with itself. Ties go to
+ * the more distal joint, since a wrist can be wrong without the elbow being.
+ *
+ * A dropped keypoint becomes null: the limb simply is not drawn. The count is
+ * reported so the beat can say how many were rejected rather than quietly
+ * cleaning up after the detector.
+ */
+function gateKeypoints(kp, edges, nJ) {
+  const nE = edges.length;
+  if (!nE) return { rejected: 0, byJoint: [] };
+  const degree = new Int32Array(nJ);
+  for (const [a, b] of edges) { degree[a] += 1; degree[b] += 1; }
+
+  const lenOf = (P, a, b) => {
+    const pa = P[a];
+    const pb = P[b];
+    if (!pa || !pb || pa[2] < KP_CONF || pb[2] < KP_CONF) return null;
+    return Math.hypot(pa[0] - pb[0], pa[1] - pb[1]);
+  };
+
+  // 1 — the median length of every bone, over the frames that measured it
+  const med = new Array(nE).fill(null);
+  for (let e = 0; e < nE; e++) {
+    const [a, b] = edges[e];
+    const L = [];
+    for (let i = 0; i < kp.length; i++) {
+      const v = lenOf(kp[i], a, b);
+      if (v != null) L.push(v);
+    }
+    if (!L.length) continue;
+    L.sort((x, y) => x - y);
+    med[e] = L[L.length >> 1];
+  }
+
+  // 2 — per frame, drop until nothing is over length
+  const byJoint = new Int32Array(nJ);
+  let rejected = 0;
+  const viol = new Int32Array(nJ);
+  for (let i = 0; i < kp.length; i++) {
+    const P = kp[i];
+    for (let guard = 0; guard < nJ; guard++) {
+      viol.fill(0);
+      let any = false;
+      for (let e = 0; e < nE; e++) {
+        if (med[e] == null || !(med[e] > 0)) continue;
+        const [a, b] = edges[e];
+        const v = lenOf(P, a, b);
+        if (v == null || v <= BONE_MAX * med[e]) continue;
+        viol[a] += 1; viol[b] += 1; any = true;
+      }
+      if (!any) break;
+      let worst = -1;
+      for (let j = 0; j < nJ; j++) {
+        if (!viol[j]) continue;
+        if (worst < 0) { worst = j; continue; }
+        if (viol[j] > viol[worst]) { worst = j; continue; }
+        if (viol[j] < viol[worst]) continue;
+        if (degree[j] < degree[worst]) { worst = j; continue; }
+        if (degree[j] === degree[worst] && P[j][2] < P[worst][2]) worst = j;
+      }
+      if (worst < 0) break;
+      P[worst] = null;
+      byJoint[worst] += 1;
+      rejected += 1;
+    }
+  }
+  return { rejected, byJoint: Array.from(byJoint) };
+}
+
 /** [n] series of numbers|null, padded/truncated to n. */
 function series(src, n) {
   const out = new Array(n);
@@ -68,8 +158,6 @@ export function buildJoints(raw) {
 
   // keypoints -> [n][nJ][3], missing entries become null triples
   const kp = new Array(n);
-  const conf = new Float64Array(nJ);
-  const confN = new Float64Array(nJ);
   for (let i = 0; i < n; i++) {
     const src = arr(kpRaw[i]);
     const row = new Array(nJ);
@@ -79,9 +167,24 @@ export function buildJoints(raw) {
       const y = p ? num(p[1]) : null;
       const c = p ? num(p[2]) : null;
       row[j] = x == null || y == null ? null : [x, y, c == null ? 0 : c];
-      if (row[j]) { conf[j] += row[j][2]; confN[j] += 1; }
     }
     kp[i] = row;
+  }
+
+  const usableEdges = edges.filter(([a, b]) => a < nJ && b < nJ);
+  // detector outliers go before anything reads the keypoints, so the 2D
+  // overlay, the 3D rig and the traces all see the same clean figure
+  const gate = gateKeypoints(kp, usableEdges, nJ);
+
+  // confidence is reported over what SURVIVED the gate — the panel that
+  // prints it sits beside the skeleton the same points drew
+  const conf = new Float64Array(nJ);
+  const confN = new Float64Array(nJ);
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < nJ; j++) {
+      const p = kp[i][j];
+      if (p) { conf[j] += p[2]; confN[j] += 1; }
+    }
   }
   const jointConf = Array.from({ length: nJ }, (_, j) => (confN[j] ? conf[j] / confN[j] : null));
   const meanConf = (() => {
@@ -152,7 +255,10 @@ export function buildJoints(raw) {
     nJ,
     nAngles,
     names,
-    edges: edges.filter(([a, b]) => a < nJ && b < nJ),
+    edges: usableEdges,
+    /** keypoints the plausibility gate rejected, and where they fell */
+    rejected: gate.rejected,
+    rejectedByJoint: gate.byJoint,
     crop: {
       file: (raw.crop && raw.crop.file) || (raw.video && raw.video.file) || null,
       w: num(raw.crop && raw.crop.width) || 540,

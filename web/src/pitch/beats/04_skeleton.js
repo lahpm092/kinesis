@@ -212,6 +212,15 @@ export function create(ctx) {
     ['mean conf', J.meanConf == null ? '—' : J.meanConf.toFixed(2)],
     ['contacts', String(J.events.ic.length || 0)],
   ]) specMeta.appendChild(el('div', 'r', `<span>${k}</span><b>${v}</b>`));
+  // Keypoints the plausibility gate threw out. A detector that hands back a
+  // neighbour's boot is a fact about the detector, so it is stated rather than
+  // quietly cleaned up: what is dropped is drawn as a missing limb, never as a
+  // guessed one.
+  if (J.rejected) {
+    const row = el('div', 'r', `<span>off-body kp</span><b>${J.rejected} of ${J.n * J.nJ} rejected</b>`);
+    row.style.gridColumn = '1 / -1';
+    specMeta.appendChild(row);
+  }
   spec.append(specLab, cropWrap, specMeta);
 
   // panel 2 — the articulated specimen

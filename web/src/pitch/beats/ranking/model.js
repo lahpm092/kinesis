@@ -255,6 +255,92 @@ export function readRoster(data) {
   };
 }
 
+/* ------------------------------------------------------------------ value */
+
+/**
+ * What a point of ability is worth.
+ *
+ * THIS IS AN ASSUMPTION, and it is the only one in the deck. No transfer data
+ * is loaded anywhere in this repository and none is implied here: what follows
+ * is a stated curve, printed on screen beside every figure it produces, so a
+ * room can argue with it instead of being asked to swallow it.
+ *
+ * The shape is the claim. Squad value is convex in ability — the market pays
+ * disproportionately for the top of the distribution — so it is modelled as a
+ * constant doubling interval:
+ *
+ *     value(o) = anchorM · 2 ^ ((o − anchorOverall) / doublePts)
+ *
+ * The SCALE is not the claim. `anchorM` is a placeholder a club replaces with
+ * its own book, and everything reported as a PERCENTAGE is independent of it:
+ * a uniform +p points moves the book by 2^(p/doublePts) − 1 whatever the
+ * anchor and whatever the squad. That percentage is the number to read; the €
+ * figures beside it are an illustration at the stated anchor.
+ */
+export const VALUE = {
+  doublePts: 8,        // value doubles every 8 points of the 0–100 overall
+  anchorOverall: 50,
+  anchorM: 1.0,        // € millions for a player at the anchor
+  currency: '€',
+};
+
+export const valueOf = (overall) => (num(overall) == null ? null
+  : VALUE.anchorM * (2 ** ((overall - VALUE.anchorOverall) / VALUE.doublePts)));
+
+/** money, in millions, at the resolution the figure deserves */
+export function fmtM(v, dec) {
+  const n = num(v);
+  if (n == null) return '—';
+  const a = Math.abs(n);
+  const d = dec != null ? dec : a >= 100 ? 0 : a >= 10 ? 1 : 2;
+  return `${VALUE.currency}${MINUS(n.toFixed(d))} m`;
+}
+
+export function fmtMDelta(v) {
+  const n = num(v);
+  if (n == null) return '—';
+  return `${n > 0 ? '+' : n < 0 ? '−' : '±'}${VALUE.currency}${Math.abs(n).toFixed(2)} m`;
+}
+
+/**
+ * The squad as an asset book, before and after the prescription, plus what a
+ * uniform gain would be worth. The uniform figures are a SENSITIVITY — "what a
+ * point is worth on this squad" — never a forecast, and the view labels them
+ * as such next to the projection actually measured.
+ */
+export function valueBook(model) {
+  const rows = model.players
+    .map((p) => {
+      const before = valueOf(p.overall);
+      const after = valueOf(p.overallAfter != null ? p.overallAfter : p.overall);
+      return {
+        p,
+        before,
+        after,
+        delta: before != null && after != null ? after - before : null,
+        projected: p.projected,
+      };
+    })
+    .filter((r) => r.before != null);
+  if (!rows.length) return null;
+  const sum = (k) => rows.reduce((a, r) => a + (r[k] || 0), 0);
+  const before = sum('before');
+  const after = sum('after');
+  const step = (pts) => {
+    const f = 2 ** (pts / VALUE.doublePts) - 1;
+    return { pts, pct: f * 100, deltaM: before * f };
+  };
+  return {
+    n: rows.length,
+    before,
+    after,
+    delta: after - before,
+    pct: before > 0 ? ((after - before) / before) * 100 : null,
+    movers: rows.filter((r) => (r.delta || 0) > 1e-9).sort((a, b) => b.delta - a.delta),
+    sensitivity: [1, 3, 5].map(step),
+  };
+}
+
 /** the player whose rank the projection moves most, else the top rank */
 export function focusOf(model) {
   if (!model.players.length) return null;

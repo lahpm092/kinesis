@@ -25,9 +25,9 @@ import { Board, Pieces, Ball, SAGE, FAIL } from './sim/board.js';
 import { Glyphs, FACTOR_LABEL } from './sim/glyph.js';
 import { TextSprite } from '../../scenes/field/label.js';
 import {
-  runOf, runOk, choreoRun, posAt, carrierAt, divergence, lastCommonDecision,
-  pairOptions, paramDeltas, fanOptions, affEvents, affName, affShort,
-  scrim, pollFor, nOrDash, intOrDash, signed,
+  runOf, runOk, choreoRun, posAt, carrierAt, divergence, comparableDecision,
+  pairOptions, paramDeltas, paramDeltaFor, fanOptions, affEvents, affName, affShort,
+  scrim, pollFor, nOrDash, intOrDash, signed, pct,
 } from './sim/data.js';
 
 export const meta = {
@@ -151,7 +151,16 @@ export function create(ctx) {
       mark.position.y = 0.12;
       holder.add(mark);
       board.own({ dispose: () => { mark.geometry.dispose(); mark.material.dispose(); } });
-      sides.push({ run, holder, pieces, ball, fan, glyphs, tag, mark, cho: new Choreo(choreoRun(run)) });
+      // the name of the athlete this side's ring is standing on — the room has
+      // to be able to read WHICH piece changed, not just that one did
+      const who = new TextSprite({ color: s === 0 ? T.bone2 : T.amber, height: 2.4, opacity: 0.95 });
+      who.sprite.visible = false;
+      holder.add(who.sprite);
+      board.own({ dispose: () => { who.tex.dispose(); who.mat.dispose(); } });
+      sides.push({
+        run, holder, pieces, ball, fan, glyphs, tag, mark, who,
+        cho: new Choreo(choreoRun(run)),
+      });
     }
 
     const fit = board.fitRect(
@@ -159,9 +168,36 @@ export function create(ctx) {
     board.moveTo(fit.pos, fit.tgt, 0);
 
     const div = divergence(A, B);
-    const kCommon = lastCommonDecision(A, B);
-    const dA = kCommon >= 0 ? A.decisions[kCommon] : null;
-    const dB = kCommon >= 0 ? B.decisions[kCommon] : null;
+    // the last decision taken from the same ball in the same place — the two
+    // fans are only comparable there, whoever is standing on it
+    const cmp = comparableDecision(A, B);
+    const dA = cmp ? cmp.dA : null;
+    const dB = cmp ? cmp.dB : null;
+
+    /* ---- WHICH athlete changed -------------------------------------------
+     * The prescription reaches the whole squad, so "the athlete changed" is
+     * true of every piece and therefore says nothing on its own. What the room
+     * can actually see is the swap: at the divergence, a different athlete is
+     * on the ball. That piece is named and ringed on each board, and the
+     * parameters that put it there are printed beside it.
+     */
+    const nameOfId = (id) => {
+      const a = A.agents.find((x) => x.id === id) || B.agents.find((x) => x.id === id);
+      return a ? `#${a.label ?? a.id}` : '—';
+    };
+    const whoA = (div && div.before && div.before.player != null)
+      ? div.before.player : (dA ? dA.carrier : null);
+    const whoB = (div && div.after && div.after.player != null)
+      ? div.after.player : (dB ? dB.carrier : null);
+    const swapped = whoA != null && whoB != null && whoA !== whoB;
+    // the athlete the panel details: the one who now has it
+    const heroId = whoB != null ? whoB : whoA;
+    const heroParams = heroId != null ? paramDeltaFor(A, B, heroId).slice(0, 4) : [];
+    const roleOf = (id) => {
+      const a = A.agents.find((x) => x.id === id);
+      return a && a.role ? a.role : null;
+    };
+
     const pairs = dA && dB ? pairOptions(dA, dB) : [];
     // the lane whose single factor moved most — that band is the story
     let hero = null;
@@ -191,16 +227,65 @@ export function create(ctx) {
     root.appendChild(foot);
 
     return {
-      board, sides, A, B, aff, sim, div, kCommon, dA, dB, pairs, hero, homePose: fit,
+      board, sides, A, B, aff, sim, div, cmp, dA, dB, pairs, hero, homePose: fit,
       fanA, fanB, unlocked, unlockedKeys, side, foot,
+      whoA, whoB, swapped, heroId, heroParams, nameOfId, roleOf,
       pdelta: paramDeltas(A, B).filter((p) => p.mean > 1e-9).slice(0, 3),
       play: { on: false, t0: 0 },
     };
   }
 
   /* ---------------------------------------------------------------- HTML */
+  /**
+   * The athlete the split is about, and the parameters that put them there.
+   * This is the panel that answers "changed how, and who?" — the squad-wide
+   * mean below it is context, not the answer.
+   */
+  function athletePanel(b) {
+    if (b.heroId == null) return '';
+    const nm = b.nameOfId(b.heroId);
+    const role = b.roleOf(b.heroId);
+    const t = b.div ? b.div.t : null;
+    return `
+      <div class="sm-panel">
+        <div class="sm-h"><span>the athlete</span><span class="sm-h-r" style="color:var(--amber)">${
+          nm}${role ? ` · ${role}` : ''}</span></div>
+        <div class="sm-rule"></div>
+        ${b.swapped ? `
+          <div class="sm-note" style="margin-bottom:7px">At <em>t ${nOrDash(t, 1)} s</em> the ball is in the same place on both boards. On the left <b>${
+            b.nameOfId(b.whoA)}</b> gets to it. On the right <b style="color:${SAGE}">${nm}</b> does — the ring on each board is standing on that athlete.</div>`
+          : `<div class="sm-note" style="margin-bottom:7px">The ringed piece is <b>${nm}</b>, on the ball at <em>t ${nOrDash(t, 1)} s</em> on both boards.</div>`}
+        ${b.heroParams.length ? `
+          <div class="sm-kv" style="opacity:.55"><span>fitted parameter</span><b style="font-size:11px">before → after</b></div>
+          ${b.heroParams.map((p) => `
+            <div class="sm-kv"><span>${p.key}</span><b><s>${
+              nOrDash(p.before, 2)}</s> → ${nOrDash(p.after, 2)}<em class="${
+              p.delta >= 0 ? 'pos' : 'neg'}">${signed(p.delta, 2)}</em></b></div>`).join('')}`
+          : '<div class="sm-note">this athlete\'s parameters are unchanged</div>'}
+        <div class="sm-note" style="margin-top:8px">Every tracked athlete is prescribed${
+          b.pdelta.length ? ` — squad mean |Δ| ${b.pdelta.slice(0, 2).map((p) => `${p.key} ${signed(p.signedMean, 2)}`).join(' · ')}` : ''
+        }. This is where it first shows.</div>
+      </div>`;
+  }
+
+  /** what the split did to this one possession — never the claim, always named */
+  function outcomePanel(b) {
+    const ra = b.A.result || {};
+    const rb = b.B.result || {};
+    const row = (k, va, vb, f) => `
+      <div class="sm-kv"><span>${k}</span><b><s style="opacity:.5">${f(va)}</s> → <em class="${
+        (vb ?? 0) >= (va ?? 0) ? 'pos' : 'neg'}">${f(vb)}</em></b></div>`;
+    return `
+      <div class="sm-panel">
+        <div class="sm-h"><span>this possession</span><span class="sm-h-r">before → after</span></div>
+        <div class="sm-rule"></div>
+        ${row('xG', ra.xg, rb.xg, (v) => nOrDash(v, 3))}
+        ${row('pass completion', ra.completion, rb.completion, (v) => `${pct(v)}%`)}
+        <div class="sm-note" style="margin-top:7px">One sampled possession. The <b>claim</b> is the paired ensemble on the next stage.</div>
+      </div>`;
+  }
+
   function samePanel(b) {
-    const e = b.sim.ensemble || {};
     return `
       <div class="sm-panel">
         <div class="sm-h"><span>same scenario</span><span class="sm-h-r">seed ${b.A.seed ?? '—'}</span></div>
@@ -210,16 +295,8 @@ export function create(ctx) {
         <div class="sm-kv"><span>press trigger</span><b>${nOrDash(b.A.strategy?.B?.press_trigger, 2)}</b></div>
         <div class="sm-note" style="margin-top:8px">Identical seed, identical opponent, identical random stream. Only the fitted parameters differ.</div>
       </div>
-      <div class="sm-panel">
-        <div class="sm-h"><span>what changed</span><span class="sm-h-r">mean |Δ|</span></div>
-        <div class="sm-rule"></div>
-        ${b.pdelta.length ? b.pdelta.map((p) => `
-          <div class="sm-kv"><span>${p.key}</span><b class="${p.signedMean >= 0 ? 'pos' : 'neg'}">${
-            signed(p.signedMean, 2)}</b></div>`).join('')
-          : '<div class="sm-note">—</div>'}
-        <div class="sm-note" style="margin-top:8px">Divergence at <em>t ${
-          nOrDash(b.div ? b.div.t : null, 1)} s</em> — the first action the two athletes do not share.</div>
-      </div>`;
+      ${athletePanel(b)}
+      ${outcomePanel(b)}`;
   }
 
   function unlockedPanel(b) {
@@ -295,6 +372,13 @@ export function create(ctx) {
   }
 
   /* -------------------------------------------------------------- stages */
+  /** keep the ring and its name travelling with the athlete they mark */
+  function follow(s) {
+    s.pieces.followSpot();
+    if (!s.pieces.spot.visible) { s.who.sprite.visible = false; return; }
+    s.who.sprite.position.set(s.pieces.spot.position.x, 5.0, s.pieces.spot.position.z);
+  }
+
   function apply(i, dir = 1) {
     curStage = i;
     if (!built) return Promise.resolve();
@@ -305,6 +389,21 @@ export function create(ctx) {
     for (const s of b.sides) { s.fan.clear(); s.glyphs.clear(); s.mark.material.opacity = 0; }
     b.foot.innerHTML = '';
 
+    // The ringed athlete is the same for the whole beat — set once, followed
+    // by each stage's loop. Without it the room is asked to spot which of
+    // thirteen identical pieces the argument is about.
+    b.sides.forEach((s, k) => {
+      const id = k === 0 ? b.whoA : b.whoB;
+      s.pieces.spotlight(id, k === 0 ? T.bone2 : T.amber);
+      // on the fan stage the ribbons start at the carrier's feet, so a name
+      // sprite there is drawn straight through them — the ring carries it, and
+      // the caption under the plate names both athletes
+      if (id == null || i === 2) { s.who.sprite.visible = false; return; }
+      s.who.set(`${b.nameOfId(id)} ${b.swapped ? 'GETS IT' : 'ON THE BALL'}`);
+      s.who.sprite.visible = true;
+      follow(s);
+    });
+
     const p = i === 0 ? stageSame(b, alive) : i === 1 ? stageUnlocked(b, alive) : stageDelta(b, alive);
     return Promise.resolve(p).then(() => { if (alive()) rest(b, i); });
   }
@@ -313,7 +412,12 @@ export function create(ctx) {
     if (i === 2) {
       if (b.dA) b.sides[0].fan.set(b.dA.pos, b.fanA, { shutBelow: 0.12 });
       if (b.dB) b.sides[1].fan.set(b.dB.pos, b.fanB, { shutBelow: 0.12 });
-      for (const s of b.sides) s.pieces.carrier(b.dA ? b.dA.carrier : null, PULSE);
+      // each board's own carrier: on the right that is a different athlete,
+      // and putting the left one's halo there would hide exactly the point
+      b.sides.forEach((s, k) => {
+        const d = k === 0 ? b.dA : b.dB;
+        s.pieces.carrier(d ? d.carrier : null, PULSE);
+      });
     } else if (i === 1) {
       for (const s of b.sides) s.glyphs.fire(1, 380 * (Math.PI / 2));
     }
@@ -342,6 +446,7 @@ export function create(ctx) {
             s.ball.set(q[0], 0, q[1]);
             s.pieces.carrier(bs.held, now);
           } else { s.ball.set(bs.x, bs.z, bs.y); s.pieces.carrier(null); }
+          follow(s);
           if (b.div && t >= b.div.t) {
             const e = s.run === b.A ? b.div.before : b.div.after;
             s.mark.position.x = e.x; s.mark.position.z = e.y;
@@ -353,12 +458,11 @@ export function create(ctx) {
       life.add(stop);
     }).then(() => {
       if (!alive() || !b.div) return;
-      const nm = (id) => {
-        const a = b.A.agents.find((x) => x.id === id);
-        return a ? `#${a.label ?? a.id}` : '—';
-      };
-      b.foot.innerHTML = `<div class="sm-cap">same seed to <span class="amb">t ${
-        nOrDash(b.div.t, 1)} s</span> · then the boards part<br><b>${
+      const nm = b.nameOfId;
+      const head = b.swapped
+        ? `<span class="amb">t ${nOrDash(b.div.t, 1)} s</span> · same ball, same spot — a different athlete reaches it`
+        : `same seed to <span class="amb">t ${nOrDash(b.div.t, 1)} s</span> · then the boards part`;
+      b.foot.innerHTML = `<div class="sm-cap">${head}<br><b>${
         captionOf(b.div.before, nm)}</b><br><b style="color:${SAGE}">${
         captionOf(b.div.after, nm)}</b></div>`;
     });
@@ -386,6 +490,7 @@ export function create(ctx) {
       s.pieces.opacity(0.35);
       s.pieces.carrier(null);
       s.ball.clear();
+      follow(s);
     });
     const t0 = performance.now();
     const stop = b.board.loop((now) => {
@@ -438,6 +543,7 @@ export function create(ctx) {
       s.ball.clear();
       s.ball.set(d.pos[0] + 0.6, 0, d.pos[1], false);
       s.fan.set(d.pos, i === 0 ? b.fanA : b.fanB, { shutBelow: 0.12 });
+      follow(s);
     });
     // frame the two fans, not the two whole pitches
     const fit = b.board.fitRect(
@@ -468,10 +574,12 @@ export function create(ctx) {
       ],
     });
     const h = b.hero;
-    b.foot.innerHTML = h
-      ? `<div class="sm-cap">the same lane, after training · <span class="amb">${
-        FACTOR_LABEL[h.factor]}</span> band <b style="color:${SAGE}">${signed(h.gain, 3)}</b></div>`
-      : '';
+    const whoLine = b.swapped
+      ? `same ball at t ${nOrDash(b.dA.t, 1)} s · left <b>${b.nameOfId(b.dA.carrier)}</b> on it, right <b style="color:${SAGE}">${b.nameOfId(b.dB.carrier)}</b>`
+      : `<b>${b.nameOfId(b.dA.carrier)}</b> on the ball at t ${nOrDash(b.dA.t, 1)} s, both boards`;
+    b.foot.innerHTML = `<div class="sm-cap">${whoLine}${h
+      ? ` · <span class="amb">${FACTOR_LABEL[h.factor]}</span> band <b style="color:${SAGE}">${
+        signed(h.gain, 3)}</b>` : ''}</div>`;
     return wait(1200);
   }
 

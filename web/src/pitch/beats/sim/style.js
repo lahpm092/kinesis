@@ -70,6 +70,14 @@ const CSS = `
 .sm-kv b.pos { color: var(--sage); }
 .sm-kv b.neg { color: var(--fail); }
 .sm-kv b .u { font-family: var(--mono); font-size: 9px; color: var(--bone-2); margin-left: 4px; }
+/* a before → after pair inside one value: the before is held back, never
+   struck through — it is a measurement, not a mistake */
+.sm-kv b s { text-decoration: none; color: var(--bone-2); }
+.sm-kv b em { font-style: normal; font-family: var(--mono); font-size: 10px; margin-left: 5px; }
+.sm-kv b em.pos { color: var(--sage); }
+.sm-kv b em.neg { color: var(--fail); }
+.sm-note b { font-weight: 400; color: var(--bone); }
+.sm-note s { text-decoration: none; color: var(--bone-2); }
 
 .sm-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
 .sm-chips span {

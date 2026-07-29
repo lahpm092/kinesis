@@ -40,6 +40,18 @@ export const meta = {
       settleMs: 1900,
     },
     {
+      eyebrow: 'The asset',
+      line: 'A better athlete is a more valuable one, and the club owns the difference.',
+      // the value curve is an assumption printed on the plate; the score it
+      // acts on is a projection. Either way this stage is not a measurement.
+      provenance: 'projected',
+      stats: [
+        { v: null, u: '%', k: 'squad book, projected' },
+        { v: null, u: '%', k: 'per point of overall' },
+      ],
+      settleMs: 1200,
+    },
+    {
       // no eyebrow: the copy sheet marks this stage's eyebrow as none
       line: 'One broadcast feed in. A ranked, coached, valued squad out.',
       // the projected column is still on screen, so the chip stays up
@@ -48,7 +60,7 @@ export const meta = {
       stats: [
         { v: null, u: '', k: 'players ranked' },
         { v: null, u: 'pts', k: 'mean projected gain' },
-        { v: null, u: '', k: 'promoted' },
+        { v: null, u: '%', k: 'per point of overall' },
       ],
       settleMs: 900,
     },

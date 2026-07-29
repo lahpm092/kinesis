@@ -340,6 +340,24 @@ export class Pieces {
       return item;
     });
 
+    // The piece the beat is ABOUT — a standing ring that follows one athlete,
+    // distinct from the carrier halo so a scene can say "this one" without
+    // fighting the ball. Two pulsing rings on one piece would read as one, so
+    // this one does not pulse.
+    this.spot = new THREE.Mesh(
+      new THREE.RingGeometry(1.5 * s, 1.75 * s, 44),
+      new THREE.MeshBasicMaterial({
+        color: T.bone, transparent: true, opacity: 0.9,
+        side: THREE.DoubleSide, depthWrite: false,
+      })
+    );
+    this.spot.rotation.x = -Math.PI / 2;
+    this.spot.position.y = 0.05 * s;
+    this.spot.renderOrder = 4;
+    this.spot.visible = false;
+    this.group.add(this.spot);
+    this._spotId = null;
+
     // carrier halo
     this.halo = new THREE.Mesh(
       new THREE.RingGeometry(0.95 * s, 1.2 * s, 40),
@@ -367,6 +385,24 @@ export class Pieces {
     const it = this.byId.get(id);
     if (it) it.g.position.set(x, 0, z);
   }
+
+  /**
+   * Mark one piece for the length of a stage. `hex` colours the ring; call
+   * with null to clear. Re-call it (or `followSpot`) each frame so the ring
+   * travels with the piece.
+   */
+  spotlight(id, hex) {
+    this._spotId = id == null ? null : id;
+    if (id == null) { this.spot.visible = false; return; }
+    const it = this.byId.get(id);
+    if (!it) { this.spot.visible = false; return; }
+    if (hex) this.spot.material.color.set(hex);
+    this.spot.visible = true;
+    this.spot.position.x = it.g.position.x;
+    this.spot.position.z = it.g.position.z;
+  }
+
+  followSpot() { if (this._spotId != null) this.spotlight(this._spotId); }
 
   carrier(id, nowMs = 0) {
     if (id == null) { this.halo.visible = false; return; }
@@ -405,6 +441,7 @@ export class Pieces {
     for (const k of ['A', 'B']) { this.mats[k].disc.dispose(); this.mats[k].stem.dispose(); }
     for (const it of this.items) if (it.lbl) { it.lbl.tex.dispose(); it.lbl.mat.dispose(); }
     this.halo.geometry.dispose(); this.halo.material.dispose();
+    this.spot.geometry.dispose(); this.spot.material.dispose();
     this.group.clear();
   }
 }
