@@ -27,6 +27,7 @@ Reads:  web/public/pitch/tracks.json, joints.json (fixtures if absent),
 Writes: web/public/pitch/metrics.json, web/public/pitch/derivation.json
 """
 import argparse
+import hashlib
 import json
 import sys
 from collections import OrderedDict, deque
@@ -38,6 +39,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from config import ACCEL_EVENT, HSR_MS, MAX_PLAUSIBLE_SPEED, SPRINT_MS  # noqa: E402
 from pitch_io import (PITCH_DIR, hilbert_phases, load_json, load_tracks,  # noqa: E402
                       rel_to_root, resolve_input, rnd)
+from scoring import (SCORE_LABEL, SCORES, Z_CLIP, Z_NOTE, cohort_stats,  # noqa: E402
+                     composite)
 
 GEN = "pipeline/60_metrics.py"
 
@@ -50,7 +53,6 @@ YAW_HYST = 0.08      # head-yaw sign hysteresis
 LOS_R = 15.0         # m, radius inside which line-of-sight rotation counts
 HOLD_OMEGA = 3.0     # deg/s, "constant bearing" tolerance
 HOLD_CLOSING = -1.0  # m/s, must actually be closing
-Z_CLIP = 2.5         # sigma
 MIN_LAT = 2          # latencies needed before a reaction time is reported
 CLAMP_FRAC = 0.20    # >20 % of the cohort on a clamp => the run is degenerate
 MIN_LIVE_S = 60.0    # s of live play below which the run is degenerate
@@ -150,7 +152,7 @@ METRIC_SPEC = OrderedDict([
                  [("interceptCourse", "seconds on an interception line")], "relation")),
     ("spaceControl", ("Space control", "m^2", True,
                       [("cellArea", "mean cell area over the keyframes")], "relation")),
-    ("syncContrib", ("Team synchrony share", "0-1", True,
+    ("syncContrib", ("Phase-lock steadiness", "0-1", True,
                      [("phaseAlign", "time-mean alignment with the cluster phase")],
                      "relation")),
     ("scanRate", ("Scan rate (head-yaw sign flips)", "1/s", True,
@@ -169,18 +171,6 @@ METRIC_SPEC = OrderedDict([
     ("cadence", ("Cadence", "1/s", True, [("gaitEvents", "steps per second")], "gait")),
 ])
 
-# 0-100 composites: (metric, signed weight). Sign follows higherIsBetter.
-SCORES = OrderedDict([
-    ("durability", [("hsr_m", 0.35), ("accelLoad", 0.35), ("strideAsym", -0.30)]),
-    ("explosiveness", [("topSpeed", 0.40), ("peakAccel", 0.30), ("sprints", 0.30)]),
-    ("reactivity", [("reactionMs", -0.40), ("losReactivity", 0.35), ("codPeak", 0.25)]),
-    ("coordination", [("syncContrib", 0.35), ("strideAsym", -0.35), ("anklePush", 0.30)]),
-    ("spatialAwareness", [("spaceControl", 0.30), ("separation", 0.25),
-                          ("scanRate", 0.20), ("holdSec", 0.25)]),
-])
-SCORE_LABEL = {"durability": "Durability", "explosiveness": "Explosiveness",
-               "reactivity": "Reactivity", "coordination": "Coordination",
-               "spatialAwareness": "Spatial awareness", "overall": "Overall"}
 # Caveats that must survive into the colophon rather than be quietly smoothed.
 CAVEATS = {
     "anklePush": ("peak |dtheta/dt| from 2D pose on an ~84 px subject. Values "
@@ -205,7 +195,12 @@ CAVEATS = {
     "strideAsym": ("mean of the three biggest swing peaks per leg; a single-peak "
                    "estimator is fragile when both legs saturate the same value."),
     "cadence": "steps per second from the stage-40 gait-event detection.",
-    "syncContrib": ("Hilbert phase needs several oscillations to mean anything. "
+    "syncContrib": ("NOT the team synchrony shown in beat V. The team value is "
+                    "the Kuramoto order across players at one instant (how spread "
+                    "the squad is, 0.245-0.403 here); this is one player's "
+                    "steadiness of phase offset over time, so the two can and do "
+                    "read very differently on the same phases. "
+                    "Hilbert phase needs several oscillations to mean anything. "
                     "On a window under ~10 s the phase of a player's pitch-x is "
                     "essentially one ramp, every track shares it, and this "
                     "saturates near 1.0 — read a short-window value as 'no "
@@ -219,8 +214,6 @@ CAVEATS = {
                 "4 seconds."),
 }
 
-Z_NOTE = ("z = (x - mean)/sd over the tracks observed in this match, "
-          f"clipped to +/-{Z_CLIP} sigma, score = 50 + 20*z")
 
 
 def build_graph():
@@ -538,47 +531,10 @@ def gait_metrics(joints):
 
 
 def composite_scores(rows):
-    """z-score every metric against this match's cohort, then weight into 0-100."""
-    stats = {}
-    for key in METRIC_SPEC:
-        vals = [r["measured"][key] for r in rows
-                if r["measured"].get(key) is not None]
-        if len(vals) >= 2:
-            mu, sd = float(np.mean(vals)), float(np.std(vals))
-        elif len(vals) == 1:
-            mu, sd = float(vals[0]), 0.0
-        else:
-            mu, sd = None, None
-        stats[key] = dict(n=len(vals), mean=mu, sd=sd)
-
-    def z(key, val):
-        st = stats[key]
-        if val is None or st["mean"] is None or not st["sd"]:
-            return None
-        return float(np.clip((val - st["mean"]) / st["sd"], -Z_CLIP, Z_CLIP))
-
+    """Freeze the cohort baseline, then score every player against it."""
+    stats = cohort_stats([r["measured"] for r in rows], list(METRIC_SPEC))
     for r in rows:
-        scores, cover = {}, {}
-        for score, comp in SCORES.items():
-            num, den = 0.0, 0.0
-            used = []
-            for key, w in comp:
-                zz = z(key, r["measured"].get(key))
-                if zz is None:
-                    continue
-                num += abs(w) * (zz if w > 0 else -zz)
-                den += abs(w)
-                used.append(key)
-            if den <= 0:
-                scores[score] = None
-                cover[score] = []
-                continue
-            scores[score] = int(round(float(np.clip(50 + 20 * (num / den), 0, 100))))
-            cover[score] = used
-        have = [v for v in scores.values() if v is not None]
-        scores["overall"] = int(round(float(np.mean(have)))) if have else None
-        r["scores"] = scores
-        r["scoreInputs"] = cover
+        r["scores"], r["scoreInputs"] = composite(r["measured"], stats)
     return stats
 
 
@@ -740,6 +696,9 @@ def main():
             )))
 
     stats = composite_scores(rows)
+    fingerprint = hashlib.sha1(json.dumps(
+        [[r["id"], r["measured"]] for r in sorted(rows, key=lambda r: r["id"])],
+        sort_keys=True).encode()).hexdigest()[:16]
     rows.sort(key=lambda r: (-(r["scores"]["overall"] or -1), -r["quality"]))
 
     scale_caveat = (None if T["scale"]["source"] == "homography" else
@@ -777,7 +736,20 @@ def main():
                                  joints=bool(j_fix))),
         corpus=corpus,
         scoring=dict(method=Z_NOTE, weights={k: dict(v) for k, v in SCORES.items()},
-                     overall="mean of the composites that have at least one input"),
+                     overall="mean of the composites that have at least one input",
+                     zClip=Z_CLIP,
+                     baseline={k: dict(n=v["n"],
+                                       mean=(None if v["mean"] is None
+                                             else round(v["mean"], 6)),
+                                       sd=(None if v["sd"] is None
+                                           else round(v["sd"], 6)))
+                               for k, v in stats.items()},
+                     baselineNote=("FROZEN pre-training cohort. Any projected "
+                                   "score must be z-scored against THIS, never "
+                                   "against the post-training cohort, or the "
+                                   "score becomes zero-sum and untrained players "
+                                   "appear to decline.")),
+        cohortFingerprint=fingerprint,
         metricDefs=metric_defs,
         gait=dict(track=gait_track, attached=bool(gait_attached),
                   forced=args.gait_track is not None, reason=gait_reason,

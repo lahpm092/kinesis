@@ -39,13 +39,20 @@ export const meta = {
     {
       eyebrow: 'Joint angles',
       line: 'Hip, knee and ankle angles, frame by frame, in degrees.',
-      stats: [{ v: null, u: 'deg', k: 'peak flexion' }],
+      stats: [
+        { v: null, u: '', k: 'joints' },
+        { v: null, u: 'deg', k: 'peak flexion' },
+      ],
       settleMs: 800,
     },
     {
       eyebrow: 'Angular velocity',
       line: 'How fast a joint turns is what separates athletes — not how far it bends.',
-      stats: [{ v: null, u: 'deg·s⁻¹', k: 'peak' }],
+      stats: [
+        { v: null, u: '', k: 'joints' },
+        { v: null, u: 'deg', k: 'peak flexion' },
+        { v: null, u: 'deg·s⁻¹', k: 'peak' },
+      ],
       settleMs: 1200,
     },
   ],
@@ -285,9 +292,13 @@ export function create(ctx) {
       const unit = f.unit === 'deg' ? '°'
         : f.unit === 'deg/s' ? 'deg·s⁻¹'
           : f.unit ? String(f.unit) : '';
+      // a measured zero prints 0.0, not 0 — the decimal is what stops it
+      // reading as "nothing here"
+      const txt = v == null ? '—'
+        : Math.abs(v) < 100 ? v.toFixed(1) : String(Math.round(v));
       feats.appendChild(el('div', 'b4-feat',
         `<span class="k">${String(f.name)}</span>`
-        + `<span class="v">${v == null ? '—' : Math.round(v * 10) / 10}<u>${unit}</u></span>`));
+        + `<span class="v">${txt}<u>${unit}</u></span>`));
     }
   } else {
     feats.appendChild(el('div', 'b4-feat',
@@ -622,18 +633,21 @@ export function create(ctx) {
   }
   life.add(() => { for (const t of timers) clearTimeout(t); timers.clear(); });
 
+  // The three stats docs/PITCH_COPY.md names for this beat, revealed as the
+  // beat earns them.
   function annotate(i) {
-    if (i === 0) {
-      ctx.deck.annotate({ stats: [{ v: J.nJ, u: '', k: 'joints' }] });
-    } else if (i === 1) {
-      ctx.deck.annotate({
-        stats: [{ v: J.peakFlexion == null ? null : Math.round(J.peakFlexion), u: 'deg', k: 'peak flexion' }],
-      });
-    } else {
-      ctx.deck.annotate({
-        stats: [{ v: J.peakOmega == null ? null : Math.round(J.peakOmega), u: 'deg·s⁻¹', k: 'peak' }],
+    const row = [{ v: J.nJ, u: '', k: 'joints' }];
+    if (i >= 1) {
+      row.push({
+        v: J.peakFlexion == null ? null : Math.round(J.peakFlexion), u: 'deg', k: 'peak flexion',
       });
     }
+    if (i >= 2) {
+      row.push({
+        v: J.peakOmega == null ? null : Math.round(J.peakOmega), u: 'deg·s⁻¹', k: 'peak',
+      });
+    }
+    ctx.deck.annotate({ stats: row });
   }
 
   function play(i) {

@@ -125,6 +125,14 @@ PITCH_ZONES: Tuple[Tuple[str, Tuple[float, float]], ...] = (
 )
 
 
+# The four criteria that need no landmark correspondences. A homography that was
+# carried forward by optical flow, or interpolated between anchors, has no inliers
+# and no leave-one-out of its own, so it is judged on these alone (plus the hard
+# goal-mouth veto). They are all measured from the image, so this is a real test,
+# not a discount.
+IMAGE_CRITERIA = ("paint_err_px", "paint_explained", "model_cover", "turf_iou")
+
+
 def _ramp(x: Optional[float], fail: float, gate: float, good: float) -> float:
     """Piecewise-linear evidence score: fail -> 0.0, gate -> 0.8, good -> 1.0."""
     if x is None or not isinstance(x, (int, float)) or not math.isfinite(float(x)):
@@ -271,10 +279,31 @@ def evaluate_H(H: np.ndarray, frame_bgr: np.ndarray,
     return res
 
 
+def image_conf(res: Dict[str, Any]) -> float:
+    """Confidence from image evidence only, for a homography with no landmarks."""
+    terms = res.get("terms") or {}
+    if not all(k in terms for k in IMAGE_CRITERIA):
+        return 0.0
+    c = min(terms[k] for k in IMAGE_CRITERIA)
+    if not res.get("goal_mouth_ok", True):
+        c = min(c, 0.15)
+    if int(res.get("n_paint_px", 0)) < 400:
+        c = min(c, 0.45)
+    return float(c)
+
+
 def fit_and_validate(frame_bgr: np.ndarray, kps: Dict[int, Tuple[float, float, float]],
-                     ransac_px: float = 8.0) -> Optional[Dict[str, Any]]:
+                     ransac_px: float = 8.0, refine: bool = True
+                     ) -> Optional[Dict[str, Any]]:
     """
     Ground-plane homography from PnLCalib keypoints, plus every acceptance metric.
+
+    The keypoints get the model into the right basin (2-4 px leave-one-out); the
+    painted lines are localised to about a pixel, so the fit is then polished by ICP
+    against the paint mask (pitch_calib._refine_H_to_lines) and the polished result is
+    kept only if it scores better under the SAME independent gates -- including the
+    7.32 m goal mouth measured from the detected post bases, which is what stops ICP
+    from sliding the model onto the wrong line.
 
     Returns None when there is no fit at all (too few usable keypoints, degenerate
     configuration, or an impossible camera). A close-up with no visible markings
@@ -307,8 +336,34 @@ def fit_and_validate(frame_bgr: np.ndarray, kps: Dict[int, Tuple[float, float, f
     if not pc._homography_sane(H, w, h):
         return None
 
+    # Leave-one-out is a property of the CORRESPONDENCE SET, not of the final matrix:
+    # refit on n-1 landmarks, predict the held-out one. It is therefore carried across
+    # the ICP polish unchanged.
     loo = pc.Calibrator._loo_err_px(src[inl], dst[inl])
-    res = evaluate_H(H, frame_bgr, kps=kps, inliers=int(inl.sum()), loo_err_px=loo)
+
+    turf = pc.turf_mask(frame_bgr)
+    lmask = pc.line_mask(frame_bgr, turf)
+    res = evaluate_H(H, frame_bgr, kps=kps, inliers=int(inl.sum()), loo_err_px=loo,
+                     turf=turf, lmask=lmask)
+    res["method"] = "pnlcalib"
+
+    if refine:
+        dist = pc._support_field(lmask)
+        conf0, perr0 = res["conf"], res["paint_err_px"]
+        for iters in (1, 2):
+            Hr = pc._refine_H_to_lines(H, dist, lmask, iters=iters, tol_px=9.0,
+                                       turf=turf)
+            if Hr is None or np.allclose(Hr, H) or not pc._homography_sane(Hr, w, h):
+                continue
+            rres = evaluate_H(Hr, frame_bgr, kps=kps, inliers=int(inl.sum()),
+                              loo_err_px=loo, turf=turf, lmask=lmask,
+                              method=f"pnlcalib+icp{iters}")
+            if rres["conf"] > res["conf"]:
+                res = rres
+        if res["method"] != "pnlcalib":
+            res["conf_before_icp"] = conf0
+            res["paint_err_px_before_icp"] = perr0
+
     res["n_kp"] = len(kps)
     res["n_kp_ground"] = len(ids)
     res["kp_ids_used"] = [ids[i] for i in range(len(ids)) if inl[i]]
@@ -381,9 +436,16 @@ class PnLCalibrator:
         self.reset()
 
     # ---- stateless ---------------------------------------------------------------
-    def fit(self, frame_bgr: np.ndarray) -> Optional[Dict[str, Any]]:
+    def keypoints(self, frame_bgr: np.ndarray) -> Dict[int, Tuple[float, float, float]]:
+        return self.model(frame_bgr, kp_threshold=self.kp_threshold)
+
+    def fit(self, frame_bgr: np.ndarray,
+            kps: Optional[Dict[int, Tuple[float, float, float]]] = None
+            ) -> Optional[Dict[str, Any]]:
         """Full result dict (H as ndarray) or None."""
-        kps = self.model(frame_bgr, kp_threshold=self.kp_threshold)
+        if kps is None:
+            kps = self.keypoints(frame_bgr)
+        self.last_kps = kps
         res = fit_and_validate(frame_bgr, kps)
         if res is not None:
             res["kps"] = kps
@@ -401,6 +463,7 @@ class PnLCalibrator:
         self._prev_hist: Optional[np.ndarray] = None
         self._prev_H: Optional[np.ndarray] = None
         self._chain = 0
+        self.last_kps: Dict[int, Tuple[float, float, float]] = {}
 
     def update(self, frame_bgr: np.ndarray) -> Optional[Dict[str, Any]]:
         h, w = frame_bgr.shape[:2]
@@ -437,14 +500,7 @@ class PnLCalibrator:
                     # Propagation carries no landmark evidence of its own, so the
                     # inlier and leave-one-out terms are meaningless. Judge it on the
                     # image terms only, then discount for chain length.
-                    img_terms = [prop["terms"][k] for k in
-                                 ("paint_err_px", "paint_explained", "model_cover",
-                                  "turf_iou")]
-                    c = min(img_terms)
-                    if not prop["goal_mouth_ok"]:
-                        c = min(c, 0.15)
-                    if prop["n_paint_px"] < 400:
-                        c = min(c, 0.45)
+                    c = image_conf(prop)
                     prop["conf"] = round(float(c * (0.985 ** (self._chain + 1))), 3)
                     prop["verified"] = bool(prop["conf"] >= VERIFY_CONF)
                     prop["chain_len"] = self._chain + 1
@@ -514,7 +570,8 @@ def package(res: Dict[str, Any]) -> Dict[str, Any]:
         "limiting": res.get("limiting"),
         "terms": res.get("terms", {}),
     }
-    for k in ("n_kp", "n_kp_ground", "kp_ids_used", "kp_spread"):
+    for k in ("n_kp", "n_kp_ground", "kp_ids_used", "kp_spread",
+              "conf_before_icp", "paint_err_px_before_icp"):
         if k in res:
             out[k] = res[k]
     return out
@@ -672,11 +729,14 @@ def row_from(res: Optional[Dict[str, Any]], stem: str, shape: Tuple[int, int],
         row.update({"conf": 0.0, "verified": False, "limiting": "no_fit",
                     "method": "none"})
         return row
+    if "kps" in res:
+        row.setdefault("n_kp_detected", len(res["kps"]))
     p = package(res) if not isinstance(res.get("H"), list) else dict(res)
     for k in ("conf", "verified", "method", "inliers", "paint_err_px",
               "paint_err_p90_px", "paint_explained", "model_cover", "turf_iou",
               "loo_err_px", "goal_mouth_m", "goal_mouth_ok", "n_kp", "n_kp_ground",
-              "kp_ids_used", "kp_spread", "n_paint_px", "limiting", "terms"):
+              "kp_ids_used", "kp_spread", "n_paint_px", "limiting", "terms",
+              "conf_before_icp", "paint_err_px_before_icp"):
         if k in p:
             row[k] = p[k]
     H = np.asarray(p["H"], float)
@@ -717,16 +777,15 @@ def cmd_frames(a) -> int:
         if img is None:
             continue
         stem = os.path.splitext(os.path.basename(f))[0]
-        res = cal.fit(img)
-        row = row_from(res, stem, img.shape[:2])
+        kps = cal.keypoints(img)
+        res = cal.fit(img, kps)
+        row = row_from(res, stem, img.shape[:2], {"n_kp_detected": len(kps)})
         rows.append(row)
         _log_row(row)
-        kps = (res or {}).get("kps") if res else \
-            cal.model(img, kp_threshold=a.kp_threshold)
         cv2.imwrite(os.path.join(a.qc, f"{stem}.jpg"),
                     draw_qc(img, res, stem, kps, show_paint=a.paint),
                     [cv2.IMWRITE_JPEG_QUALITY, 90])
-    _write(a.out or os.path.join(a.qc, "_results.json"), rows, {"mode": "frames"})
+    write_export(a.out or os.path.join(a.qc, "_results.json"), rows, {"mode": "frames"})
     return 0
 
 
@@ -742,18 +801,17 @@ def cmd_sweep(a) -> int:
             print(f"t={t:.1f}: could not decode")
             continue
         stem = f"s{t:07.1f}".replace(".", "_")
-        res = cal.fit(img)
-        row = row_from(res, stem, img.shape[:2], {"src_t": round(t, 2)})
+        kps = cal.keypoints(img)
+        res = cal.fit(img, kps)
+        row = row_from(res, stem, img.shape[:2],
+                       {"src_t": round(t, 2), "n_kp_detected": len(kps)})
         rows.append(row)
         _log_row(row)
         if a.qc:
-            kps = (res or {}).get("kps")
-            if kps is None:
-                kps = cal.model(img, kp_threshold=a.kp_threshold)
             cv2.imwrite(os.path.join(a.qc, f"{stem}.jpg"),
                         draw_qc(img, res, f"t={t:.1f}s", kps, show_paint=a.paint),
                         [cv2.IMWRITE_JPEG_QUALITY, 88])
-    _write(a.out or os.path.join(a.qc, "_results.json"), rows,
+    write_export(a.out or os.path.join(a.qc, "_results.json"), rows,
            {"mode": "sweep", "video": a.video})
     return 0
 
@@ -790,7 +848,7 @@ def cmd_track(a) -> int:
                         [cv2.IMWRITE_JPEG_QUALITY, 88])
     meta = {"mode": "track", "video": a.video, "t0": a.t0, "dur": a.dur,
             "fps": a.fps, "sig_shape": [SIG_H, SIG_W]}
-    _write(a.out, rows, meta)
+    write_export(a.out, rows, meta)
     return 0
 
 
@@ -803,7 +861,9 @@ def _times(a) -> List[float]:
     raise SystemExit("sweep needs --times or --every/--t0/--t1")
 
 
-def _write(path: str, rows: List[Dict[str, Any]], meta: Dict[str, Any]) -> None:
+def write_export(path: str, rows: List[Dict[str, Any]],
+                 meta: Dict[str, Any]) -> Dict[str, Any]:
+    """Write the per-frame homography table consumed by pitch_calib.Calibrator."""
     os.makedirs(os.path.dirname(os.path.abspath(path)) or ".", exist_ok=True)
     doc = {
         "measured": True,
@@ -828,23 +888,26 @@ def _write(path: str, rows: List[Dict[str, Any]], meta: Dict[str, Any]) -> None:
     for nm, z in s["zones"].items():
         print(f"  {nm:9s} in view {z['n_frames_in_view']:4d}  "
               f"median {z['err_m_median']} m  p90 {z['err_m_p90']} m")
+    return doc
 
 
 def main(argv: Optional[List[str]] = None) -> int:
-    ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--weights-kp", default=DEFAULT_KP)
-    ap.add_argument("--weights-line", default=DEFAULT_LINES)
-    ap.add_argument("--kp-threshold", type=float, default=0.15)
-    ap.add_argument("--qc", default="data/pnl_qc")
-    ap.add_argument("--out", default=None)
-    ap.add_argument("--paint", action="store_true",
-                    help="tint the detected paint mask in QC renders")
+    common = argparse.ArgumentParser(add_help=False)
+    common.add_argument("--weights-kp", default=DEFAULT_KP)
+    common.add_argument("--weights-line", default=DEFAULT_LINES)
+    common.add_argument("--kp-threshold", type=float, default=0.15)
+    common.add_argument("--qc", default="data/pnl_qc")
+    common.add_argument("--out", default=None)
+    common.add_argument("--paint", action="store_true",
+                        help="tint the detected paint mask in QC renders")
+
+    ap = argparse.ArgumentParser(description=__doc__, parents=[common])
     sub = ap.add_subparsers(dest="cmd")
 
-    p = sub.add_parser("frames"); p.add_argument("frames", nargs="+")
+    p = sub.add_parser("frames", parents=[common]); p.add_argument("frames", nargs="+")
     p.set_defaults(fn=cmd_frames)
 
-    p = sub.add_parser("sweep")
+    p = sub.add_parser("sweep", parents=[common])
     p.add_argument("--video", required=True)
     p.add_argument("--times", default=None)
     p.add_argument("--every", type=float, default=0.0)
@@ -852,7 +915,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     p.add_argument("--t1", type=float, default=0.0)
     p.set_defaults(fn=cmd_sweep)
 
-    p = sub.add_parser("track")
+    p = sub.add_parser("track", parents=[common])
     p.add_argument("--video", required=True)
     p.add_argument("--t0", type=float, required=True)
     p.add_argument("--dur", type=float, required=True)

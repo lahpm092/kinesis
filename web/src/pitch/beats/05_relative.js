@@ -31,13 +31,20 @@ export const meta = {
     {
       eyebrow: 'Line-of-sight rate',
       line: 'A bearing that will not rotate is a defender who cannot be beaten.',
-      stats: [{ v: null, u: 'deg·s⁻¹', k: 'bearing rate' }],
+      stats: [
+        { v: null, d: 1, u: 'm', k: 'separation' },
+        { v: null, u: 'deg·s⁻¹', k: 'bearing rate' },
+      ],
       settleMs: 1900,
     },
     {
       eyebrow: 'Team scale',
       line: 'The same relations, read across eleven bodies at once.',
-      stats: [{ v: null, d: 2, u: '', k: 'synchrony' }],
+      stats: [
+        { v: null, d: 1, u: 'm', k: 'separation' },
+        { v: null, u: 'deg·s⁻¹', k: 'bearing rate' },
+        { v: null, d: 2, u: '', k: 'synchrony' },
+      ],
       settleMs: 1500,
     },
   ],
@@ -96,7 +103,19 @@ export function create(ctx) {
     ui.title.textContent = `${m.title} — ▲ team a · ▼ team b`;
     ui.note.textContent =
       `${m.counts.all} tracks · pitch 105 × 68 m · ${Math.round(m.fps)} fps`;
-    plate = new RelativePlate({ canvas: ui.canvas, box: ui.box, model: m });
+    plate = new RelativePlate({
+      canvas: ui.canvas,
+      box: ui.box,
+      model: m,
+      // The box is measured after the plate is built, so the first camera is
+      // fitted against a canvas that does not exist yet. Re-fit the moment a
+      // real size lands, or the beat opens on a broken frame.
+      onResize: () => {
+        if (!plate || stopLoop) return;
+        plate.setView(plate.fit(rectFor(stage), stage === 2 ? 26 : 44));
+        plate.draw(true);
+      },
+    });
     life.add(() => plate.destroy());
   }).catch((err) => {
     console.error('[V] geometry unavailable:', err);
@@ -198,22 +217,19 @@ export function create(ctx) {
     }
   }
 
+  // The three stats docs/PITCH_COPY.md names for this beat, revealed as the
+  // beat earns them: separation, then the bearing rate, then synchrony.
   function annotate(s) {
     const { held } = model.dyads;
     const last = model.n - 1;
-    if (s === 0) {
-      ctx.deck.annotate({
-        stats: [{ v: held ? at(held.d, last) : null, d: 1, u: 'm', k: 'separation' }],
-      });
-    } else if (s === 1) {
-      const v = held && Number.isFinite(held.stats.meanAbs) ? Math.round(held.stats.meanAbs) : null;
-      ctx.deck.annotate({ stats: [{ v, u: 'deg·s⁻¹', k: 'bearing rate' }] });
-    } else {
-      const v = syncAt(last);
-      ctx.deck.annotate({
-        stats: [{ v: Number.isFinite(v) ? v : null, d: 2, u: '', k: 'synchrony' }],
-      });
-    }
+    const dv = held ? at(held.d, last) : null;
+    const ov = held && Number.isFinite(held.stats.meanAbs)
+      ? Math.round(held.stats.meanAbs) : null;
+    const sv = syncAt(last);
+    const row = [{ v: Number.isFinite(dv) ? dv : null, d: 1, u: 'm', k: 'separation' }];
+    if (s >= 1) row.push({ v: ov, u: 'deg·s⁻¹', k: 'bearing rate' });
+    if (s >= 2) row.push({ v: Number.isFinite(sv) ? sv : null, d: 2, u: '', k: 'synchrony' });
+    ctx.deck.annotate({ stats: row });
   }
 
   // ------------------------------------------------------------ animation --
@@ -226,7 +242,10 @@ export function create(ctx) {
     annotate(s);
 
     const from = { ...plate.view };
-    const to = plate.fit(rectFor(s), s === 2 ? 26 : 44);
+    const pad = s === 2 ? 26 : 44;
+    // recomputed per frame: the canvas can still be settling under us
+    const target = () => plate.fit(rectFor(s), pad);
+    let to = target();
     if (snap) plate.setView(to);
 
     const dur = PLAY_MS[s] || 1200;
@@ -237,7 +256,9 @@ export function create(ctx) {
     return new Promise((resolve) => {
       const tick = (now) => {
         const e = now - t0;
-        if (!snap) {
+        to = target();
+        if (snap) plate.setView(to);
+        else {
           const kv = ease(clamp01(e / VIEW_MS));
           plate.setView({
             cx: lerp(from.cx, to.cx, kv),

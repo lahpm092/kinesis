@@ -51,11 +51,17 @@ const MARKS = (() => {
 
 const SPOTS = [[L / 2, W / 2], [11, W / 2], [L - 11, W / 2]];
 
+// The camera never zooms past the point where the pitch stops being readable:
+// whatever it is framing, this much of the surveyed pitch stays in shot.
+const MIN_CTX_X = 60;   // metres of pitch length always visible
+const MIN_CTX_Y = 42;   // metres of pitch width always visible
+
 export class RelativePlate {
-  constructor({ canvas, box, model }) {
+  constructor({ canvas, box, model, onResize }) {
     this.canvas = canvas;
     this.box = box;
     this.model = model;
+    this.onResize = typeof onResize === 'function' ? onResize : null;
     this.ctx = canvas.getContext('2d');
     this.plate = document.createElement('canvas');
     this.pctx = this.plate.getContext('2d');
@@ -82,6 +88,11 @@ export class RelativePlate {
   resize() {
     const r = this.box.getBoundingClientRect();
     if (r.width < 40 || r.height < 40) return;
+    // The first observer callback usually arrives after the beat has already
+    // fitted a camera against a zero-sized box; the owner has to be told so it
+    // can re-fit, or the plate stays framed for a canvas that never existed.
+    const first = !this.w || !this.h;
+    const changed = first || Math.abs(this.w - r.width) > 0.5 || Math.abs(this.h - r.height) > 0.5;
     this.w = r.width;
     this.h = r.height;
     this.dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -93,20 +104,41 @@ export class RelativePlate {
     }
     this._plateKey = '';
     this._drawKey = '';
-    this.draw();
+    if (changed && this.onResize) this.onResize();
+    this.draw(true);
   }
 
-  /** contain-fit a metre rectangle into the canvas, with a pixel margin */
+  /** true once the box has been measured — a fit before this is not usable */
+  get sized() { return this.w > 40 && this.h > 40; }
+
+  /**
+   * Contain-fit a metre rectangle into the canvas with a pixel margin, then
+   * hold the result to two rules: never zoom in past MIN_CTX (the markings are
+   * the only thing telling a viewer where on the pitch they are), and never
+   * push the pitch out of frame — an axis whose window already spans the pitch
+   * centres on it instead of drifting with the action.
+   */
   fit(rect, pad = 34) {
     const rw = Math.max(1e-3, rect.x1 - rect.x0);
     const rh = Math.max(1e-3, rect.y1 - rect.y0);
     const w = Math.max(40, this.w - pad * 2);
     const h = Math.max(40, this.h - pad * 2);
-    return {
-      cx: (rect.x0 + rect.x1) / 2,
-      cy: (rect.y0 + rect.y1) / 2,
-      scale: Math.min(w / rw, h / rh),
-    };
+    let scale = Math.min(w / rw, h / rh);
+    if (this.sized) {
+      scale = Math.min(scale, this.w / MIN_CTX_X, this.h / MIN_CTX_Y);
+    }
+    scale = Math.max(scale, 1e-3);
+
+    let cx = (rect.x0 + rect.x1) / 2;
+    let cy = (rect.y0 + rect.y1) / 2;
+    if (this.sized) {
+      const halfW = this.w / (2 * scale);
+      const halfH = this.h / (2 * scale);
+      const M = 2;                       // metres of paper outside the touchline
+      cx = halfW >= L / 2 + M ? L / 2 : clamp(cx, halfW - M, L + M - halfW);
+      cy = halfH >= W / 2 + M ? W / 2 : clamp(cy, halfH - M, W + M - halfH);
+    }
+    return { cx, cy, scale };
   }
 
   X(mx) { return this.w / 2 + (mx - this.view.cx) * this.view.scale; }
@@ -444,17 +476,29 @@ export class RelativePlate {
     for (const b of live) this._readout(c, b);
   }
 
+  /**
+   * The readout hangs directly off its own line of sight — no box, no legend
+   * plate. Legibility over the fan comes from the coal halo every glyph already
+   * carries, plus a single 1px rule tying the block to the pair it describes.
+   */
   _readout(c, b) {
-    c.fillStyle = hexA(T.coal, 0.86);
-    c.fillRect(b.x - 96, b.y - 34, 192, 74);
-    this._mono(c, b.tag, b.x, b.y - 20, { size: 9, color: b.color, align: 'center', tracking: '2px' });
-    this._value(c, b.x, b.y + 4, b.om, 'DEG·S⁻¹',
-      { size: 23, align: 'center', color: T.bone, halo: false });
-    this._mono(c, b.verdict, b.x, b.y + 21,
-      { size: 8, color: hexA(T.bone2, 0.95), align: 'center', tracking: '1.8px' });
+    c.strokeStyle = hexA(b.color, 0.55);
+    c.lineWidth = 1;
+    c.beginPath();
+    c.moveTo(crisp(b.x), Math.round(b.y - 30) + 0.5);
+    c.lineTo(crisp(b.x), Math.round(b.y - 26) + 0.5);
+    c.moveTo(Math.round(b.x - 52) + 0.5, Math.round(b.y - 26) + 0.5);
+    c.lineTo(Math.round(b.x + 52) + 0.5, Math.round(b.y - 26) + 0.5);
+    c.stroke();
+    this._mono(c, b.tag, b.x, b.y - 12,
+      { size: 9, color: b.color, align: 'center', tracking: '2px', halo: true });
+    this._value(c, b.x, b.y + 13, b.om, 'DEG·S⁻¹',
+      { size: 23, align: 'center', color: T.bone, halo: true });
+    this._mono(c, b.verdict, b.x, b.y + 29,
+      { size: 8, color: hexA(T.bone2, 0.95), align: 'center', tracking: '1.8px', halo: true });
     if (b.closing) {
-      this._mono(c, b.closing, b.x, b.y + 34,
-        { size: 8, color: hexA(T.bone2, 0.68), align: 'center', tracking: '1.6px' });
+      this._mono(c, b.closing, b.x, b.y + 42,
+        { size: 8, color: hexA(T.bone2, 0.68), align: 'center', tracking: '1.6px', halo: true });
     }
   }
 
@@ -521,9 +565,15 @@ export class RelativePlate {
     const m = this.model;
     const i = clamp(Math.round(this.state.fi), 0, m.n - 1);
 
-    // Voronoi — dominant region per body, hairline only
+    // Voronoi — dominant region per body, hairline only, clipped to the pitch:
+    // an unbounded cell is a ray to infinity and drawing it as one throws
+    // metre-long diagonals across the plan that mean nothing.
     const cells = this.vor.cells(this.vor.keyFor(i));
     if (cells) {
+      c.save();
+      c.beginPath();
+      c.rect(this.X(0), this.Y(W), this.X(L) - this.X(0), this.Y(0) - this.Y(W));
+      c.clip();
       c.lineWidth = 1;
       c.strokeStyle = hexA(T.bone, 0.14);
       c.beginPath();
@@ -539,6 +589,7 @@ export class RelativePlate {
         c.closePath();
       }
       c.stroke();
+      c.restore();
     }
 
     const f = m.teamAt(i);

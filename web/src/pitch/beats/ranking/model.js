@@ -3,9 +3,23 @@
 //
 // Nothing is invented. A null stays null and renders as an em dash; a missing
 // projection means the projected stage says so rather than drawing one.
-import { tier, TIER_COLOR } from '../../../scenes/lab/data.js';
+import { tier } from '../../../scenes/lab/data.js';
 
-export { tier, TIER_COLOR };
+export { tier };
+
+/**
+ * Tier ramp for the deck. The lab's ramp ends on a steel blue; this deck is
+ * allowed exactly two accents (sienna on paper, amber on coal) plus bone, so
+ * the ranked plate reads down the amber→bone axis and nothing else.
+ * (docs/PITCH_COPY.md house rules; src/core/theme.js tokens.)
+ */
+export const TIER_COLOR = {
+  S: '#FFB454',   // --amber
+  A: '#E89B3E',   // --amber-2
+  B: '#EFE4CB',   // --bone
+  C: '#B3A382',   // --bone-2
+  D: '#8A7B60',   // bone, held back — the floor of the ramp
+};
 
 export const num = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : null);
 export const str = (v) => {
@@ -123,6 +137,7 @@ function normPlayer(p, defs) {
     overall,
     overallAfter: num(p.overallAfter),
     scores: p.scores && typeof p.scores === 'object' ? p.scores : null,
+    scoresAfter: p.scoresAfter && typeof p.scoresAfter === 'object' ? p.scoresAfter : null,
     drivers: arr(p.drivers).map(str).filter(Boolean),
     ev: evidence(p, defs),
   };
@@ -146,17 +161,29 @@ export function readRoster(data) {
 
   const hasProjection = players.some((p) => p.overallAfter != null || p.rankAfter != null);
   if (hasProjection) {
-    const after = [...players].sort((a, b) => {
-      const ao = a.overallAfter != null ? a.overallAfter : a.overall ?? -1;
-      const bo = b.overallAfter != null ? b.overallAfter : b.overall ?? -1;
-      return bo - ao;
-    });
-    after.forEach((p, i) => { if (p.rankAfter == null) p.rankAfter = i + 1; });
+    // The file ranks only the players the prescription reached, so its
+    // `rankAfter` is dense over a *subset* and cannot be mixed with a rank
+    // computed here — that is how two players end up sharing a rank. Trust the
+    // file only when it covers everyone; otherwise re-rank the whole squad on
+    // the projected score, falling back to the measured one where no
+    // projection exists, and break ties on the measured rank.
+    const complete = players.every((p) => p.rankAfter != null);
+    if (!complete) {
+      const scoreAfter = (p) => (p.overallAfter != null ? p.overallAfter
+        : p.overall != null ? p.overall : -Infinity);
+      [...players]
+        .sort((a, b) => scoreAfter(b) - scoreAfter(a) || a.rank - b.rank)
+        .forEach((p, i) => { p.rankAfter = i + 1; });
+    }
   }
   for (const p of players) {
     p.delta = hasProjection && p.overall != null && p.overallAfter != null
       ? p.overallAfter - p.overall : null;
     p.rankDelta = hasProjection && p.rankAfter != null ? p.rank - p.rankAfter : null;
+    // a player the prescription never reached: the projected column has
+    // nothing to say about them, and must say so rather than repeat the
+    // measurement in the projected register
+    p.projected = p.overallAfter != null;
   }
 
   const gains = players.map((p) => p.delta).filter((d) => d != null);
@@ -169,6 +196,30 @@ export function readRoster(data) {
   const faces = src.faces && typeof src.faces === 'object' ? src.faces : null;
   const guard = src.guard && typeof src.guard === 'object' ? src.guard : null;
   const scoring = data && data.metrics && data.metrics.scoring ? data.metrics.scoring : null;
+
+  // Limitations the file declares about itself. These are read out in the
+  // colophon whether or not the guard tripped: a number the pipeline is not
+  // confident in has to say so on the same screen it appears on.
+  const limits = [];
+  if (guard) {
+    for (const w of arr(guard.warnings).map(str).filter(Boolean)) limits.push(w);
+    const clamps = guard.clamps && typeof guard.clamps === 'object' ? guard.clamps : {};
+    for (const [k, c] of Object.entries(clamps)) {
+      if (!c || typeof c !== 'object') continue;
+      const hit = num(c.hit);
+      const of = num(c.of);
+      if (hit == null || !hit || !of) continue;
+      limits.push(`${hit}/${of} pinned to the ${str(c.label) || k} at ${fmtNum(c.limit)}`
+        + ' — clipped artifact, not a measurement');
+    }
+    for (const r of arr(guard.reasons).map(str).filter(Boolean)) limits.push(r);
+  }
+  if (faces && num(faces.accepted) === 0 && num(faces.attempted)) {
+    const hp = faces.headPx && typeof faces.headPx === 'object' ? faces.headPx : null;
+    limits.push(`face crops: 0 of ${num(faces.attempted)} above the acceptance threshold`
+      + (hp && num(hp.median) != null ? ` — median head ${fmtNum(hp.median, 1)} px` : '')
+      + ' — team glyph instead');
+  }
 
   return {
     scoring: scoring ? {
@@ -189,8 +240,10 @@ export function readRoster(data) {
       grading: str(faces.grading),
     } : null,
     projectionNote: str(src.projection && src.projection.note),
+    limits,
     players,
     hasProjection,
+    unprojected: players.filter((p) => !p.projected).length,
     n: players.length,
     minutes: minutes.length ? minutes.reduce((a, b) => a + b, 0) : null,
     meanGain: gains.length ? gains.reduce((a, b) => a + b, 0) / gains.length : null,

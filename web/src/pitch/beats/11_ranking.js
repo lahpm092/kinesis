@@ -42,6 +42,14 @@ export const meta = {
     {
       // no eyebrow: the copy sheet marks this stage's eyebrow as none
       line: 'One broadcast feed in. A ranked, coached, valued squad out.',
+      // the projected column is still on screen, so the chip stays up
+      // (docs/PITCH_COPY.md, "Provenance chips")
+      provenance: 'projected',
+      stats: [
+        { v: null, u: '', k: 'players ranked' },
+        { v: null, u: 'pts', k: 'mean projected gain' },
+        { v: null, u: '', k: 'promoted' },
+      ],
       settleMs: 900,
     },
   ],

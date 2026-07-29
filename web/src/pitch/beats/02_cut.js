@@ -17,15 +17,16 @@ export const meta = {
     {
       eyebrow: 'Classify',
       line: 'Ninety minutes of broadcast contains far less football than it appears to.',
+      // real values are patched in from cuts.json via deck.annotate()
+      stats: [{ v: null, u: 'min', k: 'raw' }],
       settleMs: 240,
     },
     {
       eyebrow: 'Cut',
       line: 'Stoppages, replays, crowd and dead ball are removed. What remains is play.',
-      // real values are patched in from cuts.json via deck.annotate()
       stats: [
         { v: null, u: 'min', k: 'raw' },
-        { v: null, u: 'min', k: 'live' },
+        { v: null, d: 1, u: 'min', k: 'live' },
         { v: null, u: '%', k: 'retained' },
       ],
       settleMs: 240,
@@ -33,6 +34,11 @@ export const meta = {
     {
       eyebrow: 'The reel',
       line: 'Every downstream measurement runs only on this.',
+      stats: [
+        { v: null, u: 'min', k: 'raw' },
+        { v: null, d: 1, u: 'min', k: 'live' },
+        { v: null, u: '%', k: 'retained' },
+      ],
       settleMs: 240,
     },
   ],

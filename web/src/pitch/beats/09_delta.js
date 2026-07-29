@@ -155,7 +155,7 @@ export function create(ctx) {
     }
 
     const fit = board.fitRect(
-      (GAP + 105 * SSC) / 2 + 5, 34 * SSC, GAP + 105 * SSC, 68 * SSC, { margin: 1.16 });
+      (GAP + 105 * SSC) / 2, 34 * SSC, GAP + 105 * SSC, 68 * SSC, { margin: 1.13 });
     board.moveTo(fit.pos, fit.tgt, 0);
 
     const div = divergence(A, B);
@@ -239,6 +239,8 @@ export function create(ctx) {
                 intOrDash(u.was_available_not_taken)} seen, not taken</div>
             </div>`).join('')}
         </div>
+        <div class="sm-rule"></div>
+        <div class="sm-note" id="smx-net">—</div>
       </div>`;
   }
 
@@ -393,14 +395,30 @@ export function create(ctx) {
     });
     life.add(stop);
 
+    // The claim on screen is about the UNLOCKED affordances, so the counter
+    // reports those. The net across every affordance is stated too, so the
+    // restriction is visible rather than hidden.
     const e = b.aff.ensemble;
-    let takenDelta = null, nSeeds = e && e.n_seeds;
+    const nSeeds = (e && e.n_seeds) || (b.unlocked[0] && b.unlocked[0].n_seeds) || null;
+    let takenDelta = null, netDelta = null;
+    if (b.unlocked.length) {
+      takenDelta = b.unlocked.reduce((a, u) => a + ((u.after ?? 0) - (u.before ?? 0)), 0);
+    }
     if (e && e.before && e.after) {
       const sum = (o) => Object.values(o).reduce((a, x) => a + (x.taken || 0), 0);
-      takenDelta = sum(e.after) - sum(e.before);
+      netDelta = sum(e.after) - sum(e.before);
+    }
+    const netRow = b.side.querySelector('#smx-net');
+    if (netRow) {
+      netRow.innerHTML = `net across every affordance ${
+        netDelta == null ? '—' : (netDelta >= 0 ? '+' : '−') + Math.abs(netDelta)}${
+        nSeeds ? ` in ${nSeeds} runs` : ''}`;
     }
     ctx.deck.annotate({
-      stats: [{ v: takenDelta, u: nSeeds ? `in ${nSeeds} runs` : '', k: 'affordances taken' }],
+      stats: [{
+        v: takenDelta != null ? (takenDelta >= 0 ? `+${takenDelta}` : String(takenDelta)) : null,
+        u: nSeeds ? `in ${nSeeds} runs` : '', k: 'affordances taken',
+      }],
     });
     b.foot.innerHTML = `<div class="sm-cap">left <b>available, not taken</b> · right <b style="color:${SAGE}">now accepted</b></div>`;
     return wait(2000);
@@ -423,8 +441,8 @@ export function create(ctx) {
     });
     // frame the two fans, not the two whole pitches
     const fit = b.board.fitRect(
-      b.dA.pos[0] * SSC + GAP / 2 + 5, b.dA.pos[1] * SSC, GAP + 54 * SSC, 54 * SSC,
-      { margin: 1.12, elev: 0.95 });
+      b.dA.pos[0] * SSC + GAP / 2 + 11, b.dA.pos[1] * SSC, GAP + 74 * SSC, 60 * SSC,
+      { margin: 1.14, elev: 0.95 });
     b.board.moveTo(fit.pos, fit.tgt, 900);
     const stop = b.board.loop((now) => {
       if (!alive()) { stop(); return; }
@@ -433,18 +451,20 @@ export function create(ctx) {
     life.add(stop);
 
     const d = (b.sim.ensemble && b.sim.ensemble.delta) || {};
+    // the prescription is written for the squad the deck is selling, so the
+    // projected overall is that squad's mean — not the opponent's as well.
     const roster = ctx.data.roster;
-    let overall = null;
+    let overall = null, nOverall = 0;
     if (roster && Array.isArray(roster.players)) {
       const ds = roster.players
-        .filter((p) => typeof p.overall === 'number' && typeof p.overallAfter === 'number')
+        .filter((p) => p.team === 'A' && typeof p.overall === 'number' && typeof p.overallAfter === 'number')
         .map((p) => p.overallAfter - p.overall);
-      if (ds.length) overall = ds.reduce((x, y) => x + y, 0) / ds.length;
+      if (ds.length) { overall = ds.reduce((x, y) => x + y, 0) / ds.length; nOverall = ds.length; }
     }
     ctx.deck.annotate({
       stats: [
-        { v: d.xg ? d.xg.mean : null, u: 'xG', k: 'chance' },
-        { v: overall, u: 'pts', k: 'overall' },
+        { v: d.xg ? signed(d.xg.mean, 2) : null, u: 'xG', k: 'chance' },
+        { v: overall != null ? signed(overall, 1) : null, u: 'pts', k: 'overall' },
       ],
     });
     const h = b.hero;
@@ -476,7 +496,7 @@ export function create(ctx) {
       if (!built) return;
       built.board.resize();
       built.homePose = built.board.fitRect(
-        (GAP + 105 * SSC) / 2 + 5, 34 * SSC, GAP + 105 * SSC, 68 * SSC, { margin: 1.16 });
+        (GAP + 105 * SSC) / 2, 34 * SSC, GAP + 105 * SSC, 68 * SSC, { margin: 1.13 });
     },
     dispose() {
       token++;

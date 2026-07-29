@@ -637,9 +637,13 @@ def main() -> None:
                     help="'x,y,w,h;...' in CROP px — scoreboard / broadcaster "
                          "bugs, flattened before SAM 3 so they cannot become "
                          "objects. Also excluded from the overlay render.")
-    ap.add_argument("--pitch-method", default="homography",
+    ap.add_argument("--pitch-method", default="off",
                     choices=["homography", "update", "off"],
-                    help="pitch_calib entry point ('update' is temporally smoothed)")
+                    help="legacy pitch_calib entry point. Default off: the "
+                         "`pitch` field is filled by pipeline/31_project.py, "
+                         "which uses PnLCalib and smooths the homography over "
+                         "time. Running it here would only cost a second a "
+                         "frame to write nulls that stage 31 overwrites.")
     ap.add_argument("--pitch-min-conf", type=float, default=0.80,
                     help="pitch_calib confidence below which pitch is null. "
                          "The calibrator's homography is treated as untrusted: "

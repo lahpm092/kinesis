@@ -28,13 +28,20 @@ export const meta = {
     {
       eyebrow: 'Prescription',
       line: 'Each limitation selects real methods from the catalogue, not generic advice.',
-      stats: [{ v: null, u: '', k: 'methods selected' }],
+      stats: [
+        { v: null, u: '', k: 'flags raised' },
+        { v: null, u: '', k: 'methods selected' },
+      ],
       settleMs: 900,
     },
     {
       eyebrow: 'The week',
       line: 'A microcycle that respects interference, volume landmarks and match load.',
-      stats: [{ v: null, u: 'wk', k: 'block' }],
+      stats: [
+        { v: null, u: '', k: 'flags raised' },
+        { v: null, u: '', k: 'methods selected' },
+        { v: null, u: 'wk', k: 'block' },
+      ],
       settleMs: 900,
     },
     {
@@ -43,6 +50,7 @@ export const meta = {
       stats: [
         { v: null, u: '', k: 'flags raised' },
         { v: null, u: '', k: 'methods selected' },
+        { v: null, u: 'wk', k: 'block' },
       ],
       settleMs: 900,
     },

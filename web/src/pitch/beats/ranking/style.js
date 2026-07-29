@@ -12,6 +12,7 @@ const CSS = `
   --rnk-gap:  clamp(20px, 2.4vw, 40px);
   --rnk-left: clamp(360px, 41vw, 700px);
   --sage: #7FB98A;
+  --fail: #C56B4A;
   position: absolute; inset: 0;
   color: var(--ink);
 }
@@ -50,6 +51,7 @@ const CSS = `
   color: var(--ink-3); margin-left: 5px;
 }
 .rnk-stat-v.is-gain { color: var(--sage); }
+.rnk-stat-v.is-loss { color: var(--fail); }
 .rnk-stat-k {
   font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em;
   text-transform: uppercase; color: var(--ink-3);
@@ -145,12 +147,17 @@ const CSS = `
 .rnk-srow-v {
   font-family: var(--serif); font-size: 14px; text-align: right;
   font-variant-numeric: tabular-nums; color: var(--ink);
+  white-space: nowrap;
+}
+.rnk-srow-v .a {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.04em;
+  color: var(--sienna); margin-left: 5px;
 }
 
-.rnk-drivers { display: flex; flex-direction: column; gap: 5px; }
+.rnk-drivers { display: flex; flex-direction: column; gap: 5px; align-items: flex-start; }
 .rnk-driver {
   font-family: var(--mono); font-size: 10px; letter-spacing: 0.04em;
-  color: var(--sage); border: 1px solid rgba(127, 185, 138, 0.45);
+  color: var(--ink-2); border: 1px solid var(--hair-2);
   padding: 3px 8px; align-self: flex-start;
 }
 .rnk-note {
@@ -159,6 +166,7 @@ const CSS = `
   border-top: 1px solid var(--hair); padding-top: 10px; margin-top: auto;
 }
 .rnk-note b { color: var(--ink-2); font-weight: 400; }
+.rnk-note .is-limit { color: var(--sienna); opacity: 0.9; }
 
 /* ---------------- the plate ---------------- */
 .rnk-head {
@@ -239,6 +247,7 @@ const CSS = `
 }
 .rnk-d.is-on { opacity: 1; }
 .rnk-d.is-flat { color: var(--bone-2); opacity: 0.55; }
+.rnk-d.is-loss { color: var(--fail); opacity: 1; }
 .rnk-d .rk { color: var(--bone-2); }
 
 /* the evidence, opening underneath a rank */
@@ -257,16 +266,21 @@ const CSS = `
   border-bottom: 1px solid var(--coal-hair); padding-bottom: 5px; margin-bottom: 4px;
 }
 .rnk-grp-k.is-cont { color: var(--bone-2); opacity: 0.6; }
+/* Key left, measured right, projected under the measured. Three columns on one
+   line collide the moment a key needs two words and both numbers carry a unit,
+   so the projected value takes its own row in the value column instead. */
 .rnk-mrow {
-  display: grid; grid-template-columns: minmax(0, 1fr) auto auto;
-  gap: 9px; align-items: baseline; padding: 1px 0; min-height: 17px;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0 9px; align-items: baseline; padding: 1px 0; min-height: 17px;
 }
 .rnk-mrow .k {
+  grid-column: 1; grid-row: 1;
   font-family: var(--mono); font-size: 9px; letter-spacing: 0.02em;
-  color: var(--bone-2); line-height: 1.3;
+  color: var(--bone-2); line-height: 1.3; min-width: 0;
   overflow-wrap: normal; word-break: normal;   /* wrap at spaces, never mid-word */
 }
 .rnk-mrow .v {
+  grid-column: 2; grid-row: 1; text-align: right;
   font-family: var(--serif); font-size: 13px; font-variant-numeric: tabular-nums;
   color: var(--bone); white-space: nowrap;
 }
@@ -274,12 +288,15 @@ const CSS = `
   font-family: var(--mono); font-size: 8.5px; color: var(--bone-2); margin-left: 3px;
 }
 .rnk-mrow .a {
-  font-family: var(--serif); font-size: 13px; font-variant-numeric: tabular-nums;
+  grid-column: 2; grid-row: 2; text-align: right;
+  font-family: var(--serif); font-size: 12px; font-variant-numeric: tabular-nums;
   color: var(--amber); white-space: nowrap; opacity: 0;
-  padding-left: 7px; border-left: 1px solid var(--coal-hair);
   transition: opacity 420ms var(--ease);
 }
-.rnk-mrow .a:empty { border-left: 0; padding-left: 0; }
+.rnk-mrow .a:not(:empty)::before {
+  content: '→'; font-family: var(--mono); font-size: 8px;
+  color: var(--bone-2); margin-right: 4px; vertical-align: 1px;
+}
 .rnk-mrow .a.is-on { opacity: 1; }
 
 .rnk-foot {

@@ -433,7 +433,7 @@ def check_roster(d, metric_ids, metric_keys):
         if metric_ids and pid not in metric_ids:
             err(W, f"{tag} is not a tracked player from metrics.json")
         for k in ("team", "label", "face", "face_source", "face_confidence",
-                  "minutes", "rank", "overall",
+                  "minutes", "rank", "overall", "overallDelta", "rankDelta",
                   "metrics", "metricsAfter", "overallAfter", "rankAfter"):
             if k not in p:
                 err(W, f"{tag} missing {k}")
@@ -490,6 +490,33 @@ def check_roster(d, metric_ids, metric_keys):
                             f"projected from — projection, label it as such")
         if p.get("overallAfter") is not None and p.get("rankAfter") is None:
             err(W, f"{tag} has overallAfter but no rankAfter")
+    # a SCORE is not zero-sum (frozen baseline), a RANK is
+    for p in players:
+        tag = f"players[{p.get('id')}]"
+        dv, av, ov = p.get("overallDelta"), p.get("overallAfter"), p.get("overall")
+        if dv is not None:
+            if not isinstance(dv, (int, float)):
+                err(W, f"{tag}.overallDelta is not a number")
+            elif dv < 0:
+                err(W, f"{tag}.overallDelta = {dv} < 0 — a projection scored "
+                       f"against the frozen pre-training baseline can never lower "
+                       f"a score; this is the zero-sum re-normalisation bug")
+            elif not p.get("prescribed") and dv != 0:
+                err(W, f"{tag} has no prescription but overallDelta = {dv}; an "
+                       f"untrained player must be exactly flat")
+            if av is not None and ov is not None and av - ov != dv:
+                err(W, f"{tag}.overallDelta {dv} != overallAfter - overall "
+                       f"({av} - {ov})")
+        elif av is not None:
+            err(W, f"{tag} has overallAfter but no overallDelta")
+        rd = p.get("rankDelta")
+        if rd is not None and p.get("rankAfter") is not None:
+            if p["rank"] - p["rankAfter"] != rd:
+                err(W, f"{tag}.rankDelta {rd} != rank - rankAfter")
+    ras = [p.get("rankAfter") for p in players if p.get("rankAfter") is not None]
+    if ras and sorted(ras) != list(range(1, len(ras) + 1)):
+        err(W, f"rankAfter is not a 1..{len(ras)} permutation")
+
     pool = d.get("facePool")
     if pool:
         for e in pool.get("entries", []):

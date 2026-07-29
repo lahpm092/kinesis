@@ -124,7 +124,7 @@ export function create(ctx) {
     const ball = new Ball({ trail: 170 });
     board.scene.add(ball.group);
     board.own(ball);
-    const fan = new VectorFan({ maxLanes: 6, labels: true, scale: 1.8 });
+    const fan = new VectorFan({ maxLanes: 6, labels: true, scale: 2.4 });
     board.scene.add(fan.group);
     board.own(fan);
     const glyphs = new Glyphs({ max: 24, labels: true });
@@ -402,11 +402,11 @@ export function create(ctx) {
       xs.push(c[0] + (o.vec[0] / len) * L);
       zs.push(c[1] + (o.vec[1] / len) * L);
     }
-    const x0 = Math.min(...xs) - 6, x1 = Math.max(...xs) + 6;
-    const z0 = Math.min(...zs) - 6, z1 = Math.max(...zs) + 6;
+    const x0 = Math.min(...xs) - 10, x1 = Math.max(...xs) + 10;
+    const z0 = Math.min(...zs) - 10, z1 = Math.max(...zs) + 10;
     // nudge right so the fan clears the panel rail
-    const fit = b.board.fitRect((x0 + x1) / 2 + 7, (z0 + z1) / 2, x1 - x0, z1 - z0,
-      { margin: 1.22, elev: 0.97 });
+    const fit = b.board.fitRect((x0 + x1) / 2, (z0 + z1) / 2, x1 - x0, z1 - z0,
+      { margin: 1.24, elev: 0.97 });
     // close enough for the sub-bands, far enough to keep the pitch legible
     const off = fit.pos.clone().sub(fit.tgt);
     fit.pos.copy(fit.tgt).add(off.normalize().multiplyScalar(clamp(off.length(), 58, 104)));

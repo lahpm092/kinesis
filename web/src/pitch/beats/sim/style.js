@@ -152,7 +152,6 @@ const CSS = `
 .sm-unl-row {
   display: grid; grid-template-columns: 1fr auto; gap: 4px 12px;
   padding: 8px 0; border-top: 1px solid var(--coal-hair);
-  opacity: 0;
 }
 .sm-unl-row:first-child { border-top: 0; }
 .sm-unl-n {

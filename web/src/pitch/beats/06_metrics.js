@@ -34,18 +34,26 @@ export const meta = {
     {
       eyebrow: 'Derivation',
       line: 'Nothing is scored that cannot be traced back to the footage.',
-      stats: [{ v: null, u: '', k: 'operations' }],
+      stats: [
+        { v: null, u: '', k: 'inputs' },
+        { v: null, u: '', k: 'metrics' },
+      ],
       settleMs: 2600,
     },
     {
       eyebrow: 'The player',
       line: 'One player, every number, each one still attached to its source.',
+      stats: [
+        { v: null, u: '', k: 'inputs' },
+        { v: null, u: '', k: 'metrics' },
+      ],
       settleMs: 1400,
     },
     {
       eyebrow: 'At scale',
       line: 'This chain runs per clip. More matches means more evidence, not more work.',
       stats: [
+        { v: null, u: '', k: 'inputs' },
         { v: null, u: '', k: 'metrics' },
         { v: null, u: '', k: 'clips' },
       ],
@@ -281,19 +289,14 @@ export function create(ctx) {
     }
   }
 
+  // The three stats docs/PITCH_COPY.md names for this beat, revealed as the
+  // chain earns them. The operation count is already stated on the graph's own
+  // footer and does not need the annotation as well.
   function annotate(s) {
-    if (s === 0) {
-      ctx.deck.annotate({ stats: [{ v: graph.counts.input, u: '', k: 'inputs' }] });
-    } else if (s === 1) {
-      ctx.deck.annotate({ stats: [{ v: graph.counts.edges, u: '', k: 'operations' }] });
-    } else if (s === 3) {
-      ctx.deck.annotate({
-        stats: [
-          { v: graph.counts.metric, u: '', k: 'metrics' },
-          { v: clips || null, u: '', k: 'clips' },
-        ],
-      });
-    }
+    const row = [{ v: graph.counts.input || null, u: '', k: 'inputs' }];
+    if (s >= 1) row.push({ v: graph.counts.metric || null, u: '', k: 'metrics' });
+    if (s >= 3) row.push({ v: clips || null, u: '', k: 'clips' });
+    ctx.deck.annotate({ stats: row });
   }
 
   // ----------------------------------------------------------- animation ---

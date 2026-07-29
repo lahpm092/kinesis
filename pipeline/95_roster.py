@@ -38,6 +38,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from config import ROOT  # noqa: E402
+from scoring import SCORE_KEYS, composite  # noqa: E402
 from pitch_io import (PITCH_DIR, load_json, load_tracks, rel_to_root,  # noqa: E402
                       resolve_input, resolve_video, rnd)
 
@@ -215,26 +216,80 @@ def load_pool():
     return pool, by_player
 
 
-def load_projection():
-    path, _ = resolve_input("regimes.json", required=False)
-    if not path:
-        return None, {}
+def load_projection(met, override=None):
+    """Post-training projections from regimes.json — only if they belong to THIS
+    cohort, and only as METRIC deltas.
+
+    Two rules, both learned the hard way:
+
+    * PROVENANCE. A track id is only the same athlete if the projection was
+      computed from the current metrics.json. A stale regimes.json whose ids
+      happen to collide would pair every player with a stranger's projection.
+      We check the declared cohort size, the fixture flag, and the `before`
+      values the prescriptor recorded against what we actually measured.
+    * FROZEN BASELINE. We ignore the score numbers regimes.json supplies and
+      recompute them ourselves from the projected METRIC values against the
+      frozen pre-training baseline. Re-normalising against the post-training
+      cohort would make the score zero-sum: training one athlete would push
+      the others down.
+    """
+    path = Path(override) if override else resolve_input("regimes.json",
+                                                         required=False)[0]
+    if not path or not Path(path).exists():
+        return None, {}, dict(available=False, stale=False,
+                              reason="regimes.json has not been produced yet")
     reg = load_json(path)
-    out = {}
+    ids = {p["id"] for p in met["players"]}
+    measured = {p["id"]: p["measured"] for p in met["players"]}
+    src = reg.get("metrics_source") or {}
+    problems = []
+    if src.get("cohort_n") is not None and int(src["cohort_n"]) != len(ids):
+        problems.append(f"regimes.json was built from a cohort of "
+                        f"{src['cohort_n']} tracks, metrics.json has {len(ids)}")
+    if bool(src.get("fixture")) != bool(met.get("fixture")):
+        problems.append(f"regimes.json fixture={bool(src.get('fixture'))} but "
+                        f"metrics.json fixture={bool(met.get('fixture'))}")
+    fp = src.get("cohortFingerprint")
+    if fp and met.get("cohortFingerprint") and fp != met["cohortFingerprint"]:
+        problems.append("cohort fingerprints differ")
+
+    out, checked, mismatched = {}, 0, 0
     for a in reg.get("athletes", []):
         pid = a.get("player")
-        if pid is None:
+        if pid is None or int(pid) not in ids:
             continue
-        proj = a.get("projected") or {}
-        drivers = []
-        for d in a.get("deficits", []) or []:
+        pid = int(pid)
+        deltas, drivers = {}, []
+        for m in ((a.get("projected_detail") or {}).get("metrics") or []):
+            key, before, after = m.get("metric"), m.get("before"), m.get("after")
+            if key is None or after is None:
+                continue
+            if before is not None and measured[pid].get(key) is not None:
+                checked += 1
+                if abs(float(before) - float(measured[pid][key])) > \
+                        max(0.05, 0.02 * abs(float(measured[pid][key]))):
+                    mismatched += 1
+            deltas[key] = float(after)
+        for d in (a.get("deficits") or []):
             if d.get("reads"):
                 drivers.append(d["reads"])
-        for f in a.get("flags", []) or []:
+        for f in (a.get("flags") or []):
             if f.get("name"):
                 drivers.append(f["name"])
-        out[int(pid)] = dict(projected=proj, drivers=drivers[:3])
-    return path, out
+        out[pid] = dict(metrics=deltas, drivers=drivers[:3],
+                        prescribed=bool(a.get("prescription") or a.get("flags")
+                                        or a.get("deficits") or deltas))
+    if checked and mismatched > checked * 0.25:
+        problems.append(f"{mismatched}/{checked} projected `before` values do not "
+                        f"match the measured metrics — the projection describes a "
+                        f"different cohort")
+    if problems:
+        return path, {}, dict(available=False, stale=True,
+                              reason="; ".join(problems),
+                              athletes=len(reg.get("athletes", [])))
+    return path, out, dict(available=bool(out), stale=False,
+                           reason=None, athletes=len(reg.get("athletes", [])),
+                           checked_before_values=checked)
 
 
 def main():
@@ -245,6 +300,8 @@ def main():
     ap.add_argument("--min-head", type=float, default=MIN_HEAD_PX,
                     help=f"native head height in px required to keep a crop "
                          f"(default {MIN_HEAD_PX:g}; lower it only to inspect)")
+    ap.add_argument("--regimes", default=None,
+                    help="path to regimes.json (default: the contract location)")
     ap.add_argument("--debug-dir", default=None,
                     help="also write full frames with the bbox + crop rectangle "
                          "drawn on, and sub-threshold crops, for inspection")
@@ -363,7 +420,11 @@ def main():
         rejected.update({pid: "clip video not found" for pid in picks})
 
     # ------------------------------------------------------------- projection
-    reg_path, proj = load_projection()
+    reg_path, proj, proj_meta = load_projection(met, args.regimes)
+    baseline = (met.get("scoring") or {}).get("baseline") or {}
+    if proj_meta.get("stale"):
+        print(f"[roster] STALE PROJECTION IGNORED: {proj_meta['reason']}",
+              file=sys.stderr)
     pool, pool_by_player = load_pool()
     if pool:
         print(f"[roster] face pool: {len(pool['entries'])} mined close-up faces, "
@@ -375,8 +436,20 @@ def main():
         pid = r["id"]
         best = picks.get(pid)
         pr = proj.get(pid, {})
-        after = pr.get("projected") or {}
-        m_after = {k: v for k, v in after.items() if k in r["measured"]} or None
+        m_after = None
+        s_after = None
+        delta = None
+        if pr:
+            projected = {k: v for k, v in (pr.get("metrics") or {}).items()
+                         if k in r["measured"]}
+            merged = dict(r["measured"])
+            merged.update(projected)
+            # scored against the FROZEN pre-training baseline, never against the
+            # post-training cohort — otherwise the score is zero-sum
+            s_after, _ = composite(merged, baseline)
+            m_after = projected or None
+            if r["scores"]["overall"] is not None and s_after["overall"] is not None:
+                delta = s_after["overall"] - r["scores"]["overall"]
         why = []
         if (r.get("quality") or 0) < 0.5:
             why.append(f"track quality {r.get('quality')} < 0.5")
@@ -407,10 +480,13 @@ def main():
             confidence=dict(quality=r["quality"], low=bool(why), reasons=why),
             rank=None, rankAfter=None,
             overall=r["scores"]["overall"],
-            overallAfter=after.get("overall"),
+            overallAfter=(None if s_after is None else s_after["overall"]),
+            overallDelta=delta,
+            scoresAfter=s_after,
             metrics=r["measured"],
             metricsAfter=m_after,
             scores=r["scores"],
+            prescribed=bool(pr.get("prescribed")) if pr else False,
             drivers=pr.get("drivers") or None,
             faceQuality=dict(
                 headPx=rnd(best["head_h"], 1) if best else None,
@@ -428,19 +504,60 @@ def main():
                              -(r["quality"] or 0)))
     for i, r in enumerate(rows, 1):
         r["rank"] = i
-    have_after = [r for r in rows if r["overallAfter"] is not None]
-    for i, r in enumerate(sorted(have_after, key=lambda r: -r["overallAfter"]), 1):
-        r["rankAfter"] = i
+    if any(r["overallAfter"] is not None for r in rows):
+        # everyone is re-ranked: a player with no prescription holds their
+        # measured score (flat), so only the trained players move up past them
+        after_key = [(r, (r["overallAfter"] if r["overallAfter"] is not None
+                          else r["overall"]) or -1) for r in rows]
+        for i, (r, _) in enumerate(sorted(after_key, key=lambda z: -z[1]), 1):
+            r["rankAfter"] = i
+        for r in rows:
+            r["rankDelta"] = (None if r["rankAfter"] is None
+                              else r["rank"] - r["rankAfter"])
+    else:
+        for r in rows:
+            r["rankAfter"], r["rankDelta"] = None, None
+
+    # ---- assertions: a score is not zero-sum, a rank is
+    bad = []
+    for r in rows:
+        if r["overallDelta"] is not None and r["overallDelta"] < 0:
+            bad.append(f"player {r['id']} has overallDelta {r['overallDelta']} < 0 "
+                       f"— a projection may never lower a score; the baseline is "
+                       f"frozen, so this means the prescription projects a WORSE "
+                       f"metric value")
+        if r["prescribed"] and r["overallDelta"] is None and r["overall"] is not None:
+            bad.append(f"player {r['id']} carries a prescription but no delta")
+        if not r["prescribed"] and r["overallDelta"] not in (None, 0):
+            bad.append(f"player {r['id']} has no prescription but a non-zero "
+                       f"delta {r['overallDelta']}")
+    if bad:
+        for b in bad:
+            print(f"[roster] PROJECTION FAIL: {b}", file=sys.stderr)
+        raise SystemExit(1)
 
     n_face = sum(1 for r in rows if r["face"])
     out = dict(
         measured=True, generator=GEN,
         note=("Ranking is computed from measured metrics on tracked players only. "
               "The post-training column is a PROJECTION, not a measurement."),
-        projection=dict(source=rel_to_root(reg_path) if reg_path else None,
-                        available=bool(proj), projected=True,
-                        note=("metricsAfter / overallAfter / rankAfter come from "
-                              "regimes.json; null until the prescription stage runs")),
+        projection=dict(
+            source=rel_to_root(reg_path) if reg_path else None,
+            available=bool(proj), projected=True, **{
+                k: v for k, v in proj_meta.items() if k != "available"},
+            basis="frozen pre-training cohort baseline from metrics.json",
+            deltas=dict(
+                overallDelta=("absolute change in the 0-100 score, scored against "
+                              "the FROZEN pre-training baseline; >= 0 by "
+                              "construction and exactly 0 for an untrained "
+                              "player, because the score is NOT zero-sum"),
+                rankDelta=("rank - rankAfter; POSITIVE means the player climbed. "
+                           "Rank legitimately falls for an untrained player "
+                           "because rank IS zero-sum")),
+            note=("metricsAfter / overallAfter / rankAfter are projections "
+                  "recomputed here from the projected METRIC values; the score "
+                  "numbers in regimes.json are not used, because they are "
+                  "normalised against the post-training cohort")),
         faces=dict(size=FACE_PX, grading=GRADING,
                    acceptance=dict(minHeadPx=min_head, minConf=MIN_FACE_CONF,
                                    minInside=MIN_INSIDE, cropContext=CROP_CONTEXT),

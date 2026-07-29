@@ -198,6 +198,22 @@ export function buildTracks(raw) {
     ?? num(raw.pitch && raw.pitch.median_error_m);
   const medianErr = stated != null ? stated : (model.ok ? model.err : null);
 
+  // What the pipeline says about the projection it wrote. `pitch_calib` is the
+  // PnLCalib verification block (pipeline/31_project.py): a leave-one-out
+  // reprojection error in *image pixels*, which is the only calibration error
+  // that exists — there is no metre-domain ground truth to compare against, so
+  // this beat reports px and never converts it into a metre claim.
+  const pc = raw.pitch_calib && typeof raw.pitch_calib === 'object' ? raw.pitch_calib : null;
+  const calib = pc ? {
+    ok: num(pc.frames_ok),
+    tried: num(pc.frames_tried),
+    looPx: num(pc.mean_loo_err_px),
+    score: num(pc.mean_score),
+    filled: num(pc.points_filled),
+    nulls: num(pc.points_null),
+  } : null;
+  const calibrated = !!(calib && calib.ok) || img.length > 0;
+
   const ids = [...byId.keys()].sort((a, b) => {
     const A = byId.get(a);
     const B = byId.get(b);
@@ -224,6 +240,8 @@ export function buildTracks(raw) {
     pitchModel: model,
     extent,
     medianErr,
+    calib,
+    calibrated,
     indexAt,
     objectsAt(i) { const f = frames[i]; return f ? f.objects : []; },
     objectFor(id, i) { const rec = byId.get(id); return rec ? rec.byFrame.get(frames[i] ? frames[i].i : i) || null : null; },

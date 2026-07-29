@@ -14,7 +14,7 @@ import { readCuts, clock, sourceOfReel, reelOfSource, pollJson } from './cuts.js
 import { createTimeline, TL_HEIGHT } from './timeline.js';
 
 const SWEEP_MS = 1500;
-const COLLAPSE_MS = 9000;
+const COLLAPSE_MS = 2600;
 const EXPAND_MS = 760;
 const SHIFT_MS = 760;
 const POLL_MS = 4000;
@@ -253,15 +253,19 @@ export function createCutView(ctx, meta) {
     canvas.classList.toggle('is-seek', stageIdx === 2 && videoOk);
   }
 
+  // The three stats docs/PITCH_COPY.md names for this beat. Stage 0 has only
+  // classified the broadcast, so it may only claim the raw duration; the cut
+  // earns the other two and they stay up for the reel.
   function annotate() {
-    if (!isActive() || deck.stageIndex !== 1) return;
-    deck.annotate({
-      stats: [
-        { v: d.dur != null ? Math.round(d.dur / 60) : null, u: 'min', k: 'raw' },
-        { v: d.live != null ? Math.round(d.live / 60) : null, u: 'min', k: 'live' },
-        { v: d.retained != null ? Math.round(d.retained * 100) : null, u: '%', k: 'retained' },
-      ],
-    });
+    if (!isActive()) return;
+    const i = deck.stageIndex;
+    const raw = { v: d.dur != null ? Math.round(d.dur / 60) : null, u: 'min', k: 'raw' };
+    // one decimal: 18.5 min of 45 is the number, and 18 min is not
+    const live = { v: d.live != null ? d.live / 60 : null, d: 1, u: 'min', k: 'live' };
+    const pct = {
+      v: d.retained != null ? Math.round(d.retained * 100) : null, u: '%', k: 'retained',
+    };
+    deck.annotate({ stats: i >= 1 ? [raw, live, pct] : [raw] });
   }
 
   function paintData() {
@@ -329,11 +333,12 @@ export function createCutView(ctx, meta) {
     if (stageIdx === 2 && videoOk && !anim) {
       const rt = (video.currentTime || 0) * reelScale();
       ts.playT = sourceOfReel(d, rt);
-      setClock(
-        'Playhead',
-        clock(ts.playT),
-        `REEL ${clock(rt)}${d.reelDur != null ? ` / ${clock(d.reelDur)}` : ''}`,
-      );
+      // The rendered file is a sample of the kept play, not all of it. Say
+      // both numbers in the same breath so the file's length can never be
+      // mistaken for the live total.
+      const of = d.reelDur != null ? ` / ${clock(d.reelDur)}` : '';
+      const sample = d.reelSampled && d.live != null ? ` · SAMPLE OF ${clock(d.live)} LIVE` : '';
+      setClock('Playhead', clock(ts.playT), `REEL ${clock(rt)}${of}${sample}`);
     }
     timeline.draw();
   });

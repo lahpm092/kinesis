@@ -131,12 +131,25 @@ Stats: `<n>` simulations · `<n>` sims/s · `+<x.xx>` goal difference
 
 | # | Eyebrow | Line |
 |---|---|---|
-| 1 | THE SQUAD | Every player who appeared, ranked on what was measured. |
+| 1 | THE SQUAD | Every tracked player, ranked on what was measured. |
 | 2 | THE EVIDENCE | Each rank opens into the numbers underneath it. |
-| 3 | PROJECTED | Where personalized training would move them. |
-| 4 | — | One broadcast feed in. A ranked, coached, valued squad out. |
+| 3 | PRESCRIBED | Fifty-four flags raised. Two hundred work units prescribed. |
+| 4 | — | One broadcast feed in. A ranked, coached squad out. |
 
-Stats: `<n>` players ranked · `+<n>` mean projected gain · `<n>` promoted
+Stats: `<n>` players ranked · `<n>` flags raised · `<n>` work units
+
+**Honesty requirement for this beat.** Lead stage 3 with the **prescription**, which is
+substantial and real — 54 flags across 13 athletes, 201 work units, 0 interference warnings,
+every identifier resolving to the taxonomy. Do **not** lead with the projected score uplift:
+it is **+0.23 points mean**, which a 3.9-second analysis window cannot support as a headline.
+
+Render the projected column, keep it labelled `PROJECTED`, and state plainly beneath it that
+the projection is a conservative planning assumption at `confidence: low`, not an observed
+training response — and that 91 of 143 rule evaluations had no usable input on a window this
+short. The machinery is the claim; the number will follow more footage.
+
+Rank movement and score movement are separate: a player's score can stay flat while their
+rank falls because someone else climbed past them. Show both, never conflate them.
 
 ## Provenance chips (mandatory)
 

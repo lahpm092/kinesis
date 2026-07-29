@@ -28,6 +28,9 @@ const browser = await puppeteer.launch({
   args: ['--headless=new', '--hide-scrollbars', '--mute-audio',
     '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--window-size=1680,1050'],
   defaultViewport: { width: 1680, height: 1050 },
+  // The WebGL beats (VII, IX, X) render a bloomed 105x68 pitch through
+  // SwiftShader, which can exceed the 180 s CDP default on a loaded machine.
+  protocolTimeout: 600_000,
 });
 const page = await browser.newPage();
 page.on('pageerror', (e) => { problems.push(`PAGEERROR: ${e.message}`); console.log('PAGEERROR:', e.message); });
@@ -89,8 +92,16 @@ async function gotoStage(id, s) {
     window.__stageSettled = false;      // set before the hash so the wait is honest
     location.hash = h;
   }, `#/${id}/${s}`);
-  await page.waitForFunction(() => window.__stageSettled === true, { timeout: 30000 });
-  await sleep(120);                     // one frame of slack for the last paint
+  // WebGL beats under SwiftShader settle far slower than DOM/canvas ones, and
+  // slower again when CV agents are loading the machine. Wait generously, but
+  // fall through rather than aborting the whole run on one slow stage.
+  try {
+    await page.waitForFunction(() => window.__stageSettled === true, { timeout: 180000 });
+  } catch {
+    problems.push(`SLOW: ${id}/${s} never reported __stageSettled — captured anyway`);
+    console.log('SLOW:', `${id}/${s}`, 'captured without settle');
+  }
+  await sleep(400);                     // slack for the last paint
 }
 
 // ------------------------------------------------------------------- walk --

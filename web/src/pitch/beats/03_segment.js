@@ -34,14 +34,22 @@ export const meta = {
     {
       eyebrow: 'Identity',
       line: 'Each object keeps its identity through contact, occlusion and camera pan.',
+      stats: [
+        { v: null, u: '', k: 'tracks' },
+        { v: null, u: '', k: 'frames' },
+      ],
       settleMs: 900,
     },
     {
       eyebrow: 'To the pitch',
       line: 'Projected through the pitch model, every object has a position in metres.',
       stats: [
+        { v: null, u: '', k: 'tracks' },
         { v: null, u: '', k: 'frames' },
-        { v: null, u: 'm', k: 'median error' },
+        // px, not metres: the calibration is verified by leave-one-out
+        // reprojection in image pixels and there is no metre-domain truth to
+        // compare against. Reporting m here would be inventing a number.
+        { v: null, u: 'px', k: 'median error' },
       ],
       settleMs: 1800,
     },
@@ -144,7 +152,22 @@ export function create(ctx) {
       : 'sam 3 · promptable concept segmentation')
       + (M.fixture ? ' · fixture' : '');
     const frEl = el('b', null, '—');
-    lab.append(el('span', null, promptTxt), frEl);
+    const labL = el('span', null, promptTxt);
+    lab.append(labL, frEl);
+
+    // How the projection was obtained and how well it verified — stated on the
+    // same panel as the metres it produced. `pitch` may still be null while the
+    // calibration is being wired in; the beat then says so rather than drawing
+    // an empty plan and letting the room assume it failed.
+    const calibTxt = (() => {
+      if (!M.calibrated) return 'pitch calibration pending · positions in image pixels only';
+      const c = M.calib;
+      if (!c) return 'projected through the fitted pitch model';
+      const bits = ['pnlcalib'];
+      if (c.ok != null && c.tried != null) bits.push(`${c.ok}/${c.tried} frames verified`);
+      if (c.looPx != null) bits.push(`leave-one-out ${c.looPx.toFixed(1)} px`);
+      return bits.join(' · ');
+    })();
     const filmWrap = el('div', 'b3-filmwrap');
     const film = el('div', 'b3-film');
     const video = document.createElement('video');
@@ -338,18 +361,16 @@ export function create(ctx) {
     });
     life.add(() => { for (const t of timers) clearTimeout(t); timers.clear(); });
 
+    // The three stats docs/PITCH_COPY.md names for this beat, revealed as the
+    // beat earns them.
     function annotate(i) {
-      if (i === 0) {
-        ctx.deck.annotate({ stats: [{ v: M.nTracks, u: '', k: 'tracks' }] });
-      } else if (i === 2) {
-        const e = M.medianErr;
-        ctx.deck.annotate({
-          stats: [
-            { v: M.nFrames, u: '', k: 'frames' },
-            { v: e == null ? null : Math.round(e * 10) / 10, u: 'm', k: 'median error' },
-          ],
-        });
+      const row = [{ v: M.nTracks, u: '', k: 'tracks' }];
+      if (i >= 1) row.push({ v: M.nFrames, u: '', k: 'frames' });
+      if (i >= 2) {
+        const e = M.calib && M.calib.looPx != null ? M.calib.looPx : null;
+        row.push({ v: e == null ? null : Math.round(e * 10) / 10, u: 'px', k: 'median error' });
       }
+      ctx.deck.annotate({ stats: row });
     }
 
     function play(i) {
@@ -357,7 +378,10 @@ export function create(ctx) {
       annotate(i);
       film.classList.toggle('is-plan', i === 2);
       rows.classList.toggle('is-metres', i === 2);
-      ledLabR.textContent = i === 2 ? 'position · metres' : 'frames held';
+      ledLabR.textContent = i === 2
+        ? (M.calibrated ? 'position · metres' : 'calibration pending')
+        : 'frames held';
+      labL.textContent = i === 2 ? calibTxt : promptTxt;
       for (const [id, ref] of rowEls) {
         const held = i === 1 && focus && focus.indexOf(id) >= 0;
         ref.row.classList.toggle('is-held', !!held);

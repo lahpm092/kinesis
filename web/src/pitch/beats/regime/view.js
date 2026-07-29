@@ -529,9 +529,12 @@ export function createRegimeView(ctx) {
     const flags = { v: a ? a.metricFlags.length || null : null, u: '', k: 'flags raised' };
     const methods = { v: a ? a.methods.length || null : null, u: '', k: 'methods selected' };
     const weeks = { v: a ? a.periodization.weeks : null, u: 'wk', k: 'block' };
+    // The three stats docs/PITCH_COPY.md names for this beat, revealed as the
+    // prescription earns them. Stage 4 re-reads all three off the second
+    // athlete, which is the whole point of that stage.
     if (i === 0) return [flags];
-    if (i === 1) return [methods];
-    if (i === 2) return [weeks];
+    if (i === 1) return [flags, methods];
+    if (i >= 2) return [flags, methods, weeks];
     return [flags, methods];
   }
 

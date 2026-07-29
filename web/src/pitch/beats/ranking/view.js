@@ -27,9 +27,17 @@ function h(tag, cls, txt) {
   return n;
 }
 
+/**
+ * `gain` is the signed value the cell reports, or null when the cell is not a
+ * delta. Only a real improvement earns the sage; a loss is drawn in the
+ * failure register, never in the colour that means "better".
+ */
 function statCell(v, unit, key, gain) {
   const c = h('div', 'rnk-stat');
-  const val = h('div', `rnk-stat-v${gain ? ' is-gain' : ''}`, v);
+  const sign = typeof gain === 'number' && Number.isFinite(gain)
+    ? (gain > 0 ? ' is-gain' : gain < 0 ? ' is-loss' : '')
+    : (gain === true ? ' is-gain' : '');
+  const val = h('div', `rnk-stat-v${sign}`, v);
   if (unit) val.appendChild(h('span', 'u', unit));
   c.append(val, h('div', 'rnk-stat-k', key));
   return c;
@@ -276,10 +284,14 @@ export function createRankingView(ctx) {
             h('span', 'rk', ` ${r.p.rankDelta > 0 ? '▲' : '▼'}${Math.abs(r.p.rankDelta)}`),
           );
         }
+      } else if (on) {
+        // no prescription reached this player: say nothing rather than 0
+        r.delta.appendChild(document.createTextNode('—'));
       }
-      // a zero delta is honest, but only a real gain earns the sage
-      r.delta.classList.toggle('is-flat', !!(on && d != null && d <= 0));
-      r.delta.classList.toggle('is-on', !!(on && d != null));
+      // a loss is honest too, but it is never drawn in the colour of a gain
+      r.delta.classList.toggle('is-flat', !!(on && (d == null || d <= 0)));
+      r.delta.classList.toggle('is-loss', !!(on && d != null && d < 0));
+      r.delta.classList.toggle('is-on', !!on);
     }
   }
 
@@ -309,8 +321,13 @@ export function createRankingView(ctx) {
       const card = h('div', 'rnk-card');
       card.appendChild(facePlate(p, 'rnk-card-face', urlOf, false));
       const idb = h('div', 'rnk-card-id');
+      // on the projected stage the card states where the rank moves to, so the
+      // number on the card and the number in the plate can never disagree
+      const rankTxt = stage === 2 && p.rankAfter != null && p.rankAfter !== p.rank
+        ? `rank ${p.rank != null ? p.rank : '—'} → ${p.rankAfter}`
+        : `rank ${p.rank != null ? p.rank : '—'}`;
       idb.appendChild(h('div', 'rnk-card-num',
-        `rank ${p.rank != null ? p.rank : '—'} · ${p.team ? `team ${p.team}` : 'unassigned'}`));
+        `${rankTxt} · ${p.team ? `team ${p.team}` : 'unassigned'}`));
       idb.appendChild(h('div', 'rnk-card-name', `№ ${p.label}`));
       const m = h('div', 'rnk-card-m');
       const bits = [];
@@ -335,11 +352,23 @@ export function createRankingView(ctx) {
           const row = h('div', 'rnk-srow');
           row.appendChild(h('div', 'rnk-srow-k', k.replace(/([a-z])([A-Z])/g, '$1 $2')));
           const track = h('div', 'rnk-strack');
+          // the projected stage extends the same bar in the accent, behind the
+          // measured fill — the measurement is never overwritten by a projection
+          const a = stage === 2 && p.scoresAfter && typeof p.scoresAfter[k] === 'number'
+            ? p.scoresAfter[k] : null;
+          if (a != null && a > v) {
+            const aft = h('div', 'rnk-sfill is-after');
+            aft.style.right = '100%';
+            track.appendChild(aft);
+            after(60, () => { aft.style.right = `${100 - Math.max(0, Math.min(100, a))}%`; });
+          }
           const fill = h('div', 'rnk-sfill');
           fill.style.right = '100%';
           track.appendChild(fill);
           row.appendChild(track);
-          row.appendChild(h('div', 'rnk-srow-v', fmtNum(v)));
+          const vcell = h('div', 'rnk-srow-v', fmtNum(v));
+          if (a != null && a !== v) vcell.appendChild(h('span', 'a', fmtDelta(a - v)));
+          row.appendChild(vcell);
           // the measured metrics this composite is made of — the evidence
           const w = W && W[k];
           if (w && typeof w === 'object') {
@@ -354,6 +383,9 @@ export function createRankingView(ctx) {
 
       if (stage === 2 && p.drivers.length) {
         const d = h('div', 'rnk-drivers');
+        // these name the *limitation the prescription attacks*, not a gain —
+        // so they are never drawn in the colour a gain is allowed to be
+        d.appendChild(h('div', 'rnk-how-k', 'what the projection acts on'));
         for (const x of p.drivers.slice(0, 3)) d.appendChild(h('div', 'rnk-driver', x));
         wrap.appendChild(d);
       }
@@ -365,17 +397,19 @@ export function createRankingView(ctx) {
         stats.appendChild(statCell(fmtNum(model.minutes, 1), 'min', 'tracked'));
       }
       if (model.hasProjection && model.meanGain != null) {
-        stats.appendChild(statCell(fmtDelta(model.meanGain, 1), '', 'mean projected gain', true));
+        stats.appendChild(statCell(fmtDelta(model.meanGain, 1), 'pts', 'mean projected gain',
+          model.meanGain));
       }
       if (model.hasProjection && model.promoted != null) {
-        stats.appendChild(statCell(String(model.promoted), '', 'promoted', true));
+        stats.appendChild(statCell(String(model.promoted), '', 'promoted', model.promoted));
       }
       wrap.appendChild(stats);
 
       const tiers = h('div', 'rnk-tiers');
       for (const t of model.tiers) {
+        // an empty tier is a measured zero, not an unknown — it prints 0
         const c = h('div', `rnk-tier${t.n ? '' : ' is-empty'}`);
-        c.append(h('div', 'rnk-tier-g', t.g), h('div', 'rnk-tier-n', t.n ? String(t.n) : '—'));
+        c.append(h('div', 'rnk-tier-g', t.g), h('div', 'rnk-tier-n', String(t.n)));
         tiers.appendChild(c);
       }
       wrap.appendChild(tiers);
@@ -393,17 +427,23 @@ export function createRankingView(ctx) {
       }
     }
 
+    // ---- colophon: provenance first, then every limitation the file declares
     const note = h('div', 'rnk-note');
-    const lines = [];
-    if (model.generator) lines.push(`roster.json · ${model.generator} · ${model.measured ? 'measured' : 'simulated'}`);
-    if (!model.hasProjection && model.projectionNote) lines.push(model.projectionNote);
-    if (model.faces && model.faces.accepted === 0 && model.faces.attempted) {
-      lines.push(`face crops: 0 of ${model.faces.attempted} above the acceptance threshold — team glyph instead`);
+    if (model.generator) {
+      note.appendChild(h('div', null,
+        `roster.json · ${model.generator} · ${model.measured ? 'measured' : 'simulated'}`));
     }
-    if (model.degenerate) {
-      for (const r of model.guardReasons.slice(0, 2)) lines.push(r);
+    if (!model.hasProjection && model.projectionNote) {
+      note.appendChild(h('div', null, model.projectionNote));
     }
-    for (const l of lines.slice(0, 4)) note.appendChild(h('div', null, l));
+    if (model.hasProjection && model.unprojected) {
+      note.appendChild(h('div', null,
+        `${model.unprojected} of ${model.n} players carry no prescription — `
+        + 'their projected column is blank, not flat'));
+    }
+    for (const l of model.limits.slice(0, 3)) {
+      note.appendChild(h('div', 'is-limit', l));
+    }
     if (note.childElementCount) wrap.appendChild(note);
     return wrap;
   }

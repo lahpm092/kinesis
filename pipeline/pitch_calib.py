@@ -5,16 +5,25 @@ Broadcast soccer pitch calibration.
 Given a frame from a moving broadcast camera, estimate the 3x3 homography that maps
 image pixels -> pitch coordinates in metres on a 105 x 68 m pitch.
 
-Primary path
-    YOLOv8x-pose pitch-keypoint model (roboflow/sports `football-field-detection`,
-    ONNX export hosted at `SzymonKulpinski/football-pitch-detection-onnx`), which
-    predicts 32 named pitch landmarks. RANSAC homography over the confident subset.
+`Calibrator.homography(frame)` resolves a backend in this order; see
+docs/CALIBRATION.md for the measurements behind the ordering.
 
-Fallback path (no model available, or model confidence too low)
-    Classical: turf mask -> white-line top-hat -> line segments -> merged long lines
-    -> split into the two vanishing-point families -> enumerate correspondences to the
-    template line set -> score every candidate homography by how well ALL template
-    lines + the centre circle + penalty arcs reproject onto detected white pixels.
+  1. Precomputed table (`data/pitch_calib/homographies.json`, or $PITCH_CALIB_JSON).
+     Written by `pipeline/pnl_calib.py track`: PnLCalib keyframe fits, LK propagation
+     between them, reset on shot cuts, every frame gated on the 7.32 m goal mouth.
+     Rows are matched to the incoming frame by a 12x8 greyscale signature, so the
+     table works no matter what order frames arrive in. THIS IS THE PRODUCTION PATH.
+  2. PnLCalib live (`models/pnlcalib/SV_kp` + `SV_lines`), same fit and same gates,
+     computed on demand. Used when no table covers the frame.
+  3. Legacy: roboflow YOLOv8x-pose 32-landmark model, then a classical line solver.
+     BOTH ARE MEASURED DEAD ENDS on this footage (landmarks carry 15-30 px error at
+     720p, 50-200 px on the centre circle; the classical search fires on mowing
+     stripes and stadium architecture, and collapses once the goal mouth is held to
+     7.32 m). Kept only so the negative results stay reproducible.
+
+Everything downstream of the fit -- the turf mask, the narrow-bright-ridge paint mask,
+the independent paint metric, leave-one-out and the turf IoU -- is shared by all three
+and is what any of them is judged by.
 
 Temporal
     `Calibrator.update(frame)` chains frame-to-frame homographies estimated with
@@ -522,6 +531,68 @@ class PitchKeypointModel:
         return xy.astype(np.float64), kp[:, 2].astype(np.float64), float(det_conf[best])
 
 
+# --------------------------------------------------------------------------------------
+# Precomputed homography table
+#
+# `pipeline/pnl_calib.py track` writes one row per analysis frame. Rows are keyed by a
+# 12 x 8 greyscale signature of the frame rather than by index, so a consumer that asks
+# for frames out of order, or skips some, still gets the right homography -- and a frame
+# the table does not cover is reported as a miss instead of being silently mismatched.
+# --------------------------------------------------------------------------------------
+
+PRECOMPUTED_ENV = "PITCH_CALIB_JSON"
+DEFAULT_PRECOMPUTED = os.path.normpath(
+    os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                 "..", "data", "pitch_calib", "homographies.json"))
+SIG_W, SIG_H = 12, 8
+
+
+def frame_signature(frame_bgr: np.ndarray) -> List[int]:
+    g = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2GRAY)
+    s = cv2.resize(g, (SIG_W, SIG_H), interpolation=cv2.INTER_AREA)
+    return [int(v) for v in s.reshape(-1)]
+
+
+class PrecomputedHomographies:
+    """Frame-signature -> homography lookup over a `pnl_calib.py track` export."""
+
+    def __init__(self, path: str, max_mad: float = 6.0):
+        with open(path) as fh:
+            doc = json.load(fh)
+        rows = [r for r in doc.get("frames", []) if r.get("sig")]
+        if not rows:
+            raise ValueError(f"{path}: no rows with signatures")
+        self.path = path
+        self.rows = rows
+        self.sigs = np.asarray([r["sig"] for r in rows], np.float32)
+        self.max_mad = max_mad
+        self.meta = {k: v for k, v in doc.items() if k != "frames"}
+        self.n_hit = self.n_miss = 0
+
+    def __len__(self) -> int:
+        return len(self.rows)
+
+    def lookup(self, frame_bgr: np.ndarray) -> Optional[Dict[str, Any]]:
+        s = np.asarray(frame_signature(frame_bgr), np.float32)
+        if s.size != self.sigs.shape[1]:
+            self.n_miss += 1
+            return None
+        d = np.abs(self.sigs - s[None, :]).mean(axis=1)
+        j = int(np.argmin(d))
+        if float(d[j]) > self.max_mad:
+            self.n_miss += 1
+            return None
+        self.n_hit += 1
+        return self.rows[j]
+
+
+def find_precomputed(path: Optional[str] = None) -> Optional[str]:
+    for cand in (path, os.environ.get(PRECOMPUTED_ENV), DEFAULT_PRECOMPUTED):
+        if cand and os.path.isfile(cand):
+            return cand
+    return None
+
+
 def ensure_model(model_dir: str = "models/pitch",
                  repo: str = DEFAULT_MODEL_REPO,
                  filename: str = DEFAULT_MODEL_FILE) -> Optional[str]:
@@ -938,18 +1009,49 @@ class Calibrator:
                  auto_download: bool = True,
                  model_dir: str = "models/pitch",
                  providers: Optional[Sequence[str]] = None,
-                 config: Optional[CalibConfig] = None):
+                 config: Optional[CalibConfig] = None,
+                 precomputed: Optional[str] = None,
+                 backend: str = "auto"):
         self.cfg = config or CalibConfig()
         self.model: Optional[PitchKeypointModel] = None
-        path = model_path
-        if path is None and auto_download:
-            path = ensure_model(model_dir)
-        if path and os.path.isfile(path):
+        self.table: Optional[PrecomputedHomographies] = None
+        self.pnl = None
+        self.backend = "legacy"
+
+        # 1. precomputed table (production path)
+        if backend in ("auto", "precomputed"):
+            tpath = find_precomputed(precomputed)
+            if tpath:
+                try:
+                    self.table = PrecomputedHomographies(tpath)
+                    self.backend = "precomputed"
+                except Exception as exc:                         # noqa: BLE001
+                    print(f"[pitch_calib] precomputed table unusable: {exc}",
+                          file=sys.stderr)
+
+        # 2. PnLCalib live
+        if self.table is None and backend in ("auto", "pnlcalib"):
             try:
-                self.model = PitchKeypointModel(path, providers=providers)
+                import pnl_calib
+                if os.path.isfile(pnl_calib.DEFAULT_KP) and \
+                        os.path.isfile(pnl_calib.DEFAULT_LINES):
+                    self.pnl = pnl_calib.PnLCalibrator()
+                    self.backend = "pnlcalib"
             except Exception as exc:                             # noqa: BLE001
-                print(f"[pitch_calib] could not load model: {exc}", file=sys.stderr)
-                self.model = None
+                print(f"[pitch_calib] PnLCalib backend unavailable: {exc}",
+                      file=sys.stderr)
+
+        # 3. legacy roboflow landmarks (measured dead end; kept for reproducibility)
+        if self.table is None and self.pnl is None:
+            path = model_path
+            if path is None and auto_download:
+                path = ensure_model(model_dir)
+            if path and os.path.isfile(path):
+                try:
+                    self.model = PitchKeypointModel(path, providers=providers)
+                except Exception as exc:                         # noqa: BLE001
+                    print(f"[pitch_calib] could not load model: {exc}", file=sys.stderr)
+                    self.model = None
         # temporal state
         self._prev_gray: Optional[np.ndarray] = None
         self._prev_hist: Optional[np.ndarray] = None
@@ -1299,6 +1401,16 @@ class Calibrator:
         """
         if frame_bgr is None or frame_bgr.size == 0:
             return None
+        if self.table is not None:
+            row = self.table.lookup(frame_bgr)
+            if row is None or not row.get("H"):
+                return None
+            out = {k: v for k, v in row.items() if k != "sig"}
+            out.setdefault("method", "precomputed")
+            out.setdefault("reproj_err_px", out.get("paint_err_px", float("nan")))
+            return out
+        if self.pnl is not None:
+            return self.pnl.homography(frame_bgr)
         h, w = frame_bgr.shape[:2]
         turf = turf_mask(frame_bgr)
         lmask = line_mask(frame_bgr, turf)
@@ -1420,6 +1532,12 @@ class Calibrator:
         Stateful per-frame calibration with cut detection and temporal propagation.
         Same return contract as `homography`, plus "cut" and "chain_len".
         """
+        if self.table is not None:
+            # The table was already produced by a temporal pass (keyframe fits, LK
+            # propagation, cut resets), so there is nothing left to smooth.
+            return self.homography(frame_bgr)
+        if self.pnl is not None:
+            return self.pnl.update(frame_bgr)
         h, w = frame_bgr.shape[:2]
         gray = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2GRAY)
         hist = self._hist(frame_bgr)

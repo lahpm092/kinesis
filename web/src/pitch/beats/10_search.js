@@ -482,7 +482,7 @@ export function create(ctx) {
       <div class="sm-axis" style="display:flex;justify-content:space-between">
         <span>${signed(lo, 2)}</span><span>${lo < 0 && hi > 0 ? '0' : 'xG diff'}</span><span>${signed(hi, 2)}</span></div>
       <div class="sm-rule"></div>
-      <div class="sm-kv"><span>noise floor σ</span><b>${sigma != null ? nOrDash(sigma, 3) : '—'}</b></div>
+      <div class="sm-kv"><span>noise floor <span style="text-transform:none">σ</span></span><b>${sigma != null ? nOrDash(sigma, 3) : '—'}</b></div>
       <div class="sm-note">${b.noise ? b.noise.method : 'spread of disjoint batch means at a fixed strategy'}</div>
       <div class="sm-rule"></div>
       <div class="sm-kv"><span>best</span><b class="${best && best.gd >= 0 ? 'pos' : ''}">${signed(best ? best.gd : null, 2)}</b></div>
@@ -672,7 +672,7 @@ export function create(ctx) {
     b.aPieces.reveal(1);
     b.aPieces.opacity(1);
     b.board.moveTo(b.answerFit.pos, b.answerFit.tgt, 800);
-    ctx.deck.annotate({ stats: [{ v: b.best ? b.best.gd : null, u: '', k: 'goal difference' }] });
+    ctx.deck.annotate({ stats: [{ v: b.best ? signed(b.best.gd, 2) : null, u: '', k: 'goal difference' }] });
 
     const cho = b.answerCho;
     const dur = cho.dilatedDuration;
