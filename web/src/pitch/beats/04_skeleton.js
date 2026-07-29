@@ -97,7 +97,7 @@ const CSS = `
   border-bottom:1px solid rgba(58,47,31,0.5); }
 .b4-kp .n { font-family:var(--mono); font-size:8.5px; letter-spacing:0.13em; text-transform:uppercase;
   color:var(--bone-2); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.b4-kp .bar { width:58px; height:1px; background:var(--coal-hair); position:relative; flex:none; }
+.b4-kp .bar { width:76px; height:1px; background:var(--coal-hair); position:relative; flex:none; }
 .b4-kp .bar i { position:absolute; left:0; top:0; height:1px; background:var(--amber); display:block; }
 .b4-kp .v { font-family:var(--mono); font-size:9px; color:var(--bone-2);
   font-variant-numeric:tabular-nums; width:22px; text-align:right; flex:none; }

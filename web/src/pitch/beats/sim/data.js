@@ -137,10 +137,21 @@ export function fanOptions(decision, opts = {}) {
   }
   // one shut lane — the strongest option that does not exist, so the audience
   // sees the sienna case beside the live ones
-  const shut = all.filter((o) => !o.exists && o.kind !== 'hold_retain')
-    .sort((a, b) => b.p_real - a.p_real);
+  const shut = all.filter((o) => !o.exists).sort((a, b) => b.p_real - a.p_real);
+  let added = false;
   for (const o of shut) {
-    if (fits(o)) { out.push({ ...o, exists: false }); break; }
+    if (fits(o)) { out.push({ ...o, exists: false }); added = true; break; }
+  }
+  if (!added) {
+    // a shut lane is part of the argument; take the best one that is at least
+    // visually separable rather than dropping the case entirely
+    const sepOk = (o) => out.every((q) => {
+      let d = Math.abs(bearing(o) - bearing(q));
+      if (d > Math.PI) d = 2 * Math.PI - d;
+      return d > (11 * Math.PI) / 180;
+    });
+    const o = shut.find(sepOk);
+    if (o) out.push({ ...o, exists: false });
   }
   return out;
 }

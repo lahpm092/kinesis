@@ -25,6 +25,10 @@ from config import (ROOT, WEB_PUBLIC, MAX_PLAUSIBLE_SPEED,
 PITCH_DIR = WEB_PUBLIC / "pitch"
 FIXTURE_DIR = ROOT / "pipeline" / "fixtures"
 
+STATURE_M = 1.80          # the same prior the pose stage uses
+STATURE_PCT = 12          # +/- % — the spread of adult male stature
+MIN_CALIB_COVERAGE = 0.5  # below this share of calibrated objects we fall back
+
 ACC_CLIP = 9.0            # m/s^2, matches 04_metrics_export
 MIN_TRACK_FRAMES = 12     # a track shorter than this cannot be differentiated
 
@@ -167,6 +171,60 @@ def load_tracks(name: str = "tracks.json"):
             if xy and xy[0] is not None:
                 p["px"][i], p["py"][i] = float(xy[0]), float(xy[1])
 
+    # ---- metric scale: surveyed homography if the calibration landed, else the
+    # ---- same 1.80 m stature prior the pose stage uses, clearly labelled.
+    n_obj = sum(1 for fr in frames for o in fr.get("objects", [])
+                if o.get("cls", "player") in ("player", "goalkeeper"))
+    n_cal = sum(1 for p in players.values() for i in p["frames"]
+                if np.isfinite(p["px"][i]))
+    coverage = n_cal / max(1, n_obj)
+    clip = d.get("clip") or {}
+    if coverage >= MIN_CALIB_COVERAGE:
+        scale = dict(source="homography", coverage=round(coverage, 3),
+                     px_per_m=None, uncertainty_pct=None, frame=[L, W],
+                     note="surveyed pitch metres from the image->pitch homography")
+    else:
+        # one robust scale per frame, shared by every player in that frame, so
+        # the geometry stays internally consistent
+        s_by_frame = np.full(n, np.nan)
+        for k, fr in enumerate(frames):
+            i = int(fr.get("i", k))
+            hs = [float(o["bbox"][3]) for o in fr.get("objects", [])
+                  if o.get("cls", "player") in ("player", "goalkeeper") and o.get("bbox")]
+            if len(hs) >= 3:
+                s_by_frame[i] = float(np.median(hs)) / STATURE_M
+        ok = np.isfinite(s_by_frame)
+        if ok.sum() < 2:
+            raise SystemExit(
+                f"[pitch_io] {path}: no `pitch` coordinates and too few boxes to "
+                f"derive a stature-prior scale. Beat V needs one or the other.")
+        s_by_frame[~ok] = np.interp(np.where(~ok)[0], np.where(ok)[0], s_by_frame[ok])
+        if ok.sum() >= 5:                       # gentle temporal smoothing
+            w = min(11, (int(ok.sum()) // 2) * 2 - 1)
+            if w >= 5:
+                s_by_frame = savgol_filter(s_by_frame, w, 2)
+        for oid, p in players.items():
+            for i in p["frames"]:
+                b = p["bbox"].get(i)
+                if not b:
+                    continue
+                s = s_by_frame[i]
+                p["px"][i] = (b[0] + b[2] / 2.0) / s        # foot point / scale
+                p["py"][i] = (b[1] + b[3]) / s
+        px_m = float(np.median(s_by_frame))
+        L = float(clip.get("width", 1280)) / px_m
+        W = float(clip.get("height", 720)) / px_m
+        scale = dict(
+            source="stature_prior", coverage=round(coverage, 3),
+            stature_m=STATURE_M, px_per_m=round(px_m, 2),
+            uncertainty_pct=STATURE_PCT, frame=[round(L, 1), round(W, 1)],
+            note=("no homography reached the confidence gate, so positions are "
+                  "IMAGE-PLANE metres under a 1.80 m stature prior (+/-12 %, the "
+                  "same prior and label the pose stage uses). Depth "
+                  "foreshortening is NOT corrected: separations between players "
+                  "at very different distances from the camera are biased, and "
+                  "these are not surveyed pitch metres."))
+
     keep = {}
     for oid, p in players.items():
         p["frames"] = sorted(set(p["frames"]))
@@ -181,20 +239,30 @@ def load_tracks(name: str = "tracks.json"):
         keep[oid] = p
 
     if not keep:
-        n_obj = sum(len(f.get("objects", [])) for f in frames)
         raise SystemExit(
-            f"[pitch_io] {path}: {n_obj} objects over {n} frames but no track has "
-            f"enough pitch coordinates to differentiate (need >= {MIN_TRACK_FRAMES} "
-            f"frames with a non-null `pitch`). Beat V is metres-based — run the "
-            f"homography step before this stage.")
+            f"[pitch_io] {path}: {n_obj} player objects over {n} frames but no "
+            f"track survives (needs >= {MIN_TRACK_FRAMES} frames of position). "
+            f"Beat V cannot be built from this input.")
 
     ball = None
     if np.isfinite(ball_x).sum() >= 3:
         ball = dict(px=ball_x, py=ball_y)
 
+    if scale["source"] == "stature_prior" and ball is not None:
+        s_ball = np.full(n, np.nan)
+        for k, fr in enumerate(frames):
+            i = int(fr.get("i", k))
+            for o in fr.get("objects", []):
+                if o.get("cls") == "ball" and o.get("bbox"):
+                    b = o["bbox"]
+                    s_ball[i] = 1.0
+                    ball_x[i] = (b[0] + b[2] / 2.0) / s_by_frame[i]
+                    ball_y[i] = (b[1] + b[3] / 2.0) / s_by_frame[i]
+        ball = dict(px=ball_x, py=ball_y) if np.isfinite(ball_x).sum() >= 3 else None
+
     return dict(path=path, fixture=fixture or bool(d.get("fixture")), raw=d,
                 fps=fps, n_frames=n, t=np.arange(n) / fps, pitch=(L, W),
-                players=keep, ball=ball)
+                scale=scale, players=keep, ball=ball)
 
 
 def window_tracks(T, max_frames):

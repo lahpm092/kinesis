@@ -37,6 +37,7 @@ import cv2
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from config import ROOT  # noqa: E402
 from pitch_io import (PITCH_DIR, load_json, load_tracks, rel_to_root,  # noqa: E402
                       resolve_input, resolve_video, rnd)
 
@@ -45,6 +46,46 @@ GEN = "pipeline/95_roster.py"
 from face_util import (BBOX_HEAD_FRAC, CROP_CONTEXT, FACE_PX, GRADING,  # noqa: E402
                        MIN_FACE_CONF, MIN_HEAD_PX, MIN_INSIDE, accept,
                        cut_face, grade, head_box)
+
+YUNET = ROOT / "models" / "face" / "face_detection_yunet_2023mar.onnx"
+LIVE_FACE_SCORE = 0.80   # a live crop must contain a face the detector SEES
+LIVE_FACE_H = 22.0       # px, native face-box height inside the head box
+
+
+def face_in_head(det, frame, best):
+    """Is there a real face inside this head box? Returns (face_row | None).
+
+    Head size alone is not evidence of a face: a 34 px head at broadcast
+    distance is hair and shoulders. We require the same YuNet detection the
+    mined pool must pass, so both paths answer to the same evidence.
+    """
+    if det is None:
+        return None
+    H, W = frame.shape[:2]
+    side = best["head_h"] * 3.0
+    x0 = int(max(0, best["cx"] - side / 2))
+    y0 = int(max(0, best["cy"] - side / 2))
+    x1 = int(min(W, best["cx"] + side / 2))
+    y1 = int(min(H, best["cy"] + side / 2))
+    if x1 - x0 < 24 or y1 - y0 < 24:
+        return None
+    sub = frame[y0:y1, x0:x1]
+    up = max(1.0, 160.0 / max(1, sub.shape[0]))          # help the detector
+    sub = cv2.resize(sub, (int(sub.shape[1] * up), int(sub.shape[0] * up)),
+                     interpolation=cv2.INTER_CUBIC)
+    det.setInputSize((sub.shape[1], sub.shape[0]))
+    n, faces = det.detect(sub)
+    if faces is None or not len(faces):
+        return None
+    f = max(faces, key=lambda r: float(r[3]))
+    if float(f[-1]) < LIVE_FACE_SCORE or float(f[3]) / up < LIVE_FACE_H:
+        return None
+    out = np.array(f, float).copy()
+    out[0] = out[0] / up + x0
+    out[1] = out[1] / up + y0
+    out[2] /= up
+    out[3] /= up
+    return out
 
 
 def plausible_frames(p):
@@ -267,6 +308,13 @@ def main():
                 rejected[pid] = why
                 if dbg and best is not None:
                     sub.setdefault(best["vframe"], []).append(pid)
+        fdet = None
+        if YUNET.exists():
+            fdet = cv2.FaceDetectorYN.create(str(YUNET), "", (320, 320),
+                                             LIVE_FACE_SCORE, 0.3, 5000)
+        else:
+            print("[roster] WARNING: no YuNet model — falling back to head size "
+                  "alone, which cannot tell a face from the back of a head")
         cap = cv2.VideoCapture(str(video))
         n_v = int(cap.get(cv2.CAP_PROP_FRAME_COUNT) or 0)
         for vf in sorted(set(want) | set(sub)):
@@ -277,9 +325,21 @@ def main():
                     rejected[pid] = f"video frame {vf} unreadable"
                 continue
             for pid in want.get(vf, []):
-                img, inside = cut_face(frame, picks[pid])
-                if img is None or inside < MIN_INSIDE:
-                    rejected[pid] = f"crop {inside:.0%} inside frame < {MIN_INSIDE:.0%}"
+                best = picks[pid]
+                fr_face = face_in_head(fdet, frame, best)
+                if fdet is not None and fr_face is None:
+                    rejected[pid] = ("no face detectable in the head box "
+                                     f"({best['head_h']:.0f}px head)")
+                    continue
+                if fr_face is not None:      # recentre on the detected face
+                    best = dict(best, cx=float(fr_face[0] + fr_face[2] / 2),
+                                cy=float(fr_face[1] + fr_face[3] * 0.45),
+                                head_h=float(fr_face[3]) * 1.35,
+                                conf=float(fr_face[-1]))
+                    picks[pid] = best
+                img, inside = cut_face(frame, best)
+                if img is None or inside < 0.8:
+                    rejected[pid] = f"crop only {inside:.0%} inside the frame"
                     continue
                 name = f"p{pid:02d}.jpg"
                 cv2.imwrite(str(faces_dir / name), img,

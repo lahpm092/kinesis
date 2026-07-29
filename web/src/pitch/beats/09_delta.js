@@ -19,7 +19,7 @@ import * as THREE from 'three';
 import { lifetime } from '../beat.js';
 import { T } from '../../core/theme.js';
 import { VectorFan } from '../sim/fan.js';
-import { Choreo } from '../sim/choreo.js';
+import { Choreo, captionOf } from '../sim/choreo.js';
 import { installSimCss } from './sim/style.js';
 import { Board, Pieces, Ball, SAGE, FAIL } from './sim/board.js';
 import { Glyphs, FACTOR_LABEL } from './sim/glyph.js';
@@ -64,7 +64,10 @@ export const meta = {
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
-const GAP = 84;                     // metres between the two boards, along z
+const SSC = 0.58;                   // the split boards are drawn at 58 %
+const GAP = 105 * SSC + 11;         // gap between the two boards, ACROSS the plate
+// side by side, not stacked: two boards at the same depth read as equals, and
+// neither sinks into the fog.
 const PULSE = 240 * (Math.PI / 2);
 
 /* which ensemble metrics are shown, and how they are read */
@@ -116,7 +119,8 @@ export function create(ctx) {
     const sides = [];
     for (let s = 0; s < 2; s++) {
       const holder = new THREE.Group();
-      holder.position.set(0, 0, s * GAP);
+      holder.position.set(s * GAP, 0, 0);
+      holder.scale.setScalar(SSC);
       board.scene.add(holder);
       holder.add(board.clonePitch([0, 0]));
       const run = s === 0 ? A : B;
@@ -132,9 +136,9 @@ export function create(ctx) {
       const glyphs = new Glyphs({ max: 16, labels: true });
       holder.add(glyphs.group);
       board.own(glyphs);
-      const tag = new TextSprite({ color: s === 0 ? T.bone2 : T.amber, height: 2.0, opacity: 0.9 });
+      const tag = new TextSprite({ color: s === 0 ? T.bone2 : T.amber, height: 3.4, opacity: 0.92 });
       tag.set(s === 0 ? 'MEASURED' : 'PROJECTED');
-      tag.sprite.position.set(52.5, 3.4, -4.6);
+      tag.sprite.position.set(52.5, 4.2, -6.0);
       tag.sprite.visible = true;
       holder.add(tag.sprite);
       board.own({ dispose: () => { tag.tex.dispose(); tag.mat.dispose(); } });
@@ -150,7 +154,8 @@ export function create(ctx) {
       sides.push({ run, holder, pieces, ball, fan, glyphs, tag, mark, cho: new Choreo(choreoRun(run)) });
     }
 
-    const fit = board.fitRect(52.5, GAP / 2 + 34, 105, GAP + 68, { margin: 1.16 });
+    const fit = board.fitRect(
+      (GAP + 105 * SSC) / 2 + 5, 34 * SSC, GAP + 105 * SSC, 68 * SSC, { margin: 1.16 });
     board.moveTo(fit.pos, fit.tgt, 0);
 
     const div = divergence(A, B);
@@ -318,8 +323,8 @@ export function create(ctx) {
     b.side.innerHTML = samePanel(b);
     b.board.moveTo(b.homePose.pos, b.homePose.tgt, 700);
     for (const s of b.sides) { s.ball.clear(); s.pieces.reveal(1); s.pieces.opacity(1); }
-    const tEnd = (b.div ? b.div.t : 6) + 2.4;
-    const rate = Math.max(1, tEnd / 9);            // never longer than ~9 s
+    const tEnd = Math.max((b.div ? b.div.t : 6) + 8, 11);
+    const rate = Math.max(1, tEnd / 9);            // never longer than ~9 s of wall clock
     const t0 = performance.now();
     ctx.deck.annotate({ stats: [] });
     return new Promise((resolve) => {
@@ -346,9 +351,14 @@ export function create(ctx) {
       life.add(stop);
     }).then(() => {
       if (!alive() || !b.div) return;
+      const nm = (id) => {
+        const a = b.A.agents.find((x) => x.id === id);
+        return a ? `#${a.label ?? a.id}` : '—';
+      };
       b.foot.innerHTML = `<div class="sm-cap">same seed to <span class="amb">t ${
         nOrDash(b.div.t, 1)} s</span> · then the boards part<br><b>${
-        b.div.before.outcome} → ${b.div.after.outcome}</b></div>`;
+        captionOf(b.div.before, nm)}</b><br><b style="color:${SAGE}">${
+        captionOf(b.div.after, nm)}</b></div>`;
     });
   }
 
@@ -412,8 +422,9 @@ export function create(ctx) {
       s.fan.set(d.pos, i === 0 ? b.fanA : b.fanB, { shutBelow: 0.12 });
     });
     // frame the two fans, not the two whole pitches
-    const cx = clamp(b.dA.pos[0], 30, 78);
-    const fit = b.board.fitRect(cx, b.dA.pos[1] + GAP / 2, 78, GAP + 34, { margin: 1.1 });
+    const fit = b.board.fitRect(
+      b.dA.pos[0] * SSC + GAP / 2 + 5, b.dA.pos[1] * SSC, GAP + 54 * SSC, 54 * SSC,
+      { margin: 1.12, elev: 0.95 });
     b.board.moveTo(fit.pos, fit.tgt, 900);
     const stop = b.board.loop((now) => {
       if (!alive()) { stop(); return; }
@@ -464,8 +475,8 @@ export function create(ctx) {
     resize() {
       if (!built) return;
       built.board.resize();
-      const fit = built.board.fitRect(52.5, GAP / 2 + 34, 105, GAP + 68, { margin: 1.16 });
-      built.homePose = fit;
+      built.homePose = built.board.fitRect(
+        (GAP + 105 * SSC) / 2 + 5, 34 * SSC, GAP + 105 * SSC, 68 * SSC, { margin: 1.16 });
     },
     dispose() {
       token++;

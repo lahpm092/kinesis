@@ -259,7 +259,7 @@ const CSS = `
 .rnk-grp-k.is-cont { color: var(--bone-2); opacity: 0.6; }
 .rnk-mrow {
   display: grid; grid-template-columns: minmax(0, 1fr) auto auto;
-  gap: 6px; align-items: baseline; padding: 1px 0; min-height: 17px;
+  gap: 9px; align-items: baseline; padding: 1px 0; min-height: 17px;
 }
 .rnk-mrow .k {
   font-family: var(--mono); font-size: 9px; letter-spacing: 0.02em;

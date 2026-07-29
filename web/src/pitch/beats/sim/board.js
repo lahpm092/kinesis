@@ -134,7 +134,14 @@ export class Board {
   /** Frame an axis-aligned rectangle of turf, keeping the home inclination. */
   fitRect(cx, cz, w, d, opts = {}) {
     const margin = opts.margin ?? 1.14;
-    const dir = HOME_POS.clone().sub(HOME_TGT).normalize();
+    let dir = HOME_POS.clone().sub(HOME_TGT).normalize();
+    if (opts.elev != null) {
+      // same bearing, steeper look — a flat ribbon on the turf only reads at
+      // its true width when the plate is seen from nearer overhead.
+      const h = new THREE.Vector2(dir.x, dir.z).normalize();
+      const e = opts.elev;
+      dir = new THREE.Vector3(h.x * Math.cos(e), Math.sin(e), h.y * Math.cos(e)).normalize();
+    }
     const vFov = (this.camera.fov * Math.PI) / 180;
     const hFov = 2 * Math.atan(Math.tan(vFov / 2) * this.camera.aspect);
     // the turf is seen at an inclination, so its depth foreshortens by sin(elev).
@@ -209,6 +216,9 @@ export class Board {
    * frame genuinely still — and it is what keeps a headless capture honest.
    */
   idle() {
+    // a camera tween is driven by the loop, so it must be landed before the
+    // loop stops — otherwise a starved frame rate freezes the shot mid-move.
+    if (this._tween && this._tween.step) this._tween.step(Number.MAX_SAFE_INTEGER);
     this._fns.length = 0;
     if (this._raf) { cancelAnimationFrame(this._raf); this._raf = 0; }
     this.renderOnce();

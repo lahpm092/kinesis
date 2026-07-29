@@ -99,11 +99,22 @@ Stats: `<n>` flags raised · `<n>` methods selected · `<n>` week block
 
 | # | Eyebrow | Line |
 |---|---|---|
-| 1 | SAME SCENARIO | Identical situation. The only change is the athlete. |
+| 1 | SAME SCENARIO | Four hundred paired simulations. The only variable is the athlete. |
 | 2 | UNLOCKED | These invitations existed before. Now they can be accepted. |
-| 3 | THE DELTA | Training moves the measurement, and the measurement moves the outcome. |
+| 3 | THE DELTA | Retention and shot volume move. Chance quality does not — yet. |
 
-Stats: `+<x.xx>` xG · `+<n>` affordances taken · `+<n>` overall
+Stats: `+<x.xxx>` completion · `+<x.xx>` shots/possession · `<n>` affordances unlocked
+
+**Honesty requirement for this beat.** The measured result is that completion improves by
++0.094 (95% CI +0.070 to +0.117, z = 7.87) and shots per possession by +0.160 (z = 2.63),
+while **xG and goals do not move significantly**. Render the non-significant deltas in a muted
+register with their confidence intervals crossing zero, and label them `NOT SIGNIFICANT`.
+
+Do not hide them, and do not let the presenter claim a goals gain. The reason is traceable and
+should be stated in the colophon: the `finish` parameter currently carries only 30% of its fit
+weight, because the joint-kinematic channels that feed it (`anklePush`, `strideAsym`) are not
+yet populated. The prediction — that the xG channel moves once those channels land — is a
+better thing to say in the room than an unsupported number.
 
 ## Beat X — Parallel strategy search · dark · SIMULATED
 

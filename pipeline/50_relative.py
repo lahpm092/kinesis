@@ -272,6 +272,11 @@ def main():
     L, W = T["pitch"]
     print(f"[relative] {T['path'].name}{' (FIXTURE)' if T['fixture'] else ''}: "
           f"{len(players)} tracks, {n} frames @ {fps} fps")
+    sc = T["scale"]
+    print(f"[relative] scale: {sc['source']}"
+          + (f" ({sc['px_per_m']} px/m, +/-{sc['uncertainty_pct']}%, frame "
+             f"{sc['frame'][0]}x{sc['frame'][1]} m)"
+             if sc["source"] != "homography" else " (surveyed pitch metres)"))
     if T["window"]:
         w = T["window"]
         print(f"[relative] input was {w['of']} frames — clamped to the densest "
@@ -337,7 +342,8 @@ def main():
                  + ((T["window"] or {}).get("t0") or 0.0), 3),
         window=T["window"],
         fps=float(fps), frames=int(n),
-        pitch=[L, W],
+        pitch=[round(L, 2), round(W, 2)],
+        scale=T["scale"],
         players=[dict(id=oid, team=players[oid]["team"],
                       label=str(players[oid]["label"]),
                       quality=players[oid]["quality"])

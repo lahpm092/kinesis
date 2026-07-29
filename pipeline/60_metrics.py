@@ -121,7 +121,9 @@ METRIC_SPEC = OrderedDict([
     ("meanSpeed", ("Mean speed", "m/s", True, [("speed", "mean over observed frames")], "run")),
     ("distance", ("Distance", "m", True, [("speed", "sum(v)/fps")], "run")),
     ("peakAccel", ("Peak acceleration", "m/s^2", True, [("accLon", "max")], "run")),
-    ("peakDecel", ("Peak deceleration", "m/s^2", False, [("accLon", "min")], "run")),
+    ("peakDecel", ("Peak deceleration", "m/s^2", False,
+                   [("accLon", "min over the window; POSITIVE when the track "
+                               "never decelerated inside it")], "run")),
     ("accelLoad", ("Acceleration load", "m/s", True,
                    [("accLon", "sum(|a|)/fps")], "run")),
     ("hsr_m", ("High-speed distance", "m", True,
@@ -193,13 +195,28 @@ CAVEATS = {
                  "is a tracking artifact, see guard.clamps."),
     "peakAccel": ("clamped at +9 m/s^2; a value on the clamp is a tracking "
                   "artifact, see guard.clamps."),
-    "peakDecel": ("clamped at -9 m/s^2; a value on the clamp is a tracking "
-                  "artifact, see guard.clamps."),
+    "peakDecel": ("the most negative longitudinal acceleration in the analysed "
+                  "window, clamped at -9 m/s^2. On a short window a player who "
+                  "only accelerates yields a POSITIVE value — that is 'no braking "
+                  "observed', not a deceleration. A value on the clamp is a "
+                  "tracking artifact, see guard.clamps."),
     "reactionMs": ("quantised by the analysis frame rate and computed from the "
                    "few opponent-onset stimuli inside the analysed window."),
     "strideAsym": ("mean of the three biggest swing peaks per leg; a single-peak "
                    "estimator is fragile when both legs saturate the same value."),
     "cadence": "steps per second from the stage-40 gait-event detection.",
+    "syncContrib": ("Hilbert phase needs several oscillations to mean anything. "
+                    "On a window under ~10 s the phase of a player's pitch-x is "
+                    "essentially one ramp, every track shares it, and this "
+                    "saturates near 1.0 — read a short-window value as 'no "
+                    "evidence of desynchronisation', not as perfect coordination."),
+    "codPeak": ("the largest heading change over a 0.4 s step inside the analysed "
+                "window; a short clip that contains no cut will report a small "
+                "value because the turn is absent, not because the player cannot "
+                "turn."),
+    "sprints": ("count of runs reaching 7.0 m/s for 0.4 s INSIDE the analysed "
+                "window; zero on a 4 s clip means no sprint occurred in those "
+                "4 seconds."),
 }
 
 Z_NOTE = ("z = (x - mean)/sd over the tracks observed in this match, "
@@ -725,13 +742,23 @@ def main():
     stats = composite_scores(rows)
     rows.sort(key=lambda r: (-(r["scores"]["overall"] or -1), -r["quality"]))
 
+    scale_caveat = (None if T["scale"]["source"] == "homography" else
+                    (f"distance-derived: positions are image-plane metres under a "
+                     f"{T['scale']['stature_m']} m stature prior "
+                     f"(+/-{T['scale']['uncertainty_pct']}%), not surveyed pitch "
+                     f"metres; depth foreshortening is uncorrected"))
+    SCALED = {"topSpeed", "meanSpeed", "distance", "peakAccel", "peakDecel",
+              "accelLoad", "hsr_m", "sprints", "accelEvents", "decelEvents",
+              "separation", "spaceControl", "tauMin", "holdSec", "losReactivity"}
     metric_defs = []
     for key, (name, unit, hib, ins, group) in METRIC_SPEC.items():
         metric_defs.append(dict(
             key=key, name=name, unit=unit, group=group, higherIsBetter=hib,
             **{"from": [src for src, _ in ins]},
             formula="; ".join(f"{src}: {op}" for src, op in ins),
-            caveat=CAVEATS.get(key),
+            caveat="; ".join(x for x in (CAVEATS.get(key),
+                                         scale_caveat if key in SCALED else None)
+                             if x) or None,
             cohortN=stats[key]["n"],
             cohortMean=rnd(stats[key]["mean"], 3),
             cohortSd=rnd(stats[key]["sd"], 3)))
@@ -743,6 +770,7 @@ def main():
         measured=True, generator=GEN,
         degenerate=guard["degenerate"], guard=guard,
         fixture=bool(T["fixture"] or rel.get("fixture") or j_fix),
+        scale=T["scale"],
         inputs=dict(tracks=rel_to_root(T["path"]), relative=rel_to_root(rel_path),
                     joints=rel_to_root(j_path) if j_path else None,
                     fixture=dict(tracks=bool(T["fixture"]), relative=bool(rel.get("fixture")),

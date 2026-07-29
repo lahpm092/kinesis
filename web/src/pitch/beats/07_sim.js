@@ -124,7 +124,7 @@ export function create(ctx) {
     const ball = new Ball({ trail: 170 });
     board.scene.add(ball.group);
     board.own(ball);
-    const fan = new VectorFan({ maxLanes: 7, labels: true, scale: 2.0 });
+    const fan = new VectorFan({ maxLanes: 6, labels: true, scale: 1.8 });
     board.scene.add(fan.group);
     board.own(fan);
     const glyphs = new Glyphs({ max: 24, labels: true });
@@ -145,7 +145,7 @@ export function create(ctx) {
       }
     }
     const opts = decision
-      ? fanOptions(decision, { maxLive: 4, minSepDeg: 15, force: choke ? [choke.o] : [] })
+      ? fanOptions(decision, { maxLive: 3, minSepDeg: 27, force: choke ? [choke.o] : [] })
       : [];
     const chosen = decision ? chosenOf(decision) : null;
     const bestLive = opts.filter((o) => o.exists).sort((a, b) => b.p_real - a.p_real)[0] || chosen;
@@ -228,6 +228,20 @@ export function create(ctx) {
       </div>`;
   }
 
+  /** the ribbon's own anatomy, as a bar: three segments sized by the factors */
+  function bandBar(o, sw) {
+    if (!o) return '';
+    const f = [o.p_complete, o.p_control, 1 - o.p_intercept].map((v) => Math.max(0.02, Math.min(1, v)));
+    const sum = f[0] + f[1] + f[2];
+    const lim = limitOf(o);
+    const names = ['complete', 'control', 'clear'];
+    const keys = ['p_complete', 'p_control', 'p_intercept'];
+    return `
+      <div class="sm-bandbar">${f.map((v, i) => `<i style="width:${(v / sum) * 100}%;background:${sw[i]}"></i>`).join('')}</div>
+      <div class="sm-bandlab">${f.map((v, i) => `<span style="width:${(v / sum) * 100}%" class="${
+        keys[i] === lim ? 'lim' : ''}">${names[i]} ${v.toFixed(2)}</span>`).join('')}</div>`;
+  }
+
   function fanPanel(b) {
     const o = b.bestLive;
     if (!o) return '<div class="sm-panel"><div class="sm-h"><span>no live lane</span></div></div>';
@@ -255,16 +269,14 @@ export function create(ctx) {
         <div class="sm-h"><span>best lane · amber</span><span class="sm-h-r">${Math.round((o.p_real || 0) * 100)}%</span></div>
         <div class="sm-rule"></div>
         <div class="sm-kv"><span>${affName(o.kind)}</span><b>${o.target != null ? `→ ${o.target}` : '—'}</b></div>
-        <div class="sm-kv"><span>limiting factor</span><b style="color:var(--fail)">${FACTOR_LABEL[lim] || '—'}</b></div>
+        ${bandBar(o, sw)}
       </div>
       ${ch ? `
       <div class="sm-panel">
         <div class="sm-h"><span>the choked lane</span><span class="sm-h-r">${Math.round((ch.p_real || 0) * 100)}%</span></div>
         <div class="sm-rule"></div>
         <div class="sm-kv"><span>${affName(ch.kind)}</span><b>${ch.target != null ? `→ ${ch.target}` : '—'}</b></div>
-        <div class="sm-kv"><span>p_complete</span><b${limitOf(ch) === 'p_complete' ? ' style="color:var(--fail)"' : ''}>${nOrDash(ch.p_complete, 2)}</b></div>
-        <div class="sm-kv"><span>p_control</span><b${limitOf(ch) === 'p_control' ? ' style="color:var(--fail)"' : ''}>${nOrDash(ch.p_control, 2)}</b></div>
-        <div class="sm-kv"><span>1 − p_intercept</span><b${limitOf(ch) === 'p_intercept' ? ' style="color:var(--fail)"' : ''}>${nOrDash(1 - ch.p_intercept, 2)}</b></div>
+        ${bandBar(ch, bandSwatches(T.bone))}
         <div class="sm-note" style="margin-top:7px">the <em>${FACTOR_LABEL[limitOf(ch)]}</em> band is the narrow one</div>
       </div>` : ''}
       <div class="sm-panel">
@@ -390,10 +402,14 @@ export function create(ctx) {
       xs.push(c[0] + (o.vec[0] / len) * L);
       zs.push(c[1] + (o.vec[1] / len) * L);
     }
-    const x0 = Math.min(...xs) - 9, x1 = Math.max(...xs) + 9;
-    const z0 = Math.min(...zs) - 9, z1 = Math.max(...zs) + 9;
+    const x0 = Math.min(...xs) - 6, x1 = Math.max(...xs) + 6;
+    const z0 = Math.min(...zs) - 6, z1 = Math.max(...zs) + 6;
     // nudge right so the fan clears the panel rail
-    const fit = b.board.fitRect((x0 + x1) / 2 + 9, (z0 + z1) / 2, x1 - x0, z1 - z0, { margin: 1.06 });
+    const fit = b.board.fitRect((x0 + x1) / 2 + 7, (z0 + z1) / 2, x1 - x0, z1 - z0,
+      { margin: 1.22, elev: 0.97 });
+    // close enough for the sub-bands, far enough to keep the pitch legible
+    const off = fit.pos.clone().sub(fit.tgt);
+    fit.pos.copy(fit.tgt).add(off.normalize().multiplyScalar(clamp(off.length(), 58, 104)));
     b.board.moveTo(fit.pos, fit.tgt, 900);
 
     b.fan.set(c, b.opts, { shutBelow: 0.12 });

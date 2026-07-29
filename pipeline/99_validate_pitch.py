@@ -26,6 +26,7 @@ from config import MAX_PLAUSIBLE_SPEED  # noqa: E402
 from pitch_io import PITCH_DIR, resolve_input  # noqa: E402
 
 PITCH_L, PITCH_W = 105.0, 68.0
+BOUND_L, BOUND_W = PITCH_L, PITCH_W      # the emitted coordinate frame
 SLACK = 8.0            # m outside the touchline a tracked point may still be
 OMEGA_MAX = 720.0      # deg/s, the documented line-of-sight clip
 SCORE_KEYS = ["durability", "explosiveness", "reactivity", "coordination",
@@ -122,6 +123,18 @@ def check_relative(d):
     W = "relative.json"
     provenance(W, d)
     walk_finite(W, d)
+    sc = d.get("scale")
+    if not isinstance(sc, dict) or sc.get("source") not in ("homography",
+                                                            "stature_prior"):
+        err(W, "`scale.source` must be present and be homography|stature_prior")
+        sc = {"source": "homography"}
+    if sc["source"] != "homography":
+        for k in ("stature_m", "px_per_m", "uncertainty_pct", "note"):
+            if sc.get(k) in (None, ""):
+                err(W, f"stature-prior scale must declare {k}")
+    frame = d.get("pitch") or [PITCH_L, PITCH_W]
+    global BOUND_L, BOUND_W
+    BOUND_L, BOUND_W = float(frame[0]), float(frame[1])
     fps = need(W, d, "fps", (int, float))
     n = need(W, d, "frames", int)
     t = need(W, d, "t", list)
@@ -163,8 +176,8 @@ def check_relative(d):
                     or any(not isinstance(v, (int, float)) for v in xy)):
                 err(W, f"pos[{key}][{i}] is not [x, y] metres")
                 break
-            if not (-SLACK <= xy[0] <= PITCH_L + SLACK and
-                    -SLACK <= xy[1] <= PITCH_W + SLACK):
+            if not (-SLACK <= xy[0] <= BOUND_L + SLACK and
+                    -SLACK <= xy[1] <= BOUND_W + SLACK):
                 warn(W, f"pos[{key}][{i}] = {xy} is off the pitch by more than {SLACK} m")
 
     for k, dy in enumerate(d.get("dyads", [])):
@@ -200,8 +213,8 @@ def check_relative(d):
             hull = blk.get("hull")
             if not (isinstance(hull, list) and len(hull) >= 3):
                 err(W, f"team[{i}].{side}.hull needs >= 3 vertices")
-            for key, lo, hi in (("area", 0, PITCH_L * PITCH_W), ("stretch", 0, 60),
-                                ("stretchX", 0, PITCH_L), ("stretchY", 0, PITCH_W)):
+            for key, lo, hi in (("area", 0, BOUND_L * BOUND_W), ("stretch", 0, 60),
+                                ("stretchX", 0, BOUND_L), ("stretchY", 0, BOUND_W)):
                 v = blk.get(key)
                 if not isinstance(v, (int, float)):
                     err(W, f"team[{i}].{side}.{key} is not a number")
@@ -210,7 +223,7 @@ def check_relative(d):
         cd = r.get("centroidDist", "missing")
         if cd == "missing":
             err(W, f"team[{i}] missing centroidDist")
-        elif cd is not None and not (0 <= cd <= 130):
+        elif cd is not None and not (0 <= cd <= 1.5 * (BOUND_L + BOUND_W)):
             err(W, f"team[{i}].centroidDist = {cd} implausible")
         sy = r.get("sync", "missing")
         if sy == "missing":
@@ -232,7 +245,7 @@ def check_relative(d):
                 if not (isinstance(xy, list) and len(xy) == 2):
                     err(W, f"voronoi[{key}] cell vertex is not [x, y]")
                     break
-                if not (-1 <= xy[0] <= PITCH_L + 1 and -1 <= xy[1] <= PITCH_W + 1):
+                if not (-1 <= xy[0] <= BOUND_L + 1 and -1 <= xy[1] <= BOUND_W + 1):
                     err(W, f"voronoi[{key}] vertex {xy} is off the pitch")
                     break
     return ids
@@ -376,11 +389,11 @@ def check_metrics(d, rel_ids, node_ids):
                 err(W, f"{tag}.measured.{k} is non-finite")
         for k, lo, hi in (("topSpeed", 0, MAX_PLAUSIBLE_SPEED),
                           ("meanSpeed", 0, MAX_PLAUSIBLE_SPEED),
-                          ("peakAccel", 0, 9.0), ("peakDecel", -9.0, 0),
+                          ("peakAccel", -9.0, 9.0), ("peakDecel", -9.0, 9.0),
                           ("distance", 0, 15000), ("hsr_m", 0, 15000),
                           ("sprints", 0, 500), ("codPeak", 0, 180.001),
-                          ("syncContrib", 0, 1), ("separation", 0, 130),
-                          ("spaceControl", 0, PITCH_L * PITCH_W),
+                          ("syncContrib", 0, 1), ("separation", 0, 1.5 * (BOUND_L + BOUND_W)),
+                          ("spaceControl", 0, BOUND_L * BOUND_W),
                           ("strideAsym", 0, 100), ("reactionMs", 0, 2000)):
             v = meas.get(k)
             if isinstance(v, (int, float)) and not (lo - 1e-6 <= v <= hi + 1e-6):

@@ -290,12 +290,14 @@ def torso_lab(bgr: np.ndarray, mask: np.ndarray,
 
 # -------------------------------------------------------------- SAM 3 pass --
 class Sam3Runner:
-    def __init__(self, model_dir: Path, dtype_name: str = "bf16"):
+    def __init__(self, model_dir: Path, dtype_name: str = "bf16",
+                 state_device: str = "auto", max_objects: int = 0):
         import torch
         from transformers import Sam3VideoModel, Sam3VideoProcessor
 
         self.torch = torch
         self.device = "mps" if torch.backends.mps.is_available() else "cpu"
+        self.state_device = self.device if state_device == "auto" else state_device
         self.dtype = torch.bfloat16 if dtype_name == "bf16" else torch.float32
         t = time.time()
         self.model = (Sam3VideoModel.from_pretrained(str(model_dir), dtype=self.dtype)
@@ -303,7 +305,14 @@ class Sam3Runner:
         self.processor = Sam3VideoProcessor.from_pretrained(str(model_dir))
         self._base_det = self.model.score_threshold_detection
         self._base_new = self.model.new_det_thresh
-        log(f"model loaded on {self.device} ({dtype_name}) in {time.time()-t:.1f}s")
+        # Every tracklet the model keeps alive costs a tracker forward pass on
+        # every subsequent frame, so an uncapped budget makes per-frame cost
+        # grow without bound on crowded footage.
+        if max_objects:
+            self.model.max_num_objects = int(max_objects)
+        log(f"model loaded on {self.device} ({dtype_name}), "
+            f"max_objects={self.model.max_num_objects}, state on "
+            f"{self.state_device}, in {time.time()-t:.1f}s")
 
     def free(self) -> None:
         gc.collect()
@@ -327,10 +336,13 @@ class Sam3Runner:
         self.model.new_det_thresh = (
             self._base_new if new_det_thresh is None else new_det_thresh)
 
+        # The tracker's memory bank must live on the INFERENCE device. Parking
+        # it on the CPU makes every frame copy the whole growing bank across
+        # the host boundary, which dominated runtime by ~20x in testing.
         session = self.processor.init_video_session(
             video=frames_rgb,
             inference_device=self.device,
-            inference_state_device="cpu",
+            inference_state_device=self.state_device,
             processing_device="cpu",
             video_storage_device="cpu",
             dtype=self.dtype,
@@ -361,7 +373,7 @@ class Sam3Runner:
                     if on_frame is not None:
                         on_frame(int(out.frame_idx), rec)
                     n_frames += 1
-                    if n_frames % 12 == 0:
+                    if n_frames % 4 == 0:
                         el = time.time() - t_sess
                         log(f"  .. {n_frames}/{len(frames_rgb)} frames "
                             f"{el:.0f}s ({el/n_frames:.2f}s/frame), "
@@ -632,6 +644,10 @@ def main() -> None:
                     help="pitch_calib confidence below which pitch is null. "
                          "The calibrator's homography is treated as untrusted: "
                          "we would rather emit null than a wrong metre value.")
+    ap.add_argument("--max-objects", type=int, default=48,
+                    help="cap on simultaneously tracked masklets (0 = model default)")
+    ap.add_argument("--state-device", default="auto",
+                    help="where the tracker memory bank lives: auto|mps|cpu")
     ap.add_argument("--dtype", default="bf16", choices=["bf16", "f32"])
     ap.add_argument("--keep-work", action="store_true")
     args = ap.parse_args()
@@ -780,7 +796,8 @@ def main() -> None:
         spans.pop()
     log(f"{len(spans)} windows: " + " ".join(f"[{a},{b})" for a, b in spans))
 
-    runner = Sam3Runner(MODEL_DIR, args.dtype)
+    runner = Sam3Runner(MODEL_DIR, args.dtype, args.state_device,
+                        args.max_objects)
 
     tracks: dict[int, Track] = {}
     next_gid = 1
@@ -923,6 +940,28 @@ def main() -> None:
             continue
         kept_people.append(t)
     log(f"person filter: kept {len(kept_people)}, dropped {drop_reason}")
+
+    # ---- per-track area sanity --------------------------------------------
+    # A video-segmentation session can blow a mask up to most of the frame on
+    # a hard pan or motion-blurred frame. Such a detection is not a plausible
+    # continuation of its own track, so drop it rather than let it poison the
+    # centroid, the team colour and the render.
+    n_area_dropped = 0
+    for t in list(kept_people) + ball_tracks:
+        if len(t.dets) < 5:
+            continue
+        med = float(np.median([d.area for d in t.dets.values()]))
+        if med <= 0:
+            continue
+        for fi in [fi for fi, d in t.dets.items()
+                   if d.area > 5.0 * med or d.area < 0.2 * med]:
+            del t.dets[fi]
+            n_area_dropped += 1
+    kept_people = [t for t in kept_people if len(t.dets) >= args.min_track]
+    ball_tracks = [t for t in ball_tracks if t.dets]
+    if n_area_dropped:
+        log(f"area sanity: dropped {n_area_dropped} detections that were "
+            f"5x larger or 5x smaller than their own track median")
 
     # ---- team assignment (global, colour-distance, never cluster size) -----
     labs = []

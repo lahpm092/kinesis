@@ -100,6 +100,16 @@ const CSS = `
 }
 .sm-identity em { font-style: normal; color: var(--amber); }
 
+/* ---------------- ribbon anatomy: the identity as a bar ---------------- */
+.sm-bandbar { display: flex; height: 13px; gap: 1px; margin: 7px 0 5px; }
+.sm-bandbar i { display: block; height: 100%; }
+.sm-bandlab {
+  display: flex; font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--bone-2); gap: 1px;
+}
+.sm-bandlab span { overflow: hidden; white-space: nowrap; text-overflow: clip; }
+.sm-bandlab span.lim { color: var(--fail); }
+
 /* ---------------- distribution bars (beat IX) ---------------- */
 .sm-dist { display: flex; flex-direction: column; gap: 11px; margin-top: 4px; }
 .sm-drow { display: grid; grid-template-columns: 1fr; gap: 5px; }

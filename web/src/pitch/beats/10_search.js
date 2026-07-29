@@ -70,7 +70,25 @@ const COLS = 4, ROWS = 3, PAD = 7, TSC = 0.5;
 const TILE_DUR = 20;                 // seconds of possession per miniature board
 const ANSWER_AT = [0, -260];         // where the full-size answer board lives
 
-/* diverging ramp: sienna → coal → sage, in the deck's own three colours */
+/**
+ * The map's colour ramp. Anchored at zero when the sampled field straddles it,
+ * and stretched across the observed range when it does not — a field that is
+ * positive everywhere must still show its own structure, and the scale is
+ * labelled with the real endpoints either way.
+ */
+function makeRamp(lo, hi) {
+  const a = new THREE.Color(FAIL), b = new THREE.Color(T.coal2), c = new THREE.Color(SAGE);
+  const span = (hi - lo) || 1;
+  if (lo >= 0) return (v) => `#${b.clone().lerp(c, clamp((v - lo) / span, 0, 1)).getHexString()}`;
+  if (hi <= 0) return (v) => `#${a.clone().lerp(b, clamp((v - lo) / span, 0, 1)).getHexString()}`;
+  const lim = Math.max(-lo, hi);
+  return (v) => {
+    const u = clamp(v / lim, -1, 1);
+    return `#${(u < 0 ? a.clone().lerp(b, 1 + u) : b.clone().lerp(c, u)).getHexString()}`;
+  };
+}
+
+/* zero-anchored tint for a whole miniature board */
 function gdColor(gd, lim) {
   const u = clamp(gd / (lim || 1), -1, 1);
   const a = new THREE.Color(FAIL), b = new THREE.Color(T.coal2), c = new THREE.Color(SAGE);
@@ -197,7 +215,7 @@ export function create(ctx) {
 
     const GW = COLS * 105 * TSC + (COLS - 1) * PAD;
     const GD = ROWS * 68 * TSC + (ROWS - 1) * PAD;
-    const gridFit = board.fitRect(GW / 2 - 105 * TSC / 2 + 8, GD / 2 - 68 * TSC / 2, GW, GD, { margin: 1.12 });
+    const gridFit = board.fitRect(GW / 2 - 105 * TSC / 2 + 5, GD / 2 - 68 * TSC / 2, GW, GD, { margin: 1.24 });
     board.moveTo(gridFit.pos, gridFit.tgt, 0);
     const answerFit = board.fitRect(52.5 + ANSWER_AT[0], 34 + ANSWER_AT[1], 105, 68, { margin: 1.12 });
 
@@ -374,7 +392,7 @@ export function create(ctx) {
       ctx.deck.annotate({
         stats: [
           { v: poolLive && S ? S.sims : (b.search ? b.search.total_sims : null), u: '', k: 'simulations' },
-          { v: poolLive && S ? S.simsPerS : (b.search ? b.search.sims_per_s : null), u: 's⁻¹', k: 'sims' },
+          { v: poolLive && S ? Math.round(S.simsPerS) : (b.search ? Math.round(b.search.sims_per_s) : null), u: 's⁻¹', k: 'sims' },
         ],
       });
     }
@@ -396,14 +414,17 @@ export function create(ctx) {
     const px = (x) => M + x * (W - M - 12);
     const py = (y) => (H - M) - y * (H - M - 12);
 
-    const lim = pts.length ? Math.max(0.08, ...pts.map((p) => Math.abs(p.gd))) : 1;
+    const lo = pts.length ? Math.min(...pts.map((p) => p.gd)) : -1;
+    const hi = pts.length ? Math.max(...pts.map((p) => p.gd)) : 1;
+    const ramp = makeRamp(lo, hi);
+    const lim = Math.max(Math.abs(lo), Math.abs(hi), 1e-6);
     // cell size from the point lattice
     const xs = [...new Set(pts.map((p) => p.x))].sort((a, c) => a - c);
     const ys = [...new Set(pts.map((p) => p.y))].sort((a, c) => a - c);
     const cw = xs.length > 1 ? (px(xs[1]) - px(xs[0])) : 26;
     const ch = ys.length > 1 ? (py(ys[0]) - py(ys[1])) : 26;
     for (const p of pts) {
-      g.fillStyle = gdColor(p.gd, lim);
+      g.fillStyle = ramp(p.gd);
       g.fillRect(px(p.x) - cw / 2, py(p.y) - ch / 2, cw + 0.6, ch + 0.6);
     }
     // axes
@@ -438,7 +459,7 @@ export function create(ctx) {
     const s2 = sc.getContext('2d');
     s2.scale(dpr, dpr);
     for (let i = 0; i < 200; i++) {
-      s2.fillStyle = gdColor((i / 199) * 2 * lim - lim, lim);
+      s2.fillStyle = ramp(lo + (i / 199) * (hi - lo));
       s2.fillRect(i, 0, 1.2, 8);
     }
     const sigma = b.noise ? b.noise.sigma : null;
@@ -459,7 +480,7 @@ export function create(ctx) {
       <div class="sm-h"><span>expected goal difference</span></div>
       <div id="smx-scale"></div>
       <div class="sm-axis" style="display:flex;justify-content:space-between">
-        <span>${signed(-lim, 2)}</span><span>0</span><span>${signed(lim, 2)}</span></div>
+        <span>${signed(lo, 2)}</span><span>${lo < 0 && hi > 0 ? '0' : 'xG diff'}</span><span>${signed(hi, 2)}</span></div>
       <div class="sm-rule"></div>
       <div class="sm-kv"><span>noise floor σ</span><b>${sigma != null ? nOrDash(sigma, 3) : '—'}</b></div>
       <div class="sm-note">${b.noise ? b.noise.method : 'spread of disjoint batch means at a fixed strategy'}</div>
@@ -479,7 +500,7 @@ export function create(ctx) {
     holder.appendChild(sc);
     if (sigma != null && lim > 0) {
       const band = document.createElement('div');
-      const w = clamp((sigma / lim) * 100, 0.6, 50);
+      const w = clamp((sigma / Math.max(1e-6, hi - lo)) * 100, 0.6, 60);
       band.style.cssText = `position:relative;height:1px;background:${T.bone2};opacity:0.8;width:${w}%;margin:4px auto 0`;
       holder.appendChild(band);
       const cap = document.createElement('div');
@@ -531,6 +552,8 @@ export function create(ctx) {
     const alive = () => !life.dead && token === me;
     b.mapWrap.style.display = 'none';
     b.foot.innerHTML = '';
+    // the pool owns every core while it runs; only the counter stage needs it
+    if (pool) { try { if (i === 1) pool.resume(); else pool.pause(); } catch (_) {} }
     b.answer.visible = i === 3;
     for (const t of b.tiles) t.holder.visible = i < 3;
 
@@ -679,7 +702,7 @@ export function create(ctx) {
           lastK = row.k;
           const r = b.answerRun.result;
           b.foot.innerHTML = `<div class="sm-cap">the searched strategy, played out<br><b>${
-            r.shots} shots · xG ${nOrDash(r.xg, 2)} · ${r.goals} goal${r.goals === 1 ? '' : 's'}</b></div>`;
+            r.shots} shot${r.shots === 1 ? '' : 's'} · xG ${nOrDash(r.xg, 2)} · ${r.goals} goal${r.goals === 1 ? '' : 's'}</b></div>`;
         }
         if (u >= dur) { stop(); resolve(); }
       });
@@ -709,7 +732,7 @@ export function create(ctx) {
       built.board.resize();
       const GW = COLS * 105 * TSC + (COLS - 1) * PAD;
       const GD = ROWS * 68 * TSC + (ROWS - 1) * PAD;
-      built.gridFit = built.board.fitRect(GW / 2 - 105 * TSC / 2 + 8, GD / 2 - 68 * TSC / 2, GW, GD, { margin: 1.12 });
+      built.gridFit = built.board.fitRect(GW / 2 - 105 * TSC / 2 + 5, GD / 2 - 68 * TSC / 2, GW, GD, { margin: 1.24 });
       built.answerFit = built.board.fitRect(52.5 + ANSWER_AT[0], 34 + ANSWER_AT[1], 105, 68, { margin: 1.12 });
     },
     dispose() {

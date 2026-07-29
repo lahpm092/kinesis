@@ -337,17 +337,29 @@ const midrank = (arr, v) => {
   for (const x of arr) { if (x < v) lt++; else if (x === v) eq++; }
   return (lt + 0.5 * eq) / arr.length;
 };
-const xgB = ensB.per.map((r) => r.xg);
-const xgA = ensA.per.map((r) => r.xg);
+/* Typicality is judged on BOTH headline channels, not just xG. Selecting on xG
+ * alone let through possessions whose completion ran against the ensemble — a
+ * showcase where the trained side completes fewer passes contradicts the very
+ * number the beat is claiming, and a presenter cannot defend that. The criterion
+ * stays a pure typicality one: each arm is pulled toward ITS OWN marginal median
+ * on each channel, so it cannot systematically favour either side. */
+const chan = (arr, k) => arr.map((r) => (typeof r[k] === 'number' ? r[k] : 0));
+const xgB = chan(ensB.per, 'xg'), xgA = chan(ensA.per, 'xg');
+const cmB = chan(ensB.per, 'completion'), cmA = chan(ensA.per, 'completion');
 const BAND = [0.30, 0.70];
 const band = [];
 for (let i = 0; i < ENS_N; i++) {
-  const pB = midrank(xgB, xgB[i]), pA = midrank(xgA, xgA[i]);
-  if (pB < BAND[0] || pB > BAND[1] || pA < BAND[0] || pA > BAND[1]) continue;
+  const p = [midrank(xgB, xgB[i]), midrank(xgA, xgA[i]),
+             midrank(cmB, cmB[i]), midrank(cmA, cmA[i])];
+  if (p.some((v) => v < BAND[0] || v > BAND[1])) continue;
   if (ensB.per[i].shots < 1 || ensA.per[i].shots < 1) continue;
-  band.push({ i, pB, pA, off: Math.abs(pB - 0.5) + Math.abs(pA - 0.5) });
+  band.push({
+    i, pB: p[0], pA: p[1], pcB: p[2], pcA: p[3],
+    off: p.reduce((s, v) => s + Math.abs(v - 0.5), 0),
+  });
 }
 band.sort((a, b) => a.off - b.off);
+console.log(`showcase band     ${band.length} seeds typical on xg AND completion for both arms`);
 /* Among representative seeds, prefer the one whose two possessions actually
  * DIVERGE — a split screen showing two identical runs teaches nothing. This
  * tie-break is direction-neutral: it selects for difference, never for which
@@ -363,23 +375,30 @@ const divergenceAt = (seed) => {
   return 1 - same / n;
 };
 const POOL = Math.min(48, band.length);
-let bestI = band.length ? band[0].i : 0, bestDiv = -1, showPB = band[0]?.pB ?? 0.5, showPA = band[0]?.pA ?? 0.5;
+let pick = band[0] || { i: 0, pB: 0.5, pA: 0.5, pcB: 0.5, pcA: 0.5 };
+let bestDiv = -1;
 for (let k = 0; k < POOL; k++) {
   const c = band[k];
   const d = divergenceAt(ensSeed(c.i));
-  if (d > bestDiv) { bestDiv = d; bestI = c.i; showPB = c.pB; showPA = c.pA; }
+  if (d > bestDiv) { bestDiv = d; pick = c; }
 }
+const bestI = pick.i;
 const SEED = ensSeed(bestI);
+const r3p = (v) => Math.round(v * 1000) / 1000;
 const showcase = {
   seed: SEED, index: bestI, rule: SHOWCASE_RULE,
-  percentile_before: Math.round(showPB * 1000) / 1000,
-  percentile_after: Math.round(showPA * 1000) / 1000,
-  band: BAND, pool: POOL, candidates: ENS_N,
-  divergence: Math.round(bestDiv * 1000) / 1000,
-  note: 'this is ONE sampled possession, shown for legibility. The claim is the ensemble block, not this run.',
+  percentile: {
+    xg_before: r3p(pick.pB), xg_after: r3p(pick.pA),
+    completion_before: r3p(pick.pcB), completion_after: r3p(pick.pcA),
+  },
+  percentile_before: r3p(pick.pB), percentile_after: r3p(pick.pA),
+  band: BAND, band_size: band.length, pool: POOL, candidates: ENS_N,
+  divergence: r3p(bestDiv),
+  label: 'one sampled possession',
+  note: 'ONE sampled possession, shown for legibility, chosen to be typical of both distributions on both headline channels. The before/after CLAIM is sim.json.ensemble, not this run. Scenes must label it as a single sample.',
 };
-console.log(`showcase seed     ${SEED}  (xg percentile: before ${showcase.percentile_before}, after ${showcase.percentile_after}; ` +
-  `divergence ${showcase.divergence}; ${band.length} in band, pool ${POOL} of ${ENS_N})`);
+console.log(`showcase seed     ${SEED}  pctl xg ${showcase.percentile.xg_before}/${showcase.percentile.xg_after} ` +
+  `cmp ${showcase.percentile.completion_before}/${showcase.percentile.completion_after}; divergence ${showcase.divergence}; pool ${POOL}`);
 
 const before = emitRun('before', 'Measured parameters', false, fitBefore, { strategyA, strategyB, seed: SEED });
 const after = emitRun('after', 'Projected post-training', true, fitAfter, { strategyA, strategyB, seed: SEED });
