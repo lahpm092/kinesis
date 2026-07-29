@@ -46,10 +46,10 @@ export const meta = {
       stats: [
         { v: null, u: '', k: 'tracks' },
         { v: null, u: '', k: 'frames' },
-        // px, not metres: the calibration is verified by leave-one-out
-        // reprojection in image pixels and there is no metre-domain truth to
-        // compare against. Reporting m here would be inventing a number.
-        { v: null, u: 'px', k: 'median error' },
+        // metres — pitch_calib.expected_error_m, the pipeline's own estimate of
+        // positional error on verified frames. The pixel residuals it is
+        // derived from stay on the panel as supporting detail.
+        { v: null, d: 2, u: 'm', k: 'median error' },
       ],
       settleMs: 1800,
     },
@@ -75,6 +75,17 @@ const CSS = `
 }
 .b3-lab b { font-weight:400; color:var(--ink-2); font-variant-numeric:tabular-nums; letter-spacing:0.14em; }
 .b3-filmwrap { flex:1; min-height:0; display:flex; align-items:center; justify-content:center; padding:10px; }
+.b3-foot {
+  flex:none; height:0; overflow:hidden; padding:0 12px;
+  border-top:1px solid transparent;
+  font-family:var(--mono); font-size:9px; letter-spacing:0.14em; text-transform:uppercase;
+  color:var(--ink-3); white-space:nowrap;
+  /* height snaps, opacity fades: a transitioning height would make the film's
+     resize observer chase its own tail for the length of the transition */
+  transition:opacity 420ms cubic-bezier(0.22,1,0.36,1);
+  opacity:0;
+}
+.b3-foot.is-on { height:30px; line-height:30px; border-top-color:var(--hair); opacity:1; }
 .b3-film { position:relative; background:var(--paper-3); overflow:hidden;
   transition:background 900ms cubic-bezier(0.22,1,0.36,1); }
 .b3-film video { position:absolute; inset:0; width:100%; height:100%; display:block;
@@ -159,13 +170,47 @@ export function create(ctx) {
     // same panel as the metres it produced. `pitch` may still be null while the
     // calibration is being wired in; the beat then says so rather than drawing
     // an empty plan and letting the room assume it failed.
+    //
+    // Both lines are assembled from pitch_calib at runtime. Nothing is rounded
+    // up for the room: a frame carried from a neighbour is not a frame that was
+    // fitted, and a detection with no position is counted as one.
+    const n1 = (v) => (v == null ? null : v.toFixed(1));
     const calibTxt = (() => {
       if (!M.calibrated) return 'pitch calibration pending · positions in image pixels only';
       const c = M.calib;
       if (!c) return 'projected through the fitted pitch model';
       const bits = ['pnlcalib'];
       if (c.ok != null && c.tried != null) bits.push(`${c.ok}/${c.tried} frames verified`);
-      if (c.looPx != null) bits.push(`leave-one-out ${c.looPx.toFixed(1)} px`);
+      const how = [];
+      if (c.direct != null) how.push(`${c.direct} directly fitted`);
+      if (c.carried) how.push(`${c.carried} carried`);
+      if (c.interpolated) how.push(`${c.interpolated} interpolated`);
+      if (how.length) bits.push(how.join(' + '));
+      return bits.join(' · ');
+    })();
+
+    // supporting detail: coverage, where the gaps are, and the pixel residuals
+    // the metre figure is derived from
+    const calibFoot = (() => {
+      const c = M.calib;
+      if (!M.calibrated || !c) return '';
+      const bits = [];
+      const total = M.nObjects;
+      if (total) bits.push(`${M.projected} of ${total} detections projected`);
+      if (M.nullTail === 1) {
+        bits.push('final frame unprojected — no later frame to carry from');
+      } else if (M.nullTail > 1) {
+        bits.push(`last ${M.nullTail} frames unprojected — no later frame to carry from`);
+      }
+      if (c.zone) {
+        const z = [`${c.zone.median.toFixed(2)} m median at ${c.zone.label}`];
+        if (c.zone.p90 != null) z.push(`${c.zone.p90.toFixed(2)} p90`);
+        bits.push(z.join(' · '));
+      }
+      const px = [];
+      if (c.paintPx != null) px.push(`paint ${n1(c.paintPx)} px`);
+      if (c.looPx != null) px.push(`leave-one-out ${n1(c.looPx)} px`);
+      if (px.length) bits.push(px.join(' · '));
       return bits.join(' · ');
     })();
     const filmWrap = el('div', 'b3-filmwrap');
@@ -187,7 +232,8 @@ export function create(ctx) {
     );
     film.append(video, cv, filmScrim);
     filmWrap.appendChild(film);
-    filmp.append(lab, filmWrap);
+    const foot = el('div', 'b3-foot');
+    filmp.append(lab, filmWrap, foot);
 
     // ---- ledger ----
     const ledger = el('section', 'b3-panel');
@@ -367,8 +413,8 @@ export function create(ctx) {
       const row = [{ v: M.nTracks, u: '', k: 'tracks' }];
       if (i >= 1) row.push({ v: M.nFrames, u: '', k: 'frames' });
       if (i >= 2) {
-        const e = M.calib && M.calib.looPx != null ? M.calib.looPx : null;
-        row.push({ v: e == null ? null : Math.round(e * 10) / 10, u: 'px', k: 'median error' });
+        // metres, from pitch_calib.expected_error_m — null stays null
+        row.push({ v: M.medianErr, d: 2, u: 'm', k: 'median error' });
       }
       ctx.deck.annotate({ stats: row });
     }
@@ -382,6 +428,8 @@ export function create(ctx) {
         ? (M.calibrated ? 'position · metres' : 'calibration pending')
         : 'frames held';
       labL.textContent = i === 2 ? calibTxt : promptTxt;
+      foot.textContent = i === 2 ? calibFoot : '';
+      foot.classList.toggle('is-on', i === 2 && !!calibFoot);
       for (const [id, ref] of rowEls) {
         const held = i === 1 && focus && focus.indexOf(id) >= 0;
         ref.row.classList.toggle('is-held', !!held);

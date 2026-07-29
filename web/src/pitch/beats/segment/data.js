@@ -192,27 +192,77 @@ export function buildTracks(raw) {
       Math.max(0, snap(y0, -1)), Math.min(pitchDims.width, snap(y1, 1)),
     ];
   })();
-  // a value the file states itself always wins over our fit
-  const stated = num(raw.median_error_m)
-    ?? num(raw.calibration && raw.calibration.median_error_m)
-    ?? num(raw.pitch && raw.pitch.median_error_m);
-  const medianErr = stated != null ? stated : (model.ok ? model.err : null);
-
-  // What the pipeline says about the projection it wrote. `pitch_calib` is the
-  // PnLCalib verification block (pipeline/31_project.py): a leave-one-out
-  // reprojection error in *image pixels*, which is the only calibration error
-  // that exists — there is no metre-domain ground truth to compare against, so
-  // this beat reports px and never converts it into a metre claim.
+  // ---- what the pipeline says about the projection it wrote ---------------
+  // `pitch_calib` is the verification block from pipeline/31_project.py. Every
+  // figure the beat quotes is read from it; nothing here is a literal, and the
+  // schema is read defensively because the calibration stage rewrites it.
   const pc = raw.pitch_calib && typeof raw.pitch_calib === 'object' ? raw.pitch_calib : null;
+  const stat = (o, k) => (o && typeof o === 'object' ? num(o[k]) : null);
+
+  /**
+   * Expected positional error in METRES, per pitch zone. The pipeline reports
+   * one block per zone with the number of frames that zone was actually in
+   * view for; a zone the camera never covered is null and must not be quoted.
+   * We report the zone with the most frames behind it, and name it — "0.29 m"
+   * is only meaningful with "at midfield" attached.
+   */
+  const zones = (() => {
+    const src = pc && pc.expected_error_m && typeof pc.expected_error_m === 'object'
+      ? pc.expected_error_m : null;
+    if (!src) return [];
+    const out = [];
+    for (const [key, z] of Object.entries(src)) {
+      if (!z || typeof z !== 'object') continue;
+      const median = num(z.err_m_median);
+      if (median == null) continue;
+      out.push({
+        key,
+        label: String(key).replace(/_/g, ' '),
+        median,
+        p90: num(z.err_m_p90),
+        max: num(z.err_m_max),
+        frames: num(z.n_frames_in_view) || 0,
+      });
+    }
+    out.sort((a, b) => b.frames - a.frames || a.median - b.median);
+    return out;
+  })();
+
+  // how many detections actually carry a position, and where the gaps are
+  let projected = 0;
+  for (const f of frames) for (const o of f.objects) if (o.pitch) projected += 1;
+  let nullTail = 0;
+  for (let k = frames.length - 1; k >= 0; k--) {
+    const objs = frames[k].objects;
+    if (!objs.length || objs.some((o) => o.pitch)) break;
+    nullTail += 1;
+  }
+
   const calib = pc ? {
     ok: num(pc.frames_ok),
     tried: num(pc.frames_tried),
-    looPx: num(pc.mean_loo_err_px),
-    score: num(pc.mean_score),
-    filled: num(pc.points_filled),
+    direct: num(pc.frames_direct),
+    carried: num(pc.frames_carried),
+    interpolated: num(pc.frames_interpolated),
+    conf: num(pc.mean_conf),
+    looPx: stat(pc.loo_err_px, 'median') ?? num(pc.mean_loo_err_px),
+    looP90: stat(pc.loo_err_px, 'p90'),
+    paintPx: stat(pc.paint_err_px, 'median'),
+    filled: num(pc.points_filled) ?? projected,
     nulls: num(pc.points_null),
+    zone: zones[0] || null,
+    zones,
   } : null;
-  const calibrated = !!(calib && calib.ok) || img.length > 0;
+  const calibrated = !!(calib && calib.ok) || projected > 0;
+
+  // The stat docs/PITCH_COPY.md asks for: median positional error in metres.
+  // The pipeline's own figure always wins; our own fit's residual is only a
+  // fallback, and stays null rather than being passed off as a metre claim.
+  const stated = num(raw.median_error_m)
+    ?? num(raw.calibration && raw.calibration.median_error_m)
+    ?? num(raw.pitch && raw.pitch.median_error_m);
+  const medianErr = calib && calib.zone ? calib.zone.median
+    : stated != null ? stated : null;
 
   const ids = [...byId.keys()].sort((a, b) => {
     const A = byId.get(a);
@@ -242,6 +292,8 @@ export function buildTracks(raw) {
     medianErr,
     calib,
     calibrated,
+    projected,
+    nullTail,
     indexAt,
     objectsAt(i) { const f = frames[i]; return f ? f.objects : []; },
     objectFor(id, i) { const rec = byId.get(id); return rec ? rec.byFrame.get(frames[i] ? frames[i].i : i) || null : null; },
