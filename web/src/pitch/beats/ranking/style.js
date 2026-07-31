@@ -360,6 +360,10 @@ const CSS = `
 .rnk-legend i { font-style: normal; margin-right: 4px; }
 
 /* ---------------- reveal + scrim ---------------- */
+.rnk-ledbody {
+  display: flex; flex-direction: column; flex: 1; min-height: 0;
+  gap: clamp(10px, 1.5vh, 20px);
+}
 .rnk-r-in {
   opacity: 0; transform: translateY(14px);
   transition: opacity 620ms var(--ease), transform 620ms var(--ease);
@@ -384,6 +388,110 @@ const CSS = `
 .rnk-scrim-t {
   font-family: var(--mono); font-size: 9px; letter-spacing: 0.24em;
   text-transform: uppercase; color: var(--ink-3);
+}
+
+/* ---------------- the primer ----------------
+   The card is centred and the plate is the right half of the screen, so the
+   sentence lands on top of thirteen rows of blurred grey numerals. Under the
+   primer the plate is an OBJECT, not a table: its rows and the ledger beside
+   it are exactly the detail the sentence is preparing the room for, so they
+   wait one press. What stays is the shape — the dark plate on paper — which
+   is all the blur was ever able to say. */
+.rnk-led, .rnk-list { transition: opacity 460ms var(--ease); }
+.rnk-frame.pr-blur .rnk-led,
+.rnk-frame.pr-blur .rnk-list { opacity: 0; }
+
+/* ---------------- short viewports ----------------
+   The ledger column clips at its own bottom edge. On a 1280x800 laptop that
+   cut fell inside the caveat block, leaving a sliver of half-height type
+   sitting on the annotation's eyebrow. Raise the column's floor so the cut
+   lands in clear space and the caveats stay legible. */
+@media (max-height: 900px) {
+  .rnk-led { bottom: clamp(196px, 27vh, 260px); gap: 8px; }
+  /* the beat id and its provenance chip run to y=74; below 900px the
+     plate's own top was landing under them */
+  .rnk-plate { top: 80px; }
+  .rnk-note { line-height: 1.72; padding-top: 8px; }
+  /* Five narrow columns wrap every two-word metric name onto a second line and
+     double the drawer's height, which is what pushed it past the plate. One
+     line each, ellipsised — the ledger prints the same numbers in full. */
+  .rnk-mrow .k { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rnk-srow { grid-template-columns: 112px minmax(0, 1fr) 34px; }
+  /* The ledger already runs past its own bottom edge at 720, which is the size
+     the deck is actually presented at. The weight readouts under each bar are
+     the methodology behind a composite, not the evidence for it, and the two
+     drivers sit side by side rather than stacked. */
+  .rnk-sread { display: none; }
+  .rnk-drivers { flex-direction: row; flex-wrap: wrap; gap: 4px 8px; align-items: flex-start; }
+  .rnk-drivers > div:nth-child(n+4) { display: none; }
+  .rnk-driver { line-height: 1.4; padding: 2px 7px; }
+  .rnk-how-k { flex-basis: 100%; }
+  .rnk-ledbody { gap: 7px; }
+  .rnk-card-name { font-size: 22px; margin: 2px 0 5px; }
+  .rnk-card-m { line-height: 1.55; }
+  .rnk-scores { gap: 6px; }
+  .rnk-how-t { line-height: 1.6; }
+  .rnk-vrow { padding: 5px 0; }
+  .rnk-sens .c { padding: 7px 0 9px; }
+  .rnk-note { font-size: 8.5px; line-height: 1.55; }
+}
+/* The ledger is a fixed column with prose in it, and on a 560px-tall window it
+   runs past its own bottom edge — which cuts the colophon, i.e. exactly the
+   provenance and the limitations. Everything here buys those lines back: the
+   registers get smaller and tighter, and the weight readouts (methodology, not
+   evidence) come off the score bars entirely. */
+@media (max-height: 640px) {
+  /* a wider ledger is the cheapest line-count saving there is: every caveat
+     and every driver wraps one line less, and the plate only loses bar width */
+  .rnk-frame { --rnk-left: clamp(360px, 47vw, 700px); }
+  /* the annotation's ink tops out around 170px from the bottom at this height;
+     196 keeps a clear band and hands the column the difference */
+  .rnk-led { top: 54px; bottom: 188px; gap: 5px; }
+  .rnk-ledbody { gap: 4px; }
+  .rnk-k { font-size: 9px; }
+  .rnk-card { gap: 12px; }
+  .rnk-card-face { width: clamp(40px, 3.4vw, 52px); }
+  .rnk-card-num { font-size: 9px; }
+  .rnk-card-name { font-size: 18px; margin: 1px 0 3px; }
+  .rnk-card-m { line-height: 1.4; font-size: 9px; }
+  .rnk-card-m b { font-size: 12px; }
+  /* four bars in two columns rather than four rows — the wider ledger has the
+     width for it and the column has no height to spare */
+  .rnk-scores {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 5px clamp(16px, 2vw, 30px);
+  }
+  .rnk-srow { gap: 3px 8px; grid-template-columns: 104px minmax(0, 1fr) 30px; }
+  .rnk-srow-k { font-size: 8.5px; letter-spacing: 0.1em; }
+  .rnk-srow-v { font-size: 12px; }
+  .rnk-sread { display: none; }        /* the weights are methodology, not evidence */
+  .rnk-how { padding-bottom: 9px; }
+  .rnk-how-k { margin-bottom: 5px; }
+  .rnk-how-l { font-size: 9.5px; line-height: 1.6; }
+  .rnk-how-t { font-size: 8px; line-height: 1.4; margin-top: 3px; }
+  .rnk-stat-v { font-size: 26px; }
+  .rnk-tier { padding: 6px 0 9px; }
+  .rnk-tier-n { font-size: 18px; }
+  .rnk-eq { font-size: 9.5px; padding: 2px 0 1px; }
+  .rnk-vrow { padding: 2px 0; font-size: 8.5px; }
+  .rnk-vrow b { font-size: 12px; }
+  .rnk-vrow.is-total b { font-size: 15px; }
+  .rnk-vrow .d { font-size: 8.5px; min-width: 64px; }
+  .rnk-sens .c { padding: 3px 0 4px; }
+  .rnk-sens .k { font-size: 8px; margin-bottom: 2px; }
+  .rnk-sens .v { font-size: 16px; }
+  .rnk-sens .m { font-size: 8px; margin-top: 2px; }
+  .rnk-drivers { flex-direction: row; flex-wrap: wrap; gap: 3px 8px; align-items: flex-start; }
+  .rnk-how-k { flex-basis: 100%; }
+  .rnk-driver { font-size: 8.5px; padding: 1px 5px; line-height: 1.4; }
+  /* two drivers, not three (child 1 is the block's own label), and no tier
+     histogram: the plate already prints a tier letter per player and a legend
+     in its foot. Both are summaries; the colophon under them is not. */
+  .rnk-drivers > div:nth-child(n+4) { display: none; }
+  .rnk-tiers { display: none; }
+  .rnk-note { font-size: 8px; line-height: 1.4; padding-top: 4px; }
+  .rnk-head { padding: 8px 14px 7px; }
+  .rnk-foot { padding: 7px 14px 8px; }
 }
 `;
 

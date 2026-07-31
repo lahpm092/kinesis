@@ -59,10 +59,15 @@ export const RAW_CSS = `
 }
 
 /* ---- the inset layout ---- */
+/* The bottom inset has to clear the deck annotation, which on this stage
+   carries an eyebrow, a two-line sentence and three stats — about 150px of
+   ink plus its own offset. A 20vh term is far too little on a 720px or 560px
+   display: the SOURCE caption is the last thing in the grid and lands exactly
+   on the annotation eyebrow. The floor is what does the work. */
 .raw-grid {
   position: absolute;
   left: clamp(20px, 3.4vw, 56px); right: clamp(20px, 3.4vw, 56px);
-  top: clamp(58px, 7.4vh, 88px); bottom: clamp(150px, 20vh, 210px);
+  top: clamp(58px, 7.4vh, 88px); bottom: clamp(196px, 24vh, 210px);
   display: grid;
   grid-template-columns: minmax(0, 1.52fr) minmax(0, 1fr);
   grid-template-rows: auto auto;
@@ -112,6 +117,20 @@ export const RAW_CSS = `
   color: var(--ink-3);
 }
 .raw-cap b { font-weight: 400; color: var(--ink-2); }
+
+/* Short viewports. The video slot is elastic — layout() shrinks it to whatever
+   is left — but the six provenance rows are not, so below ~620px they overrun
+   the grid box and push the caption down onto the annotation. Type comes in;
+   the strip canvas does not, because its bed, ruler and half labels are drawn
+   at fixed pixel offsets and a shorter canvas cuts them off. */
+@media (max-height: 620px) {
+  .raw-grid { top: 50px; row-gap: 13px; }
+  .raw-row { padding: 4px 0; }
+  .raw-row dt { font-size: 8.5px; letter-spacing: 0.16em; }
+  .raw-row dd { font-size: 12.5px; }
+  .raw-row dd.is-mono { font-size: 10px; }
+  .raw-cap { font-size: 8.5px; padding-top: 7px; }
+}
 
 @media (max-width: 1080px) {
   .raw-grid { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto; }

@@ -190,9 +190,14 @@ export function createCutView(ctx, meta) {
 
   function showFilm(on, animated) {
     if (filmAnim) { try { filmAnim.cancel(); } catch (_) {} filmAnim = null; }
+    const wasOn = film.classList.contains('is-on');
     film.classList.toggle('is-on', on);
     film.style.opacity = on ? '1' : '0';
-    if (!animated) return Promise.resolve();
+    // Hiding something that was never shown must be silent. The hide keyframes
+    // start at opacity 1 and `fill: backwards` applies that first frame before
+    // the animation runs — so a no-op hide painted the reel over a beat the
+    // audience had only just arrived at: the pitch flashing on the way in.
+    if (!animated || (!on && !wasOn)) return Promise.resolve();
     const a = film.animate(
       on
         ? [{ opacity: 0, transform: 'translateY(14px) scale(0.985)' }, { opacity: 1, transform: 'none' }]

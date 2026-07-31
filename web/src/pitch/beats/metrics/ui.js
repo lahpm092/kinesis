@@ -8,7 +8,7 @@ export const CSS = `
 .der-root { position:absolute; inset:0; }
 
 .der-graph {
-  position:absolute; transform-origin: left center;
+  position:absolute; transform-origin: left center; overflow:hidden;
   transition: transform 720ms cubic-bezier(0.22,1,0.36,1),
               opacity 520ms cubic-bezier(0.22,1,0.36,1);
 }
@@ -73,14 +73,39 @@ export const CSS = `
   border-left:1px solid var(--hair); border-bottom:1px solid var(--hair);
 }
 
+/* ---- compressed cells ----------------------------------------------------
+   The plate is thirteen rows deep however tall the room's screen is, so on a
+   720px stage a cell is ~24px and on a 560px one ~14px. Rather than let the
+   type spill out of its own box, the beat drops the cell to a single clamped
+   line and, at the smallest size, to the label alone. The node count and the
+   operation count stay on the footnote either way, so nothing the plate
+   claims is lost — only the per-cell unit is. */
+.der-graph.is-tight .der-node { padding:2px 6px; gap:0; }
+.der-graph.is-tight .der-lab {
+  font-size:8px; line-height:1.15; -webkit-line-clamp:1; line-clamp:1;
+}
+.der-graph.is-tight .der-node--has-src .der-lab { padding-right:13px; }
+.der-graph.is-tight .der-foot { font-size:6.5px; line-height:1.1; }
+.der-graph.is-tight .der-foot .der-v { font-size:10px; }
+.der-graph.is-tight .der-src { font-size:6px; padding:0 2px 1px; }
+.der-graph.is-tiny .der-node { padding:1px 5px; }
+.der-graph.is-tiny .der-lab { font-size:7px; line-height:1.1; }
+.der-graph.is-tiny .der-foot { display:none; }
+.der-graph.is-tiny .der-src { display:none; }
+.der-graph.is-tiny .der-head { font-size:8px; letter-spacing:0.16em; }
+
 /* ---------------- player record ---------------- */
 .der-card {
-  position:absolute; box-sizing:border-box;
+  position:absolute; box-sizing:border-box; overflow:hidden;
+  display:flex; flex-direction:column;
   border:1px solid var(--hair); background: var(--paper-2);
   opacity:0; pointer-events:none;
   transition: opacity 520ms cubic-bezier(0.22,1,0.36,1);
 }
 .der-card.is-on { opacity:1; pointer-events:auto; }
+.der-card .der-rows { flex:1; min-height:0; overflow:hidden;
+  display:flex; flex-direction:column; justify-content:space-evenly; }
+.der-card .der-card-foot { margin-top:auto; }
 .der-ops .der-chain-line { font-size:8.5px; line-height:1.85; }
 .der-ops .der-block { border-top:0; }
 .der-card-head {
@@ -134,22 +159,26 @@ export const CSS = `
   text-transform:uppercase; word-break:break-word;
 }
 .der-chain-line b { font-weight:400; color: var(--sienna); }
-.der-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px 14px; }
-.der-cell .ck {
-  font-family: var(--mono); font-size:8px; letter-spacing:0.14em;
-  text-transform:uppercase; color: var(--ink-3);
-}
-.der-cell .cv {
-  font-family: var(--serif); font-variant-numeric: tabular-nums;
-  font-size:17px; line-height:1.15; color: var(--ink);
-}
-.der-cell .cv i { font-family: var(--mono); font-size:9px; font-style:normal;
-  color: var(--ink-3); margin-left:3px; }
 .der-card-foot {
   padding:10px 14px 11px; border-top:1px solid var(--hair);
   font-family: var(--mono); font-size:8px; letter-spacing:0.14em;
   text-transform:uppercase; color: var(--ink-3); line-height:1.9;
 }
+
+/* the record card compresses rather than running off a short stage */
+.der-card.is-tight .der-card-head { padding:7px 11px; font-size:8.5px; }
+.der-card.is-tight .der-overall { padding:8px 11px 7px; }
+.der-card.is-tight .der-overall .n { font-size:27px; }
+.der-card.is-tight .der-overall .n i { font-size:9px; margin-left:4px; }
+.der-card.is-tight .der-overall .k { margin-top:3px; font-size:8.5px; }
+.der-card.is-tight .der-rows { padding:0 11px 2px; }
+.der-card.is-tight .der-row { padding:4px 0 3px; }
+.der-card.is-tight .der-row .v { font-size:15px; }
+.der-card.is-tight .der-row .k { font-size:8.5px; letter-spacing:0.12em; }
+.der-card.is-tight .der-card-foot { padding:6px 11px 7px; line-height:1.45; }
+.der-card.is-tight .der-block { padding:8px 12px 9px; }
+.der-card.is-tight .der-chain-line { font-size:7.5px; line-height:1.6; }
+.der-card.is-tight .der-block-k { margin-bottom:6px; font-size:8.5px; }
 
 /* ---------------- corpus ---------------- */
 .der-scale {
@@ -203,6 +232,24 @@ export const CSS = `
   text-transform:uppercase; color: var(--ink-3);
 }
 .der-scrim i { display:block; width:180px; height:1px; background: var(--hair); font-style:normal; }
+
+/* ---------------- short stages ----------------
+   The deck's own annotation grows upward from the bottom left and is the
+   tallest thing on a 560px stage. The corpus block gives up size before it
+   gives up any of the three counts or the tiling legend. */
+@media (max-height: 760px) {
+  .der-scale-note { font-size:17px; line-height:1.4; }
+  .der-scale-keys { margin-top:14px; padding-top:12px; gap:38px; }
+  .der-scale-keys .n { font-size:24px; }
+  .der-tilecap { margin-top:12px; }
+}
+@media (max-height: 620px) {
+  .der-scale-note { font-size:15px; }
+  .der-scale-keys { margin-top:11px; padding-top:10px; gap:30px; }
+  .der-scale-keys .n { font-size:20px; }
+  .der-scale-keys .k { font-size:8.5px; letter-spacing:0.16em; }
+  .der-tilecap { margin-top:10px; gap:22px; font-size:8.5px; }
+}
 
 html.no-anim .der-graph, html.no-anim .der-node, html.no-anim .der-card,
 html.no-anim .der-scale, html.no-anim .der-head, html.no-anim .der-tilecap {

@@ -18,7 +18,7 @@ import { lifetime, EASE } from '../beat.js';
 
 export const meta = {
   id: 'close',
-  numeral: 'XII',
+  numeral: 'XVII',
   title: 'Close',
   long: 'One feed in, a valued squad out',
   polarity: 'dark',

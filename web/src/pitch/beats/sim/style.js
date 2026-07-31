@@ -38,7 +38,12 @@ const CSS = `
   position: absolute; right: var(--sm-side);
   top: clamp(112px, 14.5vh, 168px);
   width: clamp(232px, 20.5vw, 314px);
-  max-height: calc(100% - clamp(150px, 19vh, 210px));
+  /* The bottom-right caption strip lives under this rail, and at 150px of
+     reserve the two boxes shared about sixteen pixels: English escaped a
+     collision only because its caption happened to be wide enough to push
+     its first token clear of the rail's column. Reserve enough that the
+     rail's floor is above the caption at every viewport instead. */
+  max-height: calc(100% - clamp(172px, 23vh, 240px));
   overflow: hidden;
   pointer-events: none;
 }
@@ -113,9 +118,14 @@ const CSS = `
 .sm-bandbar i { display: block; height: 100%; }
 .sm-bandlab {
   display: flex; font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--bone-2); gap: 1px;
+  text-transform: uppercase; color: var(--bone-2);
+  /* The labels read left-to-right in segment order, but they are NOT width-
+     matched to the segments: a choked band is a few percent wide and its label
+     would clip into its neighbour ("CONCLEAR 0.81"). The limiting factor is
+     exactly the narrow one, so it is the label that must never be lost. */
+  justify-content: space-between; gap: 10px;
 }
-.sm-bandlab span { overflow: hidden; white-space: nowrap; text-overflow: clip; }
+.sm-bandlab span { white-space: nowrap; flex: 0 1 auto; }
 .sm-bandlab span.lim { color: var(--fail); }
 
 /* ---------------- distribution bars (beat IX) ---------------- */

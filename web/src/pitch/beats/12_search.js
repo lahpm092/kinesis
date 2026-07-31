@@ -16,6 +16,7 @@
 // Copy: docs/PITCH_COPY.md — verbatim.
 import * as THREE from 'three';
 import { lifetime } from '../beat.js';
+import { createPrimer } from '../primer.js';
 import { T } from '../../core/theme.js';
 import { Choreo } from '../sim/choreo.js';
 import {
@@ -31,13 +32,19 @@ import {
 
 export const meta = {
   id: 'search',
-  numeral: 'X',
+  numeral: 'XII',
   title: 'Search',
   long: 'Massively parallel strategy search',
   polarity: 'dark',
   sources: ['search'],
   provenance: 'simulated',
   stages: [
+    {
+      // primer — the same many-worlds scene, blurred, with one sentence on it
+      eyebrow: 'Before the numbers',
+      line: 'A season of matches, played against this opponent, in the time it takes to read this sentence.',
+      settleMs: 700,
+    },
     {
       eyebrow: 'Many worlds',
       line: 'One match is an anecdote. Thousands of matches is a distribution.',
@@ -129,6 +136,7 @@ export function create(ctx) {
   const root = document.createElement('div');
   root.className = 'sm-root';
   ctx.mount.appendChild(root);
+  const primer = createPrimer(ctx.mount);
 
   let built = null;
   let curStage = 0;
@@ -474,7 +482,7 @@ export function create(ctx) {
       el('#smx-w').textContent = intOrDash(s ? s.workers : workerCount());
       el('#smx-g').textContent = '—';
     }
-    if (curStage === 1) {
+    if (curStage === 2) {          // content stage 1 · throughput
       ctx.deck.annotate({
         stats: [
           { v: poolLive && S ? S.sims : (b.search ? b.search.total_sims : null), u: '', k: 'simulations' },
@@ -606,7 +614,7 @@ export function create(ctx) {
       try {
         const z = b.best ? [b.best.x, b.best.y] : [0.5, 0.5];
         b.noise = noiseFloor(b.fit, z, b.opp.strategy, { batches: 5, perBatch: 3, duration_s: 16 });
-        if (!life.dead && curStage === 2) { drawMap(b); b.board.idle(); }
+        if (!life.dead && curStage === 3) { drawMap(b); b.board.idle(); }   // content stage 2 · the map
       } catch (err) { console.error('[beat x] noise floor:', err); }
     }, 30);
   }
@@ -634,6 +642,10 @@ export function create(ctx) {
   /* -------------------------------------------------------------- stages */
   function apply(i, dir = 1) {
     curStage = i;
+    // Stage 0 is the primer: the same "many worlds" scene, blurred, with one
+    // sentence over it. Everything after it is the old stage i - 1.
+    const primed = i === 0;
+    const j = primed ? 0 : i - 1;
     if (!built) return Promise.resolve();
     const b = built;
     const me = ++token;
@@ -641,15 +653,27 @@ export function create(ctx) {
     b.mapWrap.style.display = 'none';
     b.foot.innerHTML = '';
     // the pool owns every core while it runs; only the counter stage needs it
-    if (pool) { try { if (i === 1) pool.resume(); else pool.pause(); } catch (_) {} }
-    b.answer.visible = i === 3;
-    for (const t of b.tiles) t.holder.visible = i < 3;
+    if (pool) { try { if (j === 1 && !primed) pool.resume(); else pool.pause(); } catch (_) {} }
+    b.answer.visible = j === 3;
+    for (const t of b.tiles) t.holder.visible = j < 3;
 
-    const p = i === 0 ? stageWorlds(b, alive)
-      : i === 1 ? stageThroughput(b, alive)
-      : i === 2 ? stageMap(b, alive)
+    const p = j === 0 ? stageWorlds(b, alive)
+      : j === 1 ? stageThroughput(b, alive)
+      : j === 2 ? stageMap(b, alive)
       : stageAnswer(b, alive);
-    return Promise.resolve(p).then(() => { if (alive()) b.board.idle(); });
+    return Promise.resolve(p).then(() => {
+      if (!alive()) return;
+      b.board.idle();
+      if (primed) {
+        primer.show(root, {
+          kicker: 'Before the numbers',
+          line: 'A season of matches, played against this opponent, in the time it takes to read this sentence.',
+          sub: 'every match below is already played',
+        });
+      } else {
+        primer.hide();
+      }
+    });
   }
 
   // ---- 1. many worlds ---------------------------------------------------
@@ -718,7 +742,7 @@ export function create(ctx) {
           if (life.dead) return;
           b.search = json;
           if (veil) { veil.remove(); veil = null; }
-          if (curStage === 2) {
+          if (curStage === 3) {        // content stage 2 · the map
             b.mapWrap.style.display = '';
             drawMap(b);
             b.mapFit = fitGridLeft(b);
@@ -842,13 +866,14 @@ export function create(ctx) {
       built.board.resize();
       built.gridFit = built.board.fitRect(GRID_CX, GRID_CZ, GRID_W, GRID_D, { margin: 1.24 });
       built.answerFit = built.board.fitRect(52.5 + ANSWER_AT[0], 34 + ANSWER_AT[1], 105, 68, { margin: 1.12 });
-      if (curStage === 2) {
+      if (curStage === 3) {          // content stage 2, after the primer
         built.mapFit = fitGridLeft(built);
         built.board.moveTo(built.mapFit.pos, built.mapFit.tgt, 0);
         built.board.requestRender();
       }
     },
     dispose() {
+      primer.dispose();
       token++;
       if (pool) { try { pool.stop(); } catch (_) {} pool = null; }
       if (built) {

@@ -1,15 +1,22 @@
 // Beat XI — ranking and value. The closing scene.
 //
+//   0 primer        the plate, blurred back, under one plain sentence
 //   1 the squad     every tracked player ranked, face crop, tier letter
 //   2 the evidence  one rank opens into the measured numbers underneath it
 //   3 projected     bars extend, the rows physically move to their new ranks
-//   4 close         the list settles, quietly
+//   4 the asset     ability priced on the stated curve
+//   5 close         the list settles, quietly
+//
+// Deck stage 0 is the primer and it primes SCENE 0, so everything below thinks
+// in scenes (`SCENE(i) = max(0, i - 1)`) and only the entry points know that a
+// stage and a scene are different numbers.
 //
 // The rows are absolutely positioned and carry their own translateY, so a rank
 // change is a real move of a real row, not a re-render. Projected values are
 // amber and chipped PROJECTED; gains are sage; nothing measured is ever drawn
 // in that register.
 import { EASE, lifetime } from '../../beat.js';
+import { createPrimer } from '../../primer.js';
 import { ensureStyle } from './style.js';
 import {
   readRoster, focusOf, fmtNum, fmtDelta, teamGlyph, tier, TIER_COLOR,
@@ -20,6 +27,16 @@ const CHUNK = 8;          // metric rows per evidence column
 const ROW_MIN = 24;
 const ROW_MAX = 54;
 const RESHUFFLE_MS = 820;
+
+/** deck stage → scene. Stage 0 is the primer and it primes scene 0. */
+const SCENE = (i) => Math.max(0, i - 1);
+
+// The on-ramp. One sentence, no metric name, no unit, no jargon.
+const PRIMER = {
+  kicker: 'The squad, ranked',
+  line: 'Thirteen players, ordered by what was actually measured — '
+    + 'not by reputation and not by minutes played.',
+};
 
 function h(tag, cls, txt) {
   const n = document.createElement(tag);
@@ -108,10 +125,11 @@ export function createRankingView(ctx) {
     };
   }
 
+  const primer = createPrimer(ctx.mount);
   const urlOf = (p) => (ctx.data && ctx.data.url ? ctx.data.url(p) : `/pitch/${p}`);
   const focus = focusOf(model);
   const book = model.hasProjection ? valueBook(model) : null;
-  const ASSET = 3;         // the stage that reads ability as an asset
+  const ASSET = 3;         // the scene that reads ability as an asset
   // No crop cleared the acceptance threshold, so there is no photograph to
   // frame: drop the empty plate rather than print thirteen blank frames.
   const anyFace = model.players.some((p) => p.face);
@@ -242,8 +260,19 @@ export function createRankingView(ctx) {
     let need = 0;
     for (const r of rows) need = Math.max(need, r.det.scrollHeight || 0);
     const reserve = need ? Math.min(need + 10, H * 0.42) : 0;
-    rowH = Math.max(ROW_MIN, Math.min(ROW_MAX, Math.floor((H - reserve) / n)));
-    detailH = need ? Math.min(reserve, Math.max(0, H - rowH * n)) : 0;
+    let rh = Math.max(ROW_MIN, Math.min(ROW_MAX, Math.floor((H - reserve) / n)));
+    let dh = need ? Math.min(reserve, Math.max(0, H - rh * n)) : 0;
+    // A drawer that cannot hold its last metric whole is worse than no drawer:
+    // the cut lands mid-row and the half-line sits on the rank underneath it.
+    // Below that bar — a short presentation display — the plate keeps all
+    // thirteen ranks at a bigger pitch and the evidence stays on the ledger,
+    // which is where this stage prints it in full anyway.
+    if (dh < need) {
+      rh = Math.max(ROW_MIN, Math.min(ROW_MAX, Math.floor(H / n)));
+      dh = 0;
+    }
+    rowH = rh;
+    detailH = dh;
     applyRow(rowH);
   }
 
@@ -307,20 +336,18 @@ export function createRankingView(ctx) {
     for (const r of rows) {
       const on = r.p.id === id;
       r.el.classList.toggle('is-focus', on);
-      r.det.classList.toggle('is-on', on);
-      r.det.style.height = on ? `${Math.round(detailH)}px` : '0px';
+      // measure() may have decided there is no room for a drawer at all; a
+      // zero-height one must not be raised, or it paints its own padding
+      r.det.classList.toggle('is-on', on && detailH > 0);
+      r.det.style.height = on && detailH > 0 ? `${Math.round(detailH)}px` : '0px';
       for (const a of r.afterCells) a.classList.toggle('is-on', on && showAfter);
     }
   }
 
   // ------------------------------------------------------------ the ledger --
   function ledger(stage) {
-    const wrap = h('div', 'rnk-r-in');
-    wrap.style.display = 'flex';
-    wrap.style.flexDirection = 'column';
-    wrap.style.gap = 'clamp(10px, 1.5vh, 20px)';
-    wrap.style.minHeight = '0';
-    wrap.style.flex = '1';
+    // layout lives in the stylesheet so the short-viewport blocks can reach it
+    const wrap = h('div', 'rnk-r-in rnk-ledbody');
 
     if (stage === ASSET) {
       // ---- ability, priced ------------------------------------------------
@@ -395,12 +422,12 @@ export function createRankingView(ctx) {
           sens.appendChild(cell(`at +${s.pts} pts`, `+${s.pct.toFixed(0)} %`, fmtMDelta(s.deltaM)));
         }
         wrap.appendChild(sens);
+        // terse on purpose: the caveat is the load-bearing half of this line
+        // and it has to survive on a short screen with the colophon below it
         wrap.appendChild(h('div', 'rnk-how-t',
           'The first column is what this window of footage projected. The other three '
-          + 'are a sensitivity, not a forecast: what a uniform gain of that size would be '
-          + 'worth on this squad, on the curve above. They are the reason to keep '
-          + 'measuring — a club banks the difference when it sells, and keeps a better '
-          + 'squad when it does not.'));
+          + 'are a sensitivity, not a forecast: what a uniform gain of that size would '
+          + 'be worth on this squad, on the curve above.'));
       }
     } else if (stage === 1 || stage === 2) {
       const p = focus;
@@ -529,8 +556,9 @@ export function createRankingView(ctx) {
         + 'their projected column is blank, not flat'));
     }
     // Say how much the projection actually moves, so the reshuffle on screen
-    // can never be read as bigger than the numbers behind it.
-    if (model.hasProjection && model.moved != null) {
+    // can never be read as bigger than the numbers behind it. It qualifies the
+    // projected column, so it appears with it rather than two stages early.
+    if (model.hasProjection && model.moved != null && stage >= 2) {
       note.appendChild(h('div', null,
         `${model.moved} of ${model.n} ranks move under the projection`));
     }
@@ -566,14 +594,16 @@ export function createRankingView(ctx) {
   const ro = new ResizeObserver(() => {
     measure();
     place(false);
-    expand(expanded, curStage >= 2);
+    expand(expanded, curScene >= 2);
   });
   ro.observe(list);
   life.add(ro);
 
-  let curStage = -1;
+  let curStage = -1;       // deck stage, primer included
+  let curScene = -1;       // what the plate is actually showing
 
-  // Values only — the keys are the ones docs/PITCH_COPY.md names for this beat.
+  // Values only, indexed by SCENE — the keys are the ones docs/PITCH_COPY.md
+  // names for this beat.
   function annotate(i) {
     const players = { v: model.n || null, u: '', k: 'players ranked' };
     const gain = {
@@ -599,13 +629,24 @@ export function createRankingView(ctx) {
     } else if (i === 4) ctx.deck.annotate({ stats: [players, gain, lever] });
   }
 
-  function toStage(i, immediate) {
-    const prev = curStage;
-    curStage = i;
+  function toStage(stageIdx, immediate) {
+    const primed = stageIdx === 0;
+    const prevStage = curStage;
+    const prev = curScene;
+    const i = SCENE(stageIdx);
+    // the primer lifting is the first time the room really sees the plate, so
+    // it counts as an entrance and the bars run for it
+    const lifting = prevStage === 0 && !primed;
+    curStage = stageIdx;
+    curScene = i;
     measure();
-    annotate(i);
+    // The card in the middle of the screen is this stage's sentence. Printing
+    // it in the annotation as well would be the same words twice.
+    if (primed) ctx.deck.annotate({ eyebrow: '', line: '', stats: [] });
+    else annotate(i);
     showLedger(i);
     setFoot(i);
+    if (primed) primer.show(frame, PRIMER); else primer.hide();
 
     if (i <= 1) {
       order = model.players.map((p) => p.id).sort(
@@ -616,15 +657,15 @@ export function createRankingView(ctx) {
       setBars(false);
       expand(i === 1 ? focus.id : null, false);
       place(!immediate && prev >= 2);
-      // bars run once on entry to the beat
-      if (immediate || prev < 0) {
+      // bars run once on entry to the beat, and again when the primer lifts
+      if (!primed && (immediate || prev < 0 || lifting)) {
         for (const r of rows) r.fill.style.right = '100%';
         raf(() => raf(() => setBars(false)));
       }
-      return (i === 1 ? 520 : 0) + 1120;
+      return primed ? 700 : (i === 1 ? 520 : 0) + 1120;
     }
 
-    // stage 3+ — the projection
+    // scene 2+ — the projection
     if (!model.hasProjection) {
       setRankText(false);
       setBars(false);
@@ -669,9 +710,10 @@ export function createRankingView(ctx) {
     replay() {
       const i = curStage < 0 ? 0 : curStage;
       curStage = -1;
+      curScene = -1;
       return wait(toStage(i, true));
     },
-    resize() { measure(); place(false); expand(expanded, curStage >= 2); },
+    resize() { measure(); place(false); expand(expanded, curScene >= 2); },
     dispose() {
       dead = true;
       for (const id of timers) clearTimeout(id);
@@ -679,6 +721,7 @@ export function createRankingView(ctx) {
       for (const id of rafs) cancelAnimationFrame(id);
       rafs.clear();
       life.end();
+      primer.dispose();
       frame.remove();
     },
   };

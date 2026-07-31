@@ -211,14 +211,27 @@ export class Plate {
     const spec = s.tiles;
     if (!spec) return;
     const glyph = this._tileGlyph();
-    const TW = glyph.cssW; const TH = glyph.cssH;
-    const gap = 16;
     const total = spec.solid + spec.ghost;
+    const topOff = spec.top || 0;
+    // Short stages leave under 200px for the tiling. Shrink the tile rather
+    // than let the last row fall off the plate — the count is the point, and a
+    // sliced row reads as a rendering fault.
+    const availH = Math.max(40, this.h - topOff - 8);
+    let k = 1;
+    for (let i = 0; i < 8; i++) {
+      const tw = glyph.cssW * k; const th = glyph.cssH * k; const gp = 16 * k;
+      const per = Math.max(1, Math.floor((this.w + gp) / (tw + gp)));
+      const rws = Math.ceil(total / per);
+      const need = rws * (th + gp) - gp;
+      if (need <= availH || k <= 0.42) break;
+      k = Math.max(0.42, k * Math.sqrt(availH / need));
+    }
+    const TW = glyph.cssW * k; const TH = glyph.cssH * k;
+    const gap = 16 * k;
     const perRow = Math.max(1, Math.floor((this.w + gap) / (TW + gap)));
     const rows = Math.ceil(total / perRow);
     const x0 = 0;
-    const topOff = spec.top || 0;
-    const y0 = topOff + Math.max(8, (this.h - topOff - (rows * (TH + gap) - gap)) / 2);
+    const y0 = topOff + Math.max(6, (this.h - topOff - (rows * (TH + gap) - gap)) / 2);
 
     for (let i = 0; i < total; i++) {
       const r = Math.floor(i / perRow);

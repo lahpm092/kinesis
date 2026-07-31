@@ -1,7 +1,7 @@
 # KINESIS — investor deck
 
 A fork of [KINESIS](https://github.com/lahpm092/kinesis) that adds a keyboard-driven,
-twelve-beat investor presentation and a **parameterised pipeline that runs on arbitrary
+eighteen-beat investor presentation and a **parameterised pipeline that runs on arbitrary
 broadcast footage** — the original scripts were hardcoded to two specific matches.
 
 **To present it, read [`PRESENTING.md`](PRESENTING.md).** One page, one key.
@@ -10,9 +10,30 @@ broadcast footage** — the original scripts were hardcoded to two specific matc
 cd web && npm install && npm run dev     # → http://localhost:5173/pitch.html
 ```
 
-Press **→**. That is the whole interface.
+Eighteen beats, seventy-nine steps.
+
+Press **→**. That is the whole interface. Press **l** for Spanish.
 
 The original study site is untouched and still builds at `/index.html`.
+
+### English / Español
+
+The deck runs in either language. The choice is offered full-size on the opening
+frame and stays as two marks beside the wordmark after that; `l` toggles it from
+anywhere, `?lang=es` boots straight into it, and the choice is remembered.
+
+Everything the room reads switches: beat titles, the sentence on every step, the
+primers, every panel heading, caption, verdict and honesty statement, the index
+and the provenance chips. Four classes stay in English on purpose, because each
+is the *name of a thing* rather than writing — translating them would make the
+deck cite something that does not exist:
+
+* formulas and metric keys — `p_real = p_complete × p_control × (1 − p_intercept)`, `topSpeed`
+* `taxonomy-v2` method and work-unit ids, which beat IX states on screen are quoted verbatim
+* instruments, vendors, models and file names — VALD, Catapult, `rtmpose-x`, `halpe26`
+* the fixture, the competition, and every unit and number
+
+See `web/src/pitch/i18n.js` and the two dictionaries under `web/src/pitch/i18n/`.
 
 ---
 
@@ -21,24 +42,35 @@ The original study site is untouched and still builds at `/index.html`.
 **Manchester City 0 – 1 Manchester United**, Premier League, 20 March 2016.
 SoccerNet v2, 720p / 25 fps, first half (2700 s).
 
-Everything on screen in beats I–VI and the measured column of XI is computed from that file.
+Everything on screen in beats I and III–VII, and the measured column of XV, is computed from that file.
 
 ## What it shows
 
-| | Beat | Measured result |
+Eighteen beats. I and III–VII are measurement. VIII and X–XIV are simulation or projection and
+say so on screen. II and XVIII are positioning claims and carry the same fairness footnote on the
+plate. Most technical beats open on a **primer**: the scene blurred behind one plain sentence
+saying what the room is about to look at.
+
+| | Beat | Result |
 |---|---|---|
 | I | Raw match video | One broadcast feed. No sensors, no vests. |
-| II | Clipping | **18.5 min of live play** from 45:00, 226 segments / 38 kept |
-| III | Segmentation | 18 identities, **zero id switches**, ball in 31/31 frames |
-| IV | Skeleton | Peak knee flexion **121°**, top speed **10.08 m/s** |
-| V | Relative geometry | Line-of-sight rotation rate — bearing held vs bearing swept |
-| VI | Metrics | **65-node derivation graph**, every metric traceable to footage |
-| VII | Simulation | `p_real = p_complete × p_control × (1 − p_intercept)` |
-| VIII | Training | **55 flags, 204 work units**, real `taxonomy-v2` identifiers |
-| IX | Before / after | Completion **+0.094 [+0.070, +0.117]**, z = 7.87 |
-| X | Parallel search | **2627 sims/s** across 8 workers, 61/63 cells resolved |
-| XI | Ranking and value | 13 tracked players ranked on measurement; the value curve is the deck's one stated assumption |
-| XII | Close | The chain counted from its own files — 226 segments, 4550 keypoints, 44 133 simulations |
+| II | The ceiling | Four system categories, a 7-row capability matrix — *category* comparison, no competitor tested |
+| III | Clipping | **18.5 min of live play** from 45:00, 226 segments / 38 kept |
+| IV | Segmentation | 18 identities, **zero id switches**, ball in 31/31 frames |
+| V | Skeleton | Peak knee flexion **121°**, top speed **10.08 m/s** |
+| VI | Relative geometry | Line-of-sight rotation rate — bearing held vs bearing swept |
+| VII | Metrics | **65-node derivation graph**, every metric traceable to footage |
+| VIII | Simulation | `p_real = p_complete × p_control × (1 − p_intercept)` |
+| IX | Training | **55 flags, 204 work units**, real `taxonomy-v2` identifiers |
+| X | Performance Lab | Video signal → **11 HPX instruments** → a 9-week block, 15 work units, back to the pitch |
+| XI | Before / after | Completion **+0.094 [+0.070, +0.117]**, z = 7.87 |
+| XII | Parallel search | **2627 sims/s** across 8 workers, 61/63 cells resolved |
+| XIII | Strategy | 63 candidates → **2 survivors** at ×63 922 real time; the champion sits *inside* the noise band, and the beat says so |
+| XIV | Spectacle | 28 stored matches scored on an unpredictability index, then **the best card and the worst played side by side** — 0.767 against 0.592, 2.55 shots a window against 1.69 |
+| XV | Ranking and value | 13 tracked players ranked on measurement; the value curve is the deck's one stated assumption |
+| XVI | Market | 3 opponent archetypes · **+9.05 %** of value per point of overall · 9 keep / 1 develop / 3 sell |
+| XVII | Close | The chain counted from its own files — 226 segments, 4550 keypoints, 44 133 simulations |
+| XVIII | The advantage | The last word: the chain counted end to end, and the capability gap — the bookend to II |
 
 ## The pipeline
 
@@ -55,6 +87,19 @@ python pipeline/80_prescribe.py   # taxonomy-v2 prescription
 node   pipeline/90_search.mjs     # parallel strategy search
 python pipeline/95_roster.py      # ranking + face mining
 python pipeline/99_validate_pitch.py   # contract validator; exits non-zero on violation
+```
+
+The investor beats added on this branch are generated *from* those artifacts — they read the
+measured files and emit modelled ones, never the other way round:
+
+```bash
+python pipeline/21_landscape.py   # category comparison + the real feed spec
+python pipeline/22_lab.py         # the Performance Lab loop, bench and worked week
+python pipeline/23_strategy.py    # the strategy book, funnel and drills
+python pipeline/24_spectacle.py   # unpredictability index, disruptor, entertainment map
+python pipeline/25_market.py      # selection, value curve, complementarity, the book
+python pipeline/26_advantage.py   # the closing summary: the chain counted, and the gap
+python pipeline/98_validate_new.py     # provenance contract for the six; non-zero on violation
 ```
 
 Weights and footage are gitignored. `models/sam3-hf` (3.2 GB) comes from an ungated
@@ -92,6 +137,36 @@ This is the part worth reading before you present it.
 - **Calibration coverage is 52 % on live play, 37 % overall**, at 0.29 m median positional
   error at midfield. See [`docs/CALIBRATION.md`](docs/CALIBRATION.md), which records two dead
   ends before the method that worked.
+
+## Checking it
+
+The deck ships with its own QA. Run all of it against a **built** `dist` on a static
+server — the dev server's hot reload destroys the page's execution context mid-sweep.
+
+```bash
+cd web && npx vite build --outDir ../dist
+cd ../dist && python3 -m http.server 8099 &
+cd ../web
+node scripts/qa_walk.mjs    http://localhost:8099 1280x720          # every stage, both ways
+node scripts/qa_overlap.mjs http://localhost:8099 "" 1280x720       # text collisions
+node scripts/qa_overlap.mjs http://localhost:8099 "" 1280x720 lang=es
+node scripts/qa_flash.mjs   http://localhost:8099                   # transition flashes
+node scripts/qa_text.mjs    http://localhost:8099 corpus.json       # every rendered string
+node scripts/qa_shot.mjs    http://localhost:8099 shots 1280x720 spectacle/4@28000
+```
+
+`qa_overlap` reports per-line *ink* boxes, not element boxes, and hit-tests occlusion, so a
+DOM layer under a canvas is not a false positive. **Spanish sets about a fifth more type than
+English in the same box, so any copy change has to be swept in both languages** — prefer
+shortening the translation to moving the layout.
+
+The provenance validators are separate and run on the JSON, not the page:
+
+```bash
+python pipeline/99_validate_pitch.py   # the measured chain
+python pipeline/98_validate_new.py     # measured:false artifacts + beat XIV's duel contract
+node   pipeline/validate_pitch_sim.mjs # kernel determinism, 160 checks
+```
 
 ## Documents
 

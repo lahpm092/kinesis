@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en" data-polarity="dark">
+<head>
+<meta charset="utf-8" />
+<title>KINESIS — beat XIV spectacle harness</title>
+<link rel="icon" href="data:," />
+<link rel="stylesheet" href="/styles/main.css" />
+<link rel="stylesheet" href="/styles/pitch.css" />
+<style>
+  html, body { margin: 0; height: 100%; background: var(--coal); }
+  #mount { position: absolute; inset: 0; }
+</style>
+</head>
+<body class="pitch-body">
+<div id="mount"></div>
+<script type="module">
+  // Standalone harness for beat XIV until the orchestrator registers it in
+  // deck.js. Mounts the view with the real spectacle.json and a deck stub.
+  import { create } from '/src/pitch/beats/14_spectacle.js';
+
+  const spectacle = await fetch('/pitch/spectacle.json')
+    .then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  const ctx = {
+    mount: document.getElementById('mount'),
+    data: { spectacle, missing: spectacle ? [] : ['spectacle'], url: (n) => `/pitch/${n}` },
+    deck: { annotate(p) { window.__annot = p; }, provenance() {}, stageIndex: 0 },
+  };
+  const inst = create(ctx);
+  let cur = null;
+  window.__stageSettled = false;
+  window.__go = async (i) => {
+    window.__stageSettled = false;
+    if (cur == null) await inst.enter(i);
+    else await inst.stage(i, i >= cur ? 1 : -1);
+    cur = i;
+    window.__stageSettled = true;
+  };
+  await window.__go(0);
+  window.__ready = true;
+</script>
+</body>
+</html>

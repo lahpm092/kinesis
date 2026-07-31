@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en" data-polarity="light">
+<head>
+<meta charset="utf-8" />
+<title>KINESIS — beat XVI market harness</title>
+<link rel="icon" href="data:," />
+<link rel="stylesheet" href="/styles/main.css" />
+<link rel="stylesheet" href="/styles/pitch.css" />
+<style>
+  html, body { margin: 0; height: 100%; background: var(--paper); }
+  #mount { position: absolute; inset: 0; }
+</style>
+</head>
+<body>
+<div id="mount"></div>
+<script type="module">
+  // Standalone harness for beat XVI until the orchestrator registers it in
+  // deck.js. Mounts the view with the real market.json and a deck stub.
+  import { create } from '/src/pitch/beats/16_market.js';
+
+  const market = await fetch('/pitch/market.json').then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  const ctx = {
+    mount: document.getElementById('mount'),
+    data: { market, missing: market ? [] : ['market'], url: (n) => `/pitch/${n}` },
+    deck: { annotate() {}, provenance() {}, stageIndex: 0 },
+  };
+  const inst = create(ctx);
+  let cur = null;
+  window.__stageSettled = false;
+  window.__go = async (i) => {
+    window.__stageSettled = false;
+    if (cur == null) await inst.enter(i);
+    else await inst.stage(i, i >= cur ? 1 : -1);
+    cur = i;
+    window.__stageSettled = true;
+  };
+  await window.__go(0);
+  window.__ready = true;
+</script>
+</body>
+</html>

@@ -370,6 +370,29 @@ function finish(m) {
   // The team frames the contract carries may or may not include synchrony;
   // ours is always available as a fallback.
   m.teamAt = buildTeamSampler(m);
+
+  /* THE LAST FRAME THAT WAS ACTUALLY MEASURED.
+   *
+   * The projection carries one frame it could not solve — beat IV says so on
+   * its own plate: "final frame unprojected — no later frame to carry from".
+   * In relative.json that frame is present and every position in it is null,
+   * and the team-geometry frame that goes with it has no hulls.
+   *
+   * The animation still runs to the end of the window, but the readout must
+   * not COME TO REST there: every channel would report an em dash on a frame
+   * that has no measurement in it, and a panel of em dashes reads as a broken
+   * beat rather than as an honest gap. The panel therefore holds on the last
+   * frame that has something to report. Nothing is invented and nothing is
+   * carried forward — the values shown are that frame's own.
+   */
+  m.lastMeasured = 0;
+  for (let i = m.n - 1; i >= 0; i--) {
+    let k = 0;
+    for (const p of m.players) {
+      if (Number.isFinite(p.x[i]) && Number.isFinite(p.y[i])) k += 1;
+    }
+    if (k >= 2) { m.lastMeasured = i; break; }   // two bodies make a relation
+  }
   return m;
 }
 

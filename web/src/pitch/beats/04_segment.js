@@ -19,7 +19,7 @@ import { createOverlay } from './segment/overlay.js';
 
 export const meta = {
   id: 'segment',
-  numeral: 'III',
+  numeral: 'IV',
   title: 'Segmentation',
   long: 'Segmentation of players and ball',
   polarity: 'light',

@@ -276,19 +276,6 @@ export function ancestryOf(g, id) {
   return { nodes, edges };
 }
 
-/** The derivation lines behind `id`, deepest first: [{from, to, op}] */
-export function chainOf(g, id, limit = 7) {
-  const { edges } = ancestryOf(g, id);
-  const list = [...edges].map((i) => g.edges[i]);
-  list.sort((a, b) => (g.nodes.get(a.from).layer - g.nodes.get(b.from).layer)
-    || a.from.localeCompare(b.from));
-  return list.slice(0, limit).map((e) => ({
-    from: g.nodes.get(e.from).label,
-    to: g.nodes.get(e.to).label,
-    op: e.op,
-  }));
-}
-
 /**
  * A single representative path input → … → composite, used as the chain whose
  * operations are printed on the plate in stage 2.

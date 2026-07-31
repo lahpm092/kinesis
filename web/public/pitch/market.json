@@ -1,0 +1,2014 @@
+{
+ "measured": false,
+ "generator": "pipeline/25_market.py",
+ "note": "Player metrics, z-scores, overalls, the search axes, the noise floor and the ensemble goal rate are real (roster/metrics/search/sim). The fit constructs, the value curve (beat XI's stated assumption, reused verbatim), the transfer elasticity and the outcome-entropy index are stated models; the buying club is SYNTHETIC. Every projected figure is a planning aid, not a forecast.",
+ "inputs": {
+  "roster": "web/public/pitch/roster.json",
+  "metrics": "web/public/pitch/metrics.json",
+  "search": "web/public/pitch/search.json",
+  "sim": "web/public/pitch/sim.json"
+ },
+ "analysed_s": 3.9,
+ "window_note": "every fit construct reads a 3.9 s analysed window; boards demonstrate the selector, not season scouting",
+ "selection": {
+  "archetypes": [
+   {
+    "id": "high-line",
+    "label": "High line, high press",
+    "block_height": 55.0,
+    "press_trigger": 0.85,
+    "formula": "fit = 0.50·z topSpeed + 0.30·z peakAccel + 0.20·z hsr_m",
+    "weights": {
+     "topSpeed": 0.5,
+     "peakAccel": 0.3,
+     "hsr_m": 0.2
+    },
+    "reads": "Space behind the line pays straight-line speed.",
+    "board": [
+     {
+      "id": 12,
+      "label": "12",
+      "team": "B",
+      "overall": 56,
+      "fit": 1.27,
+      "inputs": 3,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "topSpeed",
+        "name": "Top speed",
+        "unit": "m/s",
+        "value": 7.01,
+        "d": 2,
+        "z": 1.85
+       },
+       {
+        "key": "peakAccel",
+        "name": "Peak acceleration",
+        "unit": "m/s^2",
+        "value": 3.6,
+        "d": 2,
+        "z": -0.15
+       },
+       {
+        "key": "hsr_m",
+        "name": "High-speed distance",
+        "unit": "m",
+        "value": 1.68,
+        "d": 2,
+        "z": 1.96
+       }
+      ]
+     },
+     {
+      "id": 8,
+      "label": "8",
+      "team": "A",
+      "overall": 53,
+      "fit": 0.75,
+      "inputs": 3,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "topSpeed",
+        "name": "Top speed",
+        "unit": "m/s",
+        "value": 6.23,
+        "d": 2,
+        "z": 1.31
+       },
+       {
+        "key": "peakAccel",
+        "name": "Peak acceleration",
+        "unit": "m/s^2",
+        "value": 2.63,
+        "d": 2,
+        "z": -0.78
+       },
+       {
+        "key": "hsr_m",
+        "name": "High-speed distance",
+        "unit": "m",
+        "value": 1.5,
+        "d": 2,
+        "z": 1.68
+       }
+      ]
+     },
+     {
+      "id": 9,
+      "label": "9",
+      "team": "B",
+      "overall": 47,
+      "fit": 0.57,
+      "inputs": 3,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "topSpeed",
+        "name": "Top speed",
+        "unit": "m/s",
+        "value": 5.9,
+        "d": 2,
+        "z": 1.07
+       },
+       {
+        "key": "peakAccel",
+        "name": "Peak acceleration",
+        "unit": "m/s^2",
+        "value": 2.36,
+        "d": 2,
+        "z": -0.96
+       },
+       {
+        "key": "hsr_m",
+        "name": "High-speed distance",
+        "unit": "m",
+        "value": 1.45,
+        "d": 2,
+        "z": 1.6
+       }
+      ]
+     },
+     {
+      "id": 13,
+      "label": "13",
+      "team": "B",
+      "overall": 54,
+      "fit": 0.53,
+      "inputs": 3,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "topSpeed",
+        "name": "Top speed",
+        "unit": "m/s",
+        "value": 5.51,
+        "d": 2,
+        "z": 0.8
+       },
+       {
+        "key": "peakAccel",
+        "name": "Peak acceleration",
+        "unit": "m/s^2",
+        "value": 4.04,
+        "d": 2,
+        "z": 0.13
+       },
+       {
+        "key": "hsr_m",
+        "name": "High-speed distance",
+        "unit": "m",
+        "value": 0.69,
+        "d": 2,
+        "z": 0.43
+       }
+      ]
+     },
+     {
+      "id": 3,
+      "label": "3",
+      "team": "B",
+      "overall": 60,
+      "fit": 0.42,
+      "inputs": 3,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "topSpeed",
+        "name": "Top speed",
+        "unit": "m/s",
+        "value": 4.55,
+        "d": 2,
+        "z": 0.13
+       },
+       {
+        "key": "peakAccel",
+        "name": "Peak acceleration",
+        "unit": "m/s^2",
+        "value": 6.33,
+        "d": 2,
+        "z": 1.62
+       },
+       {
+        "key": "hsr_m",
+        "name": "High-speed distance",
+        "unit": "m",
+        "value": 0.0,
+        "d": 0,
+        "z": -0.63
+       }
+      ]
+     },
+     {
+      "id": 2,
+      "label": "2",
+      "team": "A",
+      "overall": 52,
+      "fit": 0.41,
+      "inputs": 3,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "topSpeed",
+        "name": "Top speed",
+        "unit": "m/s",
+        "value": 5.21,
+        "d": 2,
+        "z": 0.59
+       },
+       {
+        "key": "peakAccel",
+        "name": "Peak acceleration",
+        "unit": "m/s^2",
+        "value": 5.05,
+        "d": 2,
+        "z": 0.79
+       },
+       {
+        "key": "hsr_m",
+        "name": "High-speed distance",
+        "unit": "m",
+        "value": 0.0,
+        "d": 0,
+        "z": -0.63
+       }
+      ]
+     },
+     {
+      "id": 5,
+      "label": "5",
+      "team": "A",
+      "overall": 55,
+      "fit": 0.16,
+      "inputs": 3,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "topSpeed",
+        "name": "Top speed",
+        "unit": "m/s",
+        "value": 3.86,
+        "d": 2,
+        "z": -0.36
+       },
+       {
+        "key": "peakAccel",
+        "name": "Peak acceleration",
+        "unit": "m/s^2",
+        "value": 6.21,
+        "d": 2,
+        "z": 1.54
+       },
+       {
+        "key": "hsr_m",
+        "name": "High-speed distance",
+        "unit": "m",
+        "value": 0.0,
+        "d": 0,
+        "z": -0.63
+       }
+      ]
+     },
+     {
+      "id": 7,
+      "label": "7",
+      "team": "A",
+      "overall": 50,
+      "fit": 0.0,
+      "inputs": 3,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "topSpeed",
+        "name": "Top speed",
+        "unit": "m/s",
+        "value": 3.76,
+        "d": 2,
+        "z": -0.43
+       },
+       {
+        "key": "peakAccel",
+        "name": "Peak acceleration",
+        "unit": "m/s^2",
+        "value": 5.58,
+        "d": 2,
+        "z": 1.13
+       },
+       {
+        "key": "hsr_m",
+        "name": "High-speed distance",
+        "unit": "m",
+        "value": 0.0,
+        "d": 0,
+        "z": -0.63
+       }
+      ]
+     },
+     {
+      "id": 11,
+      "label": "11",
+      "team": "A",
+      "overall": 49,
+      "fit": -0.46,
+      "inputs": 3,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "topSpeed",
+        "name": "Top speed",
+        "unit": "m/s",
+        "value": 3.22,
+        "d": 2,
+        "z": -0.81
+       },
+       {
+        "key": "peakAccel",
+        "name": "Peak acceleration",
+        "unit": "m/s^2",
+        "value": 4.19,
+        "d": 2,
+        "z": 0.23
+       },
+       {
+        "key": "hsr_m",
+        "name": "High-speed distance",
+        "unit": "m",
+        "value": 0.0,
+        "d": 0,
+        "z": -0.63
+       }
+      ]
+     },
+     {
+      "id": 10,
+      "label": "10",
+      "team": "A",
+      "overall": 40,
+      "fit": -0.79,
+      "inputs": 3,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "topSpeed",
+        "name": "Top speed",
+        "unit": "m/s",
+        "value": 2.46,
+        "d": 2,
+        "z": -1.34
+       },
+       {
+        "key": "peakAccel",
+        "name": "Peak acceleration",
+        "unit": "m/s^2",
+        "value": 3.88,
+        "d": 2,
+        "z": 0.03
+       },
+       {
+        "key": "hsr_m",
+        "name": "High-speed distance",
+        "unit": "m",
+        "value": 0.0,
+        "d": 0,
+        "z": -0.63
+       }
+      ]
+     },
+     {
+      "id": 15,
+      "label": "15",
+      "team": "A",
+      "overall": 48,
+      "fit": -0.89,
+      "inputs": 3,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "topSpeed",
+        "name": "Top speed",
+        "unit": "m/s",
+        "value": 3.39,
+        "d": 2,
+        "z": -0.69
+       },
+       {
+        "key": "peakAccel",
+        "name": "Peak acceleration",
+        "unit": "m/s^2",
+        "value": 1.7,
+        "d": 2,
+        "z": -1.39
+       },
+       {
+        "key": "hsr_m",
+        "name": "High-speed distance",
+        "unit": "m",
+        "value": 0.0,
+        "d": 0,
+        "z": -0.63
+       }
+      ]
+     },
+     {
+      "id": 4,
+      "label": "4",
+      "team": "B",
+      "overall": 42,
+      "fit": -0.9,
+      "inputs": 3,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "topSpeed",
+        "name": "Top speed",
+        "unit": "m/s",
+        "value": 3.3,
+        "d": 2,
+        "z": -0.75
+       },
+       {
+        "key": "peakAccel",
+        "name": "Peak acceleration",
+        "unit": "m/s^2",
+        "value": 1.78,
+        "d": 2,
+        "z": -1.34
+       },
+       {
+        "key": "hsr_m",
+        "name": "High-speed distance",
+        "unit": "m",
+        "value": 0.0,
+        "d": 0,
+        "z": -0.63
+       }
+      ]
+     },
+     {
+      "id": 16,
+      "label": "16",
+      "team": "A",
+      "overall": 42,
+      "fit": -1.08,
+      "inputs": 3,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "topSpeed",
+        "name": "Top speed",
+        "unit": "m/s",
+        "value": 2.4,
+        "d": 2,
+        "z": -1.38
+       },
+       {
+        "key": "peakAccel",
+        "name": "Peak acceleration",
+        "unit": "m/s^2",
+        "value": 2.51,
+        "d": 2,
+        "z": -0.86
+       },
+       {
+        "key": "hsr_m",
+        "name": "High-speed distance",
+        "unit": "m",
+        "value": 0.0,
+        "d": 0,
+        "z": -0.63
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "low-block",
+    "label": "Low block, deep and passive",
+    "block_height": 25.0,
+    "press_trigger": 0.25,
+    "formula": "fit = 0.40·z codPeak + 0.35·z spaceControl + 0.25·z losReactivity",
+    "weights": {
+     "codPeak": 0.4,
+     "spaceControl": 0.35,
+     "losReactivity": 0.25
+    },
+    "reads": "No space behind — sharp turns and controlled space in front.",
+    "board": [
+     {
+      "id": 12,
+      "label": "12",
+      "team": "B",
+      "overall": 56,
+      "fit": 0.56,
+      "inputs": 3,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "codPeak",
+        "name": "Sharpest turn",
+        "unit": "deg",
+        "value": 73.91,
+        "d": 1,
+        "z": 2.23
+       },
+       {
+        "key": "spaceControl",
+        "name": "Space control",
+        "unit": "m^2",
+        "value": 451.07,
+        "d": 0,
+        "z": -0.35
+       },
+       {
+        "key": "losReactivity",
+        "name": "Line-of-sight reactivity",
+        "unit": "deg/s",
+        "value": 7.24,
+        "d": 2,
+        "z": -0.85
+       }
+      ]
+     },
+     {
+      "id": 16,
+      "label": "16",
+      "team": "A",
+      "overall": 42,
+      "fit": 0.42,
+      "inputs": 2,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "codPeak",
+        "name": "Sharpest turn",
+        "unit": "deg",
+        "value": 35.53,
+        "d": 1,
+        "z": 0.24
+       },
+       {
+        "key": "spaceControl",
+        "name": "Space control",
+        "unit": "m^2",
+        "value": 920.92,
+        "d": 0,
+        "z": 0.62
+       },
+       {
+        "key": "losReactivity",
+        "name": "Line-of-sight reactivity",
+        "unit": "deg/s",
+        "value": null,
+        "d": null,
+        "z": null
+       }
+      ]
+     },
+     {
+      "id": 3,
+      "label": "3",
+      "team": "B",
+      "overall": 60,
+      "fit": 0.38,
+      "inputs": 3,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "codPeak",
+        "name": "Sharpest turn",
+        "unit": "deg",
+        "value": 31.16,
+        "d": 1,
+        "z": 0.01
+       },
+       {
+        "key": "spaceControl",
+        "name": "Space control",
+        "unit": "m^2",
+        "value": 1363.72,
+        "d": 0,
+        "z": 1.54
+       },
+       {
+        "key": "losReactivity",
+        "name": "Line-of-sight reactivity",
+        "unit": "deg/s",
+        "value": 19.51,
+        "d": 1,
+        "z": -0.66
+       }
+      ]
+     },
+     {
+      "id": 8,
+      "label": "8",
+      "team": "A",
+      "overall": 53,
+      "fit": 0.33,
+      "inputs": 3,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "codPeak",
+        "name": "Sharpest turn",
+        "unit": "deg",
+        "value": 58.45,
+        "d": 1,
+        "z": 1.43
+       },
+       {
+        "key": "spaceControl",
+        "name": "Space control",
+        "unit": "m^2",
+        "value": 572.46,
+        "d": 0,
+        "z": -0.09
+       },
+       {
+        "key": "losReactivity",
+        "name": "Line-of-sight reactivity",
+        "unit": "deg/s",
+        "value": 7.24,
+        "d": 2,
+        "z": -0.85
+       }
+      ]
+     },
+     {
+      "id": 15,
+      "label": "15",
+      "team": "A",
+      "overall": 48,
+      "fit": 0.33,
+      "inputs": 3,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "codPeak",
+        "name": "Sharpest turn",
+        "unit": "deg",
+        "value": 14.96,
+        "d": 1,
+        "z": -0.83
+       },
+       {
+        "key": "spaceControl",
+        "name": "Space control",
+        "unit": "m^2",
+        "value": 1736.94,
+        "d": 0,
+        "z": 2.31
+       },
+       {
+        "key": "losReactivity",
+        "name": "Line-of-sight reactivity",
+        "unit": "deg/s",
+        "value": 23.55,
+        "d": 1,
+        "z": -0.6
+       }
+      ]
+     },
+     {
+      "id": 5,
+      "label": "5",
+      "team": "A",
+      "overall": 55,
+      "fit": 0.15,
+      "inputs": 3,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "codPeak",
+        "name": "Sharpest turn",
+        "unit": "deg",
+        "value": 41.72,
+        "d": 1,
+        "z": 0.56
+       },
+       {
+        "key": "spaceControl",
+        "name": "Space control",
+        "unit": "m^2",
+        "value": 796.02,
+        "d": 0,
+        "z": 0.37
+       },
+       {
+        "key": "losReactivity",
+        "name": "Line-of-sight reactivity",
+        "unit": "deg/s",
+        "value": 9.71,
+        "d": 2,
+        "z": -0.81
+       }
+      ]
+     },
+     {
+      "id": 9,
+      "label": "9",
+      "team": "B",
+      "overall": 47,
+      "fit": 0.09,
+      "inputs": 3,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "codPeak",
+        "name": "Sharpest turn",
+        "unit": "deg",
+        "value": 36.93,
+        "d": 1,
+        "z": 0.31
+       },
+       {
+        "key": "spaceControl",
+        "name": "Space control",
+        "unit": "m^2",
+        "value": 66.45,
+        "d": 1,
+        "z": -1.14
+       },
+       {
+        "key": "losReactivity",
+        "name": "Line-of-sight reactivity",
+        "unit": "deg/s",
+        "value": 154.74,
+        "d": 0,
+        "z": 1.47
+       }
+      ]
+     },
+     {
+      "id": 13,
+      "label": "13",
+      "team": "B",
+      "overall": 54,
+      "fit": -0.05,
+      "inputs": 3,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "codPeak",
+        "name": "Sharpest turn",
+        "unit": "deg",
+        "value": 20.51,
+        "d": 1,
+        "z": -0.54
+       },
+       {
+        "key": "spaceControl",
+        "name": "Space control",
+        "unit": "m^2",
+        "value": 459.87,
+        "d": 0,
+        "z": -0.33
+       },
+       {
+        "key": "losReactivity",
+        "name": "Line-of-sight reactivity",
+        "unit": "deg/s",
+        "value": 132.06,
+        "d": 0,
+        "z": 1.11
+       }
+      ]
+     },
+     {
+      "id": 2,
+      "label": "2",
+      "team": "A",
+      "overall": 52,
+      "fit": -0.1,
+      "inputs": 3,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "codPeak",
+        "name": "Sharpest turn",
+        "unit": "deg",
+        "value": 42.38,
+        "d": 1,
+        "z": 0.6
+       },
+       {
+        "key": "spaceControl",
+        "name": "Space control",
+        "unit": "m^2",
+        "value": 105.04,
+        "d": 0,
+        "z": -1.06
+       },
+       {
+        "key": "losReactivity",
+        "name": "Line-of-sight reactivity",
+        "unit": "deg/s",
+        "value": 68.72,
+        "d": 1,
+        "z": 0.12
+       }
+      ]
+     },
+     {
+      "id": 7,
+      "label": "7",
+      "team": "A",
+      "overall": 50,
+      "fit": -0.23,
+      "inputs": 3,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "codPeak",
+        "name": "Sharpest turn",
+        "unit": "deg",
+        "value": 16.91,
+        "d": 1,
+        "z": -0.73
+       },
+       {
+        "key": "spaceControl",
+        "name": "Space control",
+        "unit": "m^2",
+        "value": 118.57,
+        "d": 0,
+        "z": -1.03
+       },
+       {
+        "key": "losReactivity",
+        "name": "Line-of-sight reactivity",
+        "unit": "deg/s",
+        "value": 169.29,
+        "d": 0,
+        "z": 1.7
+       }
+      ]
+     },
+     {
+      "id": 11,
+      "label": "11",
+      "team": "A",
+      "overall": 49,
+      "fit": -0.46,
+      "inputs": 3,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "codPeak",
+        "name": "Sharpest turn",
+        "unit": "deg",
+        "value": 11.88,
+        "d": 1,
+        "z": -0.99
+       },
+       {
+        "key": "spaceControl",
+        "name": "Space control",
+        "unit": "m^2",
+        "value": 145.59,
+        "d": 0,
+        "z": -0.98
+       },
+       {
+        "key": "losReactivity",
+        "name": "Line-of-sight reactivity",
+        "unit": "deg/s",
+        "value": 132.06,
+        "d": 0,
+        "z": 1.11
+       }
+      ]
+     },
+     {
+      "id": 4,
+      "label": "4",
+      "team": "B",
+      "overall": 42,
+      "fit": -0.52,
+      "inputs": 3,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "codPeak",
+        "name": "Sharpest turn",
+        "unit": "deg",
+        "value": 10.31,
+        "d": 1,
+        "z": -1.07
+       },
+       {
+        "key": "spaceControl",
+        "name": "Space control",
+        "unit": "m^2",
+        "value": 771.06,
+        "d": 0,
+        "z": 0.31
+       },
+       {
+        "key": "losReactivity",
+        "name": "Line-of-sight reactivity",
+        "unit": "deg/s",
+        "value": 9.71,
+        "d": 2,
+        "z": -0.81
+       }
+      ]
+     },
+     {
+      "id": 10,
+      "label": "10",
+      "team": "A",
+      "overall": 40,
+      "fit": -0.79,
+      "inputs": 3,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "codPeak",
+        "name": "Sharpest turn",
+        "unit": "deg",
+        "value": 7.21,
+        "d": 2,
+        "z": -1.23
+       },
+       {
+        "key": "spaceControl",
+        "name": "Space control",
+        "unit": "m^2",
+        "value": 532.23,
+        "d": 0,
+        "z": -0.18
+       },
+       {
+        "key": "losReactivity",
+        "name": "Line-of-sight reactivity",
+        "unit": "deg/s",
+        "value": 2.55,
+        "d": 2,
+        "z": -0.93
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "mid-block",
+    "label": "Mid block, ball-side trigger",
+    "block_height": 40.0,
+    "press_trigger": 0.5,
+    "formula": "fit = 0.35·z accelLoad + 0.35·z separation + 0.30·z reactionMs⁻",
+    "weights": {
+     "accelLoad": 0.35,
+     "separation": 0.35,
+     "reactionMs": 0.3
+    },
+    "reads": "Transition both ways: repeat accelerations, separation held, first reaction.",
+    "board": [
+     {
+      "id": 12,
+      "label": "12",
+      "team": "B",
+      "overall": 56,
+      "fit": 0.98,
+      "inputs": 3,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "accelLoad",
+        "name": "Acceleration load",
+        "unit": "m/s",
+        "value": 8.51,
+        "d": 2,
+        "z": 1.58
+       },
+       {
+        "key": "separation",
+        "name": "Separation",
+        "unit": "m",
+        "value": 9.34,
+        "d": 2,
+        "z": 0.6
+       },
+       {
+        "key": "reactionMs",
+        "name": "Reaction latency",
+        "unit": "ms",
+        "value": 312.0,
+        "d": 0,
+        "z": 0.71
+       }
+      ]
+     },
+     {
+      "id": 5,
+      "label": "5",
+      "team": "A",
+      "overall": 55,
+      "fit": 0.79,
+      "inputs": 3,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "accelLoad",
+        "name": "Acceleration load",
+        "unit": "m/s",
+        "value": 8.46,
+        "d": 2,
+        "z": 1.55
+       },
+       {
+        "key": "separation",
+        "name": "Separation",
+        "unit": "m",
+        "value": 8.91,
+        "d": 2,
+        "z": 0.49
+       },
+       {
+        "key": "reactionMs",
+        "name": "Reaction latency",
+        "unit": "ms",
+        "value": 375.0,
+        "d": 0,
+        "z": 0.23
+       }
+      ]
+     },
+     {
+      "id": 8,
+      "label": "8",
+      "team": "A",
+      "overall": 53,
+      "fit": 0.78,
+      "inputs": 2,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "accelLoad",
+        "name": "Acceleration load",
+        "unit": "m/s",
+        "value": 7.26,
+        "d": 2,
+        "z": 0.95
+       },
+       {
+        "key": "separation",
+        "name": "Separation",
+        "unit": "m",
+        "value": 9.34,
+        "d": 2,
+        "z": 0.6
+       },
+       {
+        "key": "reactionMs",
+        "name": "Reaction latency",
+        "unit": "ms",
+        "value": null,
+        "d": null,
+        "z": null
+       }
+      ]
+     },
+     {
+      "id": 10,
+      "label": "10",
+      "team": "A",
+      "overall": 40,
+      "fit": 0.68,
+      "inputs": 2,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "accelLoad",
+        "name": "Acceleration load",
+        "unit": "m/s",
+        "value": 3.77,
+        "d": 2,
+        "z": -0.79
+       },
+       {
+        "key": "separation",
+        "name": "Separation",
+        "unit": "m",
+        "value": 15.55,
+        "d": 1,
+        "z": 2.15
+       },
+       {
+        "key": "reactionMs",
+        "name": "Reaction latency",
+        "unit": "ms",
+        "value": null,
+        "d": null,
+        "z": null
+       }
+      ]
+     },
+     {
+      "id": 3,
+      "label": "3",
+      "team": "B",
+      "overall": 60,
+      "fit": 0.52,
+      "inputs": 2,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "accelLoad",
+        "name": "Acceleration load",
+        "unit": "m/s",
+        "value": 6.14,
+        "d": 2,
+        "z": 0.39
+       },
+       {
+        "key": "separation",
+        "name": "Separation",
+        "unit": "m",
+        "value": 9.5,
+        "d": 2,
+        "z": 0.64
+       },
+       {
+        "key": "reactionMs",
+        "name": "Reaction latency",
+        "unit": "ms",
+        "value": null,
+        "d": null,
+        "z": null
+       }
+      ]
+     },
+     {
+      "id": 2,
+      "label": "2",
+      "team": "A",
+      "overall": 52,
+      "fit": 0.06,
+      "inputs": 3,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "accelLoad",
+        "name": "Acceleration load",
+        "unit": "m/s",
+        "value": 5.29,
+        "d": 2,
+        "z": -0.03
+       },
+       {
+        "key": "separation",
+        "name": "Separation",
+        "unit": "m",
+        "value": 3.68,
+        "d": 2,
+        "z": -0.81
+       },
+       {
+        "key": "reactionMs",
+        "name": "Reaction latency",
+        "unit": "ms",
+        "value": 250.0,
+        "d": 0,
+        "z": 1.18
+       }
+      ]
+     },
+     {
+      "id": 13,
+      "label": "13",
+      "team": "B",
+      "overall": 54,
+      "fit": -0.21,
+      "inputs": 3,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "accelLoad",
+        "name": "Acceleration load",
+        "unit": "m/s",
+        "value": 4.24,
+        "d": 2,
+        "z": -0.56
+       },
+       {
+        "key": "separation",
+        "name": "Separation",
+        "unit": "m",
+        "value": 2.73,
+        "d": 2,
+        "z": -1.05
+       },
+       {
+        "key": "reactionMs",
+        "name": "Reaction latency",
+        "unit": "ms",
+        "value": 250.0,
+        "d": 0,
+        "z": 1.18
+       }
+      ]
+     },
+     {
+      "id": 4,
+      "label": "4",
+      "team": "B",
+      "overall": 42,
+      "fit": -0.29,
+      "inputs": 3,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "accelLoad",
+        "name": "Acceleration load",
+        "unit": "m/s",
+        "value": 5.54,
+        "d": 2,
+        "z": 0.09
+       },
+       {
+        "key": "separation",
+        "name": "Separation",
+        "unit": "m",
+        "value": 8.91,
+        "d": 2,
+        "z": 0.49
+       },
+       {
+        "key": "reactionMs",
+        "name": "Reaction latency",
+        "unit": "ms",
+        "value": 625.0,
+        "d": 0,
+        "z": -1.65
+       }
+      ]
+     },
+     {
+      "id": 11,
+      "label": "11",
+      "team": "A",
+      "overall": 49,
+      "fit": -0.31,
+      "inputs": 3,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "accelLoad",
+        "name": "Acceleration load",
+        "unit": "m/s",
+        "value": 5.46,
+        "d": 2,
+        "z": 0.05
+       },
+       {
+        "key": "separation",
+        "name": "Separation",
+        "unit": "m",
+        "value": 2.37,
+        "d": 2,
+        "z": -1.14
+       },
+       {
+        "key": "reactionMs",
+        "name": "Reaction latency",
+        "unit": "ms",
+        "value": 375.0,
+        "d": 0,
+        "z": 0.23
+       }
+      ]
+     },
+     {
+      "id": 16,
+      "label": "16",
+      "team": "A",
+      "overall": 42,
+      "fit": -0.62,
+      "inputs": 2,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "accelLoad",
+        "name": "Acceleration load",
+        "unit": "m/s",
+        "value": 1.78,
+        "d": 2,
+        "z": -1.79
+       },
+       {
+        "key": "separation",
+        "name": "Separation",
+        "unit": "m",
+        "value": 9.13,
+        "d": 2,
+        "z": 0.55
+       },
+       {
+        "key": "reactionMs",
+        "name": "Reaction latency",
+        "unit": "ms",
+        "value": null,
+        "d": null,
+        "z": null
+       }
+      ]
+     },
+     {
+      "id": 9,
+      "label": "9",
+      "team": "B",
+      "overall": 47,
+      "fit": -0.68,
+      "inputs": 3,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "accelLoad",
+        "name": "Acceleration load",
+        "unit": "m/s",
+        "value": 5.26,
+        "d": 2,
+        "z": -0.05
+       },
+       {
+        "key": "separation",
+        "name": "Separation",
+        "unit": "m",
+        "value": 1.76,
+        "d": 2,
+        "z": -1.29
+       },
+       {
+        "key": "reactionMs",
+        "name": "Reaction latency",
+        "unit": "ms",
+        "value": 500.0,
+        "d": 0,
+        "z": -0.71
+       }
+      ]
+     },
+     {
+      "id": 7,
+      "label": "7",
+      "team": "A",
+      "overall": 50,
+      "fit": -0.71,
+      "inputs": 3,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "accelLoad",
+        "name": "Acceleration load",
+        "unit": "m/s",
+        "value": 5.9,
+        "d": 2,
+        "z": 0.27
+       },
+       {
+        "key": "separation",
+        "name": "Separation",
+        "unit": "m",
+        "value": 1.76,
+        "d": 2,
+        "z": -1.29
+       },
+       {
+        "key": "reactionMs",
+        "name": "Reaction latency",
+        "unit": "ms",
+        "value": 562.0,
+        "d": 0,
+        "z": -1.18
+       }
+      ]
+     },
+     {
+      "id": 15,
+      "label": "15",
+      "team": "A",
+      "overall": 48,
+      "fit": -0.81,
+      "inputs": 2,
+      "of": 3,
+      "metrics": [
+       {
+        "key": "accelLoad",
+        "name": "Acceleration load",
+        "unit": "m/s",
+        "value": 2.01,
+        "d": 2,
+        "z": -1.67
+       },
+       {
+        "key": "separation",
+        "name": "Separation",
+        "unit": "m",
+        "value": 7.19,
+        "d": 2,
+        "z": 0.06
+       },
+       {
+        "key": "reactionMs",
+        "name": "Reaction latency",
+        "unit": "ms",
+        "value": null,
+        "d": null,
+        "z": null
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "n_players": 13,
+  "axes": {
+   "block_height": {
+    "min": 20,
+    "max": 60,
+    "unit": "m"
+   },
+   "press_trigger": {
+    "min": 0,
+    "max": 1,
+    "unit": ""
+   },
+   "from": "search.json axes — the real strategy space beat X searched"
+  },
+  "note": "fit is a stated construct over measured z-scores against the frozen cohort baseline (metrics.json); z sign is flipped where lower is better; weights are renormalised over the inputs a player has. scanRate is unpopulated on a 3.9 s window, so line-of-sight reactivity stands in."
+ },
+ "curve": {
+  "provenance": "projected",
+  "equation": "value(o) = €1.0 m × 2 ^ ((o − 50) ÷ 8)",
+  "constants": {
+   "currency": "€",
+   "anchorM": 1.0,
+   "anchorOverall": 50,
+   "doublePts": 8
+  },
+  "perPointPct": 9.05,
+  "players": [
+   {
+    "id": 3,
+    "label": "3",
+    "team": "B",
+    "overall": 60,
+    "overallAfter": 60,
+    "value": 2.378,
+    "valueAfter": 2.378,
+    "pct": 0.0
+   },
+   {
+    "id": 12,
+    "label": "12",
+    "team": "B",
+    "overall": 56,
+    "overallAfter": 56,
+    "value": 1.682,
+    "valueAfter": 1.682,
+    "pct": 0.0
+   },
+   {
+    "id": 5,
+    "label": "5",
+    "team": "A",
+    "overall": 55,
+    "overallAfter": 55,
+    "value": 1.542,
+    "valueAfter": 1.542,
+    "pct": 0.0
+   },
+   {
+    "id": 13,
+    "label": "13",
+    "team": "B",
+    "overall": 54,
+    "overallAfter": 54,
+    "value": 1.414,
+    "valueAfter": 1.414,
+    "pct": 0.0
+   },
+   {
+    "id": 8,
+    "label": "8",
+    "team": "A",
+    "overall": 53,
+    "overallAfter": 53,
+    "value": 1.297,
+    "valueAfter": 1.297,
+    "pct": 0.0
+   },
+   {
+    "id": 2,
+    "label": "2",
+    "team": "A",
+    "overall": 52,
+    "overallAfter": 52,
+    "value": 1.189,
+    "valueAfter": 1.189,
+    "pct": 0.0
+   },
+   {
+    "id": 7,
+    "label": "7",
+    "team": "A",
+    "overall": 50,
+    "overallAfter": 50,
+    "value": 1.0,
+    "valueAfter": 1.0,
+    "pct": 0.0
+   },
+   {
+    "id": 11,
+    "label": "11",
+    "team": "A",
+    "overall": 49,
+    "overallAfter": 49,
+    "value": 0.917,
+    "valueAfter": 0.917,
+    "pct": 0.0
+   },
+   {
+    "id": 15,
+    "label": "15",
+    "team": "A",
+    "overall": 48,
+    "overallAfter": 48,
+    "value": 0.841,
+    "valueAfter": 0.841,
+    "pct": 0.0
+   },
+   {
+    "id": 9,
+    "label": "9",
+    "team": "B",
+    "overall": 47,
+    "overallAfter": 47,
+    "value": 0.771,
+    "valueAfter": 0.771,
+    "pct": 0.0
+   },
+   {
+    "id": 4,
+    "label": "4",
+    "team": "B",
+    "overall": 42,
+    "overallAfter": 42,
+    "value": 0.5,
+    "valueAfter": 0.5,
+    "pct": 0.0
+   },
+   {
+    "id": 16,
+    "label": "16",
+    "team": "A",
+    "overall": 42,
+    "overallAfter": 43,
+    "value": 0.5,
+    "valueAfter": 0.545,
+    "pct": 9.05
+   },
+   {
+    "id": 10,
+    "label": "10",
+    "team": "A",
+    "overall": 40,
+    "overallAfter": 40,
+    "value": 0.42,
+    "valueAfter": 0.42,
+    "pct": 0.0
+   }
+  ],
+  "movers": [
+   {
+    "id": 16,
+    "label": "16",
+    "team": "A",
+    "overall": 42,
+    "overallAfter": 43,
+    "value": 0.5,
+    "valueAfter": 0.545,
+    "pct": 9.05
+   }
+  ],
+  "book": {
+   "n": 13,
+   "before": 14.451,
+   "after": 14.496,
+   "deltaM": 0.045,
+   "pct": 0.31
+  },
+  "sensitivity": [
+   {
+    "pts": 1,
+    "pct": 9.1,
+    "deltaM": 1.31
+   },
+   {
+    "pts": 3,
+    "pct": 29.7,
+    "deltaM": 4.29
+   },
+   {
+    "pts": 5,
+    "pct": 54.2,
+    "deltaM": 7.84
+   }
+  ],
+  "note": "no transfer data exists anywhere in this repository and none is implied. The anchor is a placeholder a club replaces with its own book; the CONVEXITY is the claim, and every percentage is independent of the anchor."
+ },
+ "transfer": {
+  "provenance": "projected",
+  "buyer": {
+   "synthetic": true,
+   "label": "Buyer — synthetic profile",
+   "gap": "no ball-carrier who breaks the first line",
+   "gapMetrics": [
+    {
+     "key": "peakAccel",
+     "name": "Peak acceleration",
+     "unit": "m/s^2",
+     "z": -1.2
+    },
+    {
+     "key": "codPeak",
+     "name": "Sharpest turn",
+     "unit": "deg",
+     "z": -1.2
+    }
+   ],
+   "note": "a stated squad profile — midfield -1.2 SD below this cohort on both gap metrics. No scouting data exists in this repository."
+  },
+  "player": {
+   "id": 5,
+   "label": "5",
+   "team": "A",
+   "overall": 55,
+   "metrics": [
+    {
+     "key": "peakAccel",
+     "name": "Peak acceleration",
+     "unit": "m/s^2",
+     "value": 6.21,
+     "d": 2,
+     "z": 1.54
+    },
+    {
+     "key": "codPeak",
+     "name": "Sharpest turn",
+     "unit": "deg",
+     "value": 41.72,
+     "d": 1,
+     "z": 0.56
+    }
+   ],
+   "zMean": 1.05
+  },
+  "model": {
+   "gdEq": "Δgd = σ × (z̄ player − z̄ buyer midfield)",
+   "openEq": "Δλ = σ × z̄ player, split to both sides",
+   "hEq": "H = −Σ p·log₂ p over {win, draw, loss} per window",
+   "sigma": 0.01101,
+   "sigmaFrom": "search.json noise_floor.sigma — the search's own measured luck",
+   "band": 0.02157,
+   "lambdaAnchor": 0.19,
+   "anchorFrom": "sim.json ensemble goals mean, 400 seeds, 90 s window",
+   "note": "elasticity stated, not fitted: one cohort SD of the gap ability is priced at one σ of the search's measured noise floor"
+  },
+  "toBuyer": {
+   "dGd": 0.0248,
+   "outsideBand": true
+  },
+  "toAverage": {
+   "dGd": 0.0116,
+   "outsideBand": false
+  },
+  "premium": 2.14,
+  "unpredictability": {
+   "before": {
+    "pWin": 0.14,
+    "pDraw": 0.709,
+    "pLoss": 0.151,
+    "H": 1.161,
+    "goalRate": 0.38
+   },
+   "after": {
+    "pWin": 0.161,
+    "pDraw": 0.688,
+    "pLoss": 0.151,
+    "H": 1.207,
+    "goalRate": 0.4164
+   },
+   "dH": 0.046,
+   "dHPct": 4.0,
+   "dGoalsPct": 9.6,
+   "index": "outcome entropy — the spectacle index"
+  }
+ },
+ "book": {
+  "provenance": "projected",
+  "policy": {
+   "sell": "best board fit ≥ +0.75 z and overall at or above the squad median (50) — a surplus a named buyer pays for",
+   "develop": "the 13-athlete prescription's projection moves the overall by ≥ 1 pt",
+   "keep": "everyone else — squad depth holds its book value"
+  },
+  "buyers": [
+   {
+    "id": "runner",
+    "label": "needs a runner in behind",
+    "needs": [
+     "topSpeed",
+     "hsr_m"
+    ]
+   },
+   {
+    "id": "carrier",
+    "label": "needs a first-line breaker",
+    "needs": [
+     "peakAccel",
+     "codPeak"
+    ]
+   },
+   {
+    "id": "engine",
+    "label": "needs a transition engine",
+    "needs": [
+     "accelLoad",
+     "separation"
+    ]
+   }
+  ],
+  "rows": [
+   {
+    "id": 3,
+    "label": "3",
+    "team": "B",
+    "rank": 1,
+    "overall": 60,
+    "overallAfter": 60,
+    "dPts": 0,
+    "valueM": 2.378,
+    "valueAfterM": 2.378,
+    "dValueM": 0.0,
+    "valuePct": 0.0,
+    "bestFit": {
+     "arch": "Mid block, ball-side trigger",
+     "fit": 0.52
+    },
+    "action": "keep",
+    "buyer": null
+   },
+   {
+    "id": 12,
+    "label": "12",
+    "team": "B",
+    "rank": 2,
+    "overall": 56,
+    "overallAfter": 56,
+    "dPts": 0,
+    "valueM": 1.682,
+    "valueAfterM": 1.682,
+    "dValueM": 0.0,
+    "valuePct": 0.0,
+    "bestFit": {
+     "arch": "High line, high press",
+     "fit": 1.27
+    },
+    "action": "sell",
+    "buyer": {
+     "id": "runner",
+     "label": "needs a runner in behind",
+     "fit": 1.91,
+     "why": "topSpeed z +1.9 · hsr_m z +2.0"
+    }
+   },
+   {
+    "id": 5,
+    "label": "5",
+    "team": "A",
+    "rank": 3,
+    "overall": 55,
+    "overallAfter": 55,
+    "dPts": 0,
+    "valueM": 1.542,
+    "valueAfterM": 1.542,
+    "dValueM": 0.0,
+    "valuePct": 0.0,
+    "bestFit": {
+     "arch": "Mid block, ball-side trigger",
+     "fit": 0.79
+    },
+    "action": "sell",
+    "buyer": {
+     "id": "carrier",
+     "label": "needs a first-line breaker",
+     "fit": 1.05,
+     "why": "peakAccel z +1.5 · codPeak z +0.6"
+    }
+   },
+   {
+    "id": 13,
+    "label": "13",
+    "team": "B",
+    "rank": 4,
+    "overall": 54,
+    "overallAfter": 54,
+    "dPts": 0,
+    "valueM": 1.414,
+    "valueAfterM": 1.414,
+    "dValueM": 0.0,
+    "valuePct": 0.0,
+    "bestFit": {
+     "arch": "High line, high press",
+     "fit": 0.53
+    },
+    "action": "keep",
+    "buyer": null
+   },
+   {
+    "id": 8,
+    "label": "8",
+    "team": "A",
+    "rank": 5,
+    "overall": 53,
+    "overallAfter": 53,
+    "dPts": 0,
+    "valueM": 1.297,
+    "valueAfterM": 1.297,
+    "dValueM": 0.0,
+    "valuePct": 0.0,
+    "bestFit": {
+     "arch": "Mid block, ball-side trigger",
+     "fit": 0.78
+    },
+    "action": "sell",
+    "buyer": {
+     "id": "runner",
+     "label": "needs a runner in behind",
+     "fit": 1.49,
+     "why": "topSpeed z +1.3 · hsr_m z +1.7"
+    }
+   },
+   {
+    "id": 2,
+    "label": "2",
+    "team": "A",
+    "rank": 6,
+    "overall": 52,
+    "overallAfter": 52,
+    "dPts": 0,
+    "valueM": 1.189,
+    "valueAfterM": 1.189,
+    "dValueM": 0.0,
+    "valuePct": 0.0,
+    "bestFit": {
+     "arch": "High line, high press",
+     "fit": 0.41
+    },
+    "action": "keep",
+    "buyer": null
+   },
+   {
+    "id": 7,
+    "label": "7",
+    "team": "A",
+    "rank": 7,
+    "overall": 50,
+    "overallAfter": 50,
+    "dPts": 0,
+    "valueM": 1.0,
+    "valueAfterM": 1.0,
+    "dValueM": 0.0,
+    "valuePct": 0.0,
+    "bestFit": {
+     "arch": "High line, high press",
+     "fit": 0.0
+    },
+    "action": "keep",
+    "buyer": null
+   },
+   {
+    "id": 11,
+    "label": "11",
+    "team": "A",
+    "rank": 8,
+    "overall": 49,
+    "overallAfter": 49,
+    "dPts": 0,
+    "valueM": 0.917,
+    "valueAfterM": 0.917,
+    "dValueM": 0.0,
+    "valuePct": 0.0,
+    "bestFit": {
+     "arch": "Mid block, ball-side trigger",
+     "fit": -0.31
+    },
+    "action": "keep",
+    "buyer": null
+   },
+   {
+    "id": 15,
+    "label": "15",
+    "team": "A",
+    "rank": 9,
+    "overall": 48,
+    "overallAfter": 48,
+    "dPts": 0,
+    "valueM": 0.841,
+    "valueAfterM": 0.841,
+    "dValueM": 0.0,
+    "valuePct": 0.0,
+    "bestFit": {
+     "arch": "Low block, deep and passive",
+     "fit": 0.33
+    },
+    "action": "keep",
+    "buyer": null
+   },
+   {
+    "id": 9,
+    "label": "9",
+    "team": "B",
+    "rank": 10,
+    "overall": 47,
+    "overallAfter": 47,
+    "dPts": 0,
+    "valueM": 0.771,
+    "valueAfterM": 0.771,
+    "dValueM": 0.0,
+    "valuePct": 0.0,
+    "bestFit": {
+     "arch": "High line, high press",
+     "fit": 0.57
+    },
+    "action": "keep",
+    "buyer": null
+   },
+   {
+    "id": 4,
+    "label": "4",
+    "team": "B",
+    "rank": 11,
+    "overall": 42,
+    "overallAfter": 42,
+    "dPts": 0,
+    "valueM": 0.5,
+    "valueAfterM": 0.5,
+    "dValueM": 0.0,
+    "valuePct": 0.0,
+    "bestFit": {
+     "arch": "Mid block, ball-side trigger",
+     "fit": -0.29
+    },
+    "action": "keep",
+    "buyer": null
+   },
+   {
+    "id": 16,
+    "label": "16",
+    "team": "A",
+    "rank": 12,
+    "overall": 42,
+    "overallAfter": 43,
+    "dPts": 1,
+    "valueM": 0.5,
+    "valueAfterM": 0.545,
+    "dValueM": 0.045,
+    "valuePct": 9.05,
+    "bestFit": {
+     "arch": "Low block, deep and passive",
+     "fit": 0.42
+    },
+    "action": "develop",
+    "buyer": null
+   },
+   {
+    "id": 10,
+    "label": "10",
+    "team": "A",
+    "rank": 13,
+    "overall": 40,
+    "overallAfter": 40,
+    "dPts": 0,
+    "valueM": 0.42,
+    "valueAfterM": 0.42,
+    "dValueM": 0.0,
+    "valuePct": 0.0,
+    "bestFit": {
+     "arch": "Mid block, ball-side trigger",
+     "fit": 0.68
+    },
+    "action": "keep",
+    "buyer": null
+   }
+  ],
+  "counts": {
+   "keep": 9,
+   "develop": 1,
+   "sell": 3
+  },
+  "note": "actions follow the printed policy, applied to measured fit and the projected column of roster.json. no transfer data exists anywhere in this repository and none is implied. The anchor is a placeholder a club replaces with its own book; the CONVEXITY is the claim, and every percentage is independent of the anchor."
+ }
+}

@@ -6,8 +6,12 @@
 const CSS = `
 .rgm-frame {
   --rgm-side: clamp(20px, 3.4vw, 56px);
-  --rgm-top:  clamp(62px, 8vh, 92px);
-  --rgm-bot:  clamp(184px, 22.5vh, 248px);
+  --rgm-top:  clamp(74px, 9.5vh, 92px);
+  /* The deck's annotation is bottom-left and its ink starts 179px above the
+     floor once it carries three stats — the same in absolute pixels at 720px
+     tall as at 560px, because it is sized off the width. A 184px floor put the
+     stage's own foot line 4px under the eyebrow, which read as one block. */
+  --rgm-bot:  clamp(196px, 26vh, 248px);
   --sage: #7FB98A;
   position: absolute; inset: 0;
   color: var(--bone);
@@ -58,30 +62,6 @@ const CSS = `
   margin-right: 5px;
 }
 .rgm-right { margin-left: auto; text-align: right; }
-
-/* ---------------- measured metric strip ---------------- */
-.rgm-strip {
-  display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr);
-  gap: 1px; background: var(--coal-hair);
-  border: 1px solid var(--coal-hair);
-}
-.rgm-cell { background: var(--coal-2); padding: 10px 12px 11px; min-width: 0; }
-.rgm-cell.is-flag { background: #211a10; }
-.rgm-cell-v {
-  font-family: var(--serif); font-variant-numeric: tabular-nums;
-  font-size: clamp(18px, 1.62vw, 24px); line-height: 1.05; color: var(--bone);
-  white-space: nowrap;
-}
-.rgm-cell.is-flag .rgm-cell-v { color: var(--amber); }
-.rgm-cell-v .u {
-  font-family: var(--mono); font-size: 9px; letter-spacing: 0.04em;
-  color: var(--bone-2); margin-left: 4px;
-}
-.rgm-cell-k {
-  font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.16em;
-  text-transform: uppercase; color: var(--bone-2); margin-top: 6px;
-  line-height: 1.5;
-}
 
 /* ---------------- deficit table ---------------- */
 .rgm-tbl {
@@ -158,6 +138,10 @@ const CSS = `
   padding: 13px 15px 14px;
   display: flex; flex-direction: column; gap: 9px;
 }
+.rgm-fp-body {
+  flex: 1; min-height: 0; overflow: hidden;
+  display: flex; flex-direction: column; gap: 9px;
+}
 .rgm-fp-h { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 0; }
 .rgm-fp-from {
   font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.18em;
@@ -200,55 +184,11 @@ const CSS = `
   border: 1px solid var(--coal-hair); padding: 1px 5px; white-space: nowrap;
 }
 
-/* ---------------- projection panel ---------------- */
-.rgm-proj {
-  border: 1px solid var(--coal-hair);
-  background: linear-gradient(180deg, #221a10 0%, var(--coal-2) 55%, var(--coal) 100%);
-  padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 10px;
-  min-width: 0;
-}
-.rgm-proj-h {
-  display: flex; align-items: center; justify-content: space-between; gap: 10px;
-  font-family: var(--mono); font-size: 9px; letter-spacing: 0.22em;
-  text-transform: uppercase; color: var(--bone-2);
-  border-bottom: 1px solid var(--coal-hair); padding-bottom: 10px;
-}
+/* ---------------- projected register ---------------- */
 .rgm-projchip {
   font-family: var(--mono); font-size: 8px; letter-spacing: 0.2em;
   text-transform: uppercase; color: var(--amber);
   border: 1px solid var(--amber); padding: 2px 6px; white-space: nowrap;
-}
-.rgm-tgt {
-  font-family: var(--mono); font-size: 10px; line-height: 1.4;
-  color: var(--bone-2); padding: 6px 0; border-top: 1px solid var(--coal-hair);
-  min-width: 0;
-}
-.rgm-tgt:first-of-type { border-top: 0; }
-.rgm-tgt-v {
-  display: flex; align-items: baseline; gap: 6px; margin-top: 2px;
-  font-variant-numeric: tabular-nums; white-space: nowrap;
-}
-.rgm-tgt-from { color: var(--bone-2); text-decoration: line-through; opacity: 0.6; }
-.rgm-tgt-arr { color: var(--bone-2); }
-.rgm-tgt-to { color: var(--amber); }
-.rgm-ovr {
-  display: flex; align-items: center; justify-content: center;
-  gap: 16px; padding: 4px 0 2px;
-}
-.rgm-ovr-b { text-align: center; }
-.rgm-ovr-v {
-  font-family: var(--serif); font-size: clamp(30px, 2.8vw, 40px); line-height: 0.9;
-  font-variant-numeric: tabular-nums; color: var(--bone-2);
-}
-.rgm-ovr-b.next .rgm-ovr-v { color: var(--amber); }
-.rgm-ovr-k {
-  font-family: var(--mono); font-size: 8px; letter-spacing: 0.2em;
-  text-transform: uppercase; color: var(--bone-2); margin-top: 5px;
-}
-.rgm-ovr-arr { font-family: var(--mono); font-size: 18px; color: var(--sage); }
-.rgm-delta {
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em;
-  color: var(--sage); text-align: center;
 }
 .rgm-note {
   font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.1em;
@@ -318,6 +258,8 @@ const CSS = `
   gap: clamp(18px, 2.4vw, 40px);
 }
 .rgm-col { min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+/* the day rows are one block, so the column's gap is not paid seven times */
+.rgm-mweek { display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
 .rgm-mrow {
   display: grid; grid-template-columns: 58px minmax(0, 1fr);
   gap: 12px; align-items: baseline;
@@ -368,6 +310,105 @@ const CSS = `
 .rgm-mproj .gain {
   font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; color: var(--sage);
 }
+
+/* ---------------- short viewports ----------------
+   The two-athlete stage is the tallest thing in the beat: two columns of a
+   week, each day carrying wrapped work-unit ids. On a 1280x800 laptop the
+   taller column overran the stack and painted over the deck's own annotation.
+   Compress the microcycle rows, and clip the column as a hard guarantee that
+   nothing can ever reach the annotation again. Nothing is dropped at
+   presentation size. */
+@media (max-height: 900px) {
+  .rgm-two { gap: clamp(14px, 2vw, 28px); }
+  .rgm-col { overflow: hidden; gap: 7px; }
+  .rgm-mrow { padding: 4px 0; grid-template-columns: 52px minmax(0, 1fr); gap: 10px; }
+  .rgm-msess { font-size: 12.5px; }
+  .rgm-mids { font-size: 8.5px; line-height: 1.45; margin-top: 2px; }
+  .rgm-mdef-r { padding: 3px 0; }
+  .rgm-mproj { padding: 6px 0; }
+  .rgm-mproj .now, .rgm-mproj .next { font-size: 17px; }
+}
+
+/* A 1280x720 stage leaves ~450px between the athlete strip and the annotation,
+   and a 1280x560 one leaves ~290px. Everything gives up size; nothing gives up
+   a threshold, a flag id, a work-unit id or an audit line. */
+@media (max-height: 760px) {
+  .rgm-view { gap: clamp(9px, 1.3vh, 16px); }
+  .rgm-who { padding-bottom: 9px; }
+  .rgm-tr { padding: clamp(6px, 1vh, 12px) 0; }
+  .rgm-mname { font-size: 15px; }
+  .rgm-mv { font-size: clamp(18px, 1.7vw, 23px); }
+  .rgm-reads { font-size: 12.5px; margin-top: 5px; line-height: 1.4; }
+  .rgm-fp { padding: 10px 12px 11px; gap: 6px; }
+  .rgm-fp-body { gap: 6px; }
+  .rgm-fp-why { padding-top: 8px; font-size: 11.5px; line-height: 1.35; }
+  .rgm-blkline { padding-top: 6px; gap: 7px; }
+  .rgm-u { padding-top: 3px; }
+  .rgm-u-role { font-size: 7.5px; }
+  .rgm-u-id { font-size: 10.5px; line-height: 1.25; }
+  .rgm-dose { margin-top: 2px; }
+  .rgm-dose span { font-size: 8.5px; padding: 0 4px; }
+  .rgm-day { padding: 8px 9px 10px; gap: 4px; }
+  .rgm-day-h { padding-bottom: 5px; }
+  .rgm-day-s { font-size: 12.5px; line-height: 1.2; }
+  .rgm-blk { padding-top: 5px; }
+  .rgm-blk-m { font-size: 9.5px; line-height: 1.25; }
+  .rgm-wu { margin-top: 2px; }
+  .rgm-wu-id { font-size: 9.5px; line-height: 1.25; }
+  .rgm-wu-d { font-size: 8.5px; }
+  .rgm-col { gap: 6px; }
+  .rgm-mrow { padding: 2px 0; }
+  .rgm-mdef-r { padding: 2px 0; }
+  .rgm-mproj { padding: 5px 0; }
+  .rgm-mids { line-height: 1.35; }
+  .rgm-rules { padding-top: 8px; gap: clamp(12px, 1.6vw, 26px); }
+}
+@media (max-height: 620px) {
+  .rgm-who-n { font-size: clamp(16px, 1.5vw, 20px); }
+  .rgm-tr { padding: 5px 0; }
+  .rgm-mname { font-size: 13.5px; }
+  .rgm-mv { font-size: 18px; }
+  .rgm-reads { font-size: 11.5px; margin-top: 4px; }
+  .rgm-basis { font-size: 8px; }
+  .rgm-fp { padding: 8px 10px 9px; gap: 5px; }
+  .rgm-fp-why { padding-top: 7px; font-size: 11px; }
+  .rgm-method { font-size: 10.5px; }
+  .rgm-u-id { font-size: 10px; }
+  .rgm-day { padding: 6px 8px 8px; gap: 5px; }
+  .rgm-day-s { font-size: 11.5px; }
+  .rgm-wu-id { font-size: 9px; }
+  .rgm-wu-d { font-size: 8px; }
+  /* the id lists are the most jargon-heavy rows and the first to go — the
+     prescription and the week stages both print them in full. The flag chips
+     go with them: the deficit rows immediately below name the same three
+     limitations, with the measurement and the threshold beside each. */
+  .rgm-mids { display: none; }
+  .rgm-mchips { display: none; }
+  .rgm-col { gap: 5px; }
+  .rgm-mrow { padding: 2px 0; }
+  .rgm-msess { font-size: 11px; }
+  .rgm-mdef-r { padding: 1px 0; }
+  .rgm-mdef-r .v { font-size: 14px; }
+  .rgm-mproj { padding: 4px 0; }
+  .rgm-mproj .now, .rgm-mproj .next { font-size: 15px; }
+  .rgm-rules { padding-top: 7px; font-size: 8.5px; letter-spacing: 0.1em; }
+}
+
+/* ---------------- primer scrim ----------------
+   The primer's own veil pushes the scene back with a pseudo-element, which
+   means nothing in the DOM sits between the blurred table and the sentence
+   over it. This is that layer: it is what actually stops a deficit row from
+   being legible under the card, and being a real element it also tells the
+   text-collision sweep the truth — the row behind the sentence is covered,
+   not colliding with it. It is hit-test-invisible whenever the primer is off,
+   so it can never mask a real stage. */
+.rgm-veilcap {
+  position: absolute; inset: 0; z-index: 4;
+  background: var(--bg);
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity 520ms var(--ease), visibility 520ms var(--ease);
+}
+.rgm-veilcap.is-on { opacity: 0.34; visibility: visible; }
 
 /* ---------------- reveal + scrim ---------------- */
 .rgm-r {

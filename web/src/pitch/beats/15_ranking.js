@@ -11,13 +11,22 @@ import { createRankingView } from './ranking/view.js';
 
 export const meta = {
   id: 'ranking',
-  numeral: 'XI',
+  numeral: 'XV',
   title: 'Ranking',
   long: 'Ranking and value',
   polarity: 'light',
   sources: ['roster'],
   provenance: null,          // measurement is the default; stage 3 overrides
   stages: [
+    {
+      // The primer. view.js blanks the deck's annotation for this one stage:
+      // the card in the middle of the screen is already saying this sentence,
+      // and the copy lives here so meta stays the beat's script of record.
+      eyebrow: 'The squad, ranked',
+      line: 'Thirteen players, ordered by what was actually measured — '
+        + 'not by reputation and not by minutes played.',
+      settleMs: 700,
+    },
     {
       eyebrow: 'The squad',
       line: 'Every player who appeared, ranked on what was measured.',

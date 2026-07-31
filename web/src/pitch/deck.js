@@ -13,6 +13,9 @@ import { fmt } from '../core/format.js';
 import { T, teamColor } from '../core/theme.js';
 import { createChrome } from './chrome.js';
 import { validateMeta, EASE, SWAP_MS, DEFAULT_SETTLE_MS } from './beat.js';
+import {
+  getLang, setLang, toggleLang, onLang, tStage, tMeta, translateTree, watchTree,
+} from './i18n.js';
 
 // ---------------------------------------------------------------- data ----
 const DATA_DIR = '/pitch/';
@@ -20,24 +23,33 @@ const DATA_DIR = '/pitch/';
 const DATA_KEYS = [
   'source', 'cuts', 'tracks', 'positions', 'joints', 'relative',
   'metrics', 'derivation', 'sim', 'affordances', 'regimes', 'search', 'roster',
+  // the investor beats added on this branch — all measured:false, see
+  // pipeline/98_validate_new.py
+  'landscape', 'lab', 'strategy', 'spectacle', 'market', 'advantage',
 ];
 
 // -------------------------------------------------------------- registry --
 // Order is the deck order. Each entry is a dynamic import; a beat that fails
 // to load is replaced by a failure plate rather than taking the deck down.
 const BEAT_LOADERS = [
-  () => import('./beats/01_raw.js'),
-  () => import('./beats/02_cut.js'),
-  () => import('./beats/03_segment.js'),
-  () => import('./beats/04_skeleton.js'),
-  () => import('./beats/05_relative.js'),
-  () => import('./beats/06_metrics.js'),
-  () => import('./beats/07_sim.js'),
-  () => import('./beats/08_regime.js'),
-  () => import('./beats/09_delta.js'),
-  () => import('./beats/10_search.js'),
-  () => import('./beats/11_ranking.js'),
-  () => import('./beats/12_close.js'),
+  () => import('./beats/01_raw.js'),        // I     the feed
+  () => import('./beats/02_landscape.js'),  // II    what the industry buys, and where it stops
+  () => import('./beats/03_cut.js'),        // III   ─┐
+  () => import('./beats/04_segment.js'),    // IV     │
+  () => import('./beats/05_skeleton.js'),   // V      ├ the measurement chain
+  () => import('./beats/06_relative.js'),   // VI     │
+  () => import('./beats/07_metrics.js'),    // VII   ─┘
+  () => import('./beats/08_sim.js'),        // VIII  ─┐
+  () => import('./beats/09_regime.js'),     // IX     ├ from measurement to training
+  () => import('./beats/10_lab.js'),        // X      │  the Performance Lab loop
+  () => import('./beats/11_delta.js'),      // XI    ─┘
+  () => import('./beats/12_search.js'),     // XII   ─┐
+  () => import('./beats/13_strategy.js'),   // XIII   ├ the engine: tactics, then spectacle
+  () => import('./beats/14_spectacle.js'),  // XIV   ─┘
+  () => import('./beats/15_ranking.js'),    // XV    ─┐
+  () => import('./beats/16_market.js'),     // XVI    ├ the asset
+  () => import('./beats/17_close.js'),      // XVII  ─┘
+  () => import('./beats/18_advantage.js'),  // XVIII the last word: what it took, and the gap
 ];
 
 const clamp = (v, lo, hi) => (v < lo ? lo : v > hi ? hi : v);
@@ -105,6 +117,7 @@ export function createDeck({ root, stage: stageEl }) {
   let busy = false;          // a transition is running
   let pending = null;        // at most one queued action
   let suppressHash = false;
+  let stopWatch = null;         // the Spanish DOM observer, while the deck lives
   const instances = new Map(); // beatIndex -> { el, inst, preloaded }
   const overrides = { eyebrow: null, line: null, stats: null };
 
@@ -142,10 +155,13 @@ export function createDeck({ root, stage: stageEl }) {
 
   function currentStageMeta() {
     const st = stagesOf(curB)[curS] || {};
+    // Translate the STAGE, then let a beat's own annotate() override it — a
+    // beat that patches values in has already run its own strings through t().
+    const base = tStage(st);
     return {
-      eyebrow: overrides.eyebrow != null ? overrides.eyebrow : st.eyebrow,
-      line: overrides.line != null ? overrides.line : st.line,
-      stats: overrides.stats != null ? overrides.stats : st.stats,
+      eyebrow: overrides.eyebrow != null ? overrides.eyebrow : base.eyebrow,
+      line: overrides.line != null ? overrides.line : base.line,
+      stats: overrides.stats != null ? overrides.stats : base.stats,
     };
   }
 
@@ -252,7 +268,7 @@ export function createDeck({ root, stage: stageEl }) {
     const meta = metaOf(bi);
     if (beatChanged) {
       chrome.setPolarity(meta.polarity);
-      chrome.setBeat(bi, si, meta);
+      chrome.setBeat(bi, si, tMeta(meta));
     } else {
       chrome.setStage(bi, si);
     }
@@ -295,6 +311,13 @@ export function createDeck({ root, stage: stageEl }) {
       disposeOutside(new Set([bi - 1, bi, bi + 1].filter((i) => i >= 0 && i < beats.length)));
       preloadNeighbour(bi);
     }
+
+    // The beats are monolingual by construction — each writes its panels in
+    // whatever language was current when it built them. In Spanish the
+    // rendered tree is translated here, once the stage has settled and its
+    // late-revealing blocks are in the DOM; the observer installed at boot
+    // catches anything a beat writes after that.
+    translateTree(stageEl);
 
     window.__stageSettled = true;
     window.__deckState = { beat: bi, stage: si, id: meta.id, global: globalStage(), of: totalStages() };
@@ -346,8 +369,12 @@ export function createDeck({ root, stage: stageEl }) {
 
       if (chrome && chrome.isIndexOpen()) {
         if (k === 'Escape' || k === 'Enter') { e.preventDefault(); chrome.toggleIndex(false); return; }
-        const jump = '123456789'.indexOf(k) >= 0 ? '123456789'.indexOf(k)
-          : k === '0' ? 9 : k === '-' ? 10 : k === '=' ? 11 : -1;
+        if (k === 'l' || k === 'L') { e.preventDefault(); switchLang(); return; }
+        // The deck outgrew ten shortcuts. The jump row continues past '=' onto
+        // the top letter row so every beat stays one keystroke from the index;
+        // beats beyond the row are still reachable by click and by ↓/↑.
+        const JUMP = '123456789' + '0-=' + 'qwertyui';
+        const jump = k.length === 1 ? JUMP.indexOf(k.toLowerCase()) : -1;
         if (jump >= 0 && jump < beats.length) {
           e.preventDefault(); chrome.toggleIndex(false); nav.goto(jump, 0); return;
         }
@@ -372,6 +399,9 @@ export function createDeck({ root, stage: stageEl }) {
           else document.documentElement.requestFullscreen().catch(() => {});
           break;
         }
+        // English / Español. Reachable from anywhere in the deck, not only from
+        // the opening beat, because the room asks for it mid-pitch.
+        case 'l': case 'L': e.preventDefault(); switchLang(); break;
         default: break;
       }
     } catch (err) {
@@ -394,6 +424,29 @@ export function createDeck({ root, stage: stageEl }) {
     if (!t) return;
     if (t.b === curB && clamp(t.s, 0, stagesOf(t.b).length - 1) === curS) return;
     act(() => go(t.b, t.s, { dir: t.b >= curB ? 1 : -1 }));
+  }
+
+  // ----------------------------------------------------------- language ---
+  /**
+   * A beat writes its DOM once, in whatever language was current when it was
+   * built, so switching cannot be a re-paint — every instance is disposed and
+   * the current stage is entered again. That costs a WebGL context rebuild on
+   * the simulation beats, which is why it happens on a keypress and not on a
+   * hover, and why the deck settles before it is allowed to run.
+   */
+  function relang() {
+    if (curB < 0) return;
+    const bi = curB, si = curS;
+    chrome.relabel(beats.map((b) => tMeta(b.meta)));
+    disposeOutside(new Set());
+    curB = -1;                       // force enter(), not stage()
+    act(() => go(bi, si, { dir: 1 }));
+  }
+
+  function switchLang(next) {
+    const before = getLang();
+    const now = next == null ? toggleLang() : setLang(next);
+    return now !== before;
   }
 
   // ------------------------------------------------------------ resize ----
@@ -432,12 +485,15 @@ export function createDeck({ root, stage: stageEl }) {
       id: b.meta.id, numeral: b.meta.numeral, title: b.meta.title,
       polarity: b.meta.polarity, stages: b.meta.stages.length,
     })),
+    get lang() { return getLang(); },
+    setLang: (code) => switchLang(code),
     on: (topic, fn) => bus.on(topic, fn),
     isBusy: () => busy,
     dispose() {
       window.removeEventListener('keydown', onKey);
       window.removeEventListener('hashchange', onHashChange);
       window.removeEventListener('resize', onResize);
+      if (stopWatch) { stopWatch(); stopWatch = null; }
       disposeOutside(new Set());
       chrome && chrome.dispose();
     },
@@ -448,14 +504,18 @@ export function createDeck({ root, stage: stageEl }) {
     const [d, bs] = await Promise.all([loadData(), loadBeats()]);
     data = d; beats = bs;
 
-    chrome = createChrome(root, beats.map((b) => b.meta), {
+    chrome = createChrome(root, beats.map((b) => tMeta(b.meta)), {
       onJump: (i) => { chrome.toggleIndex(false); nav.goto(i, 0); },
+      onLang: (code) => switchLang(code),
+      getLang,
     });
     chrome.setColophon(data);
+    onLang(() => { chrome.setColophon(data); relang(); });
 
     window.addEventListener('keydown', onKey);
     window.addEventListener('hashchange', onHashChange);
     window.addEventListener('resize', onResize);
+    stopWatch = watchTree(stageEl);
 
     const t = parseHash() || { b: 0, s: 0 };
     await go(t.b, t.s, { dir: 1 });

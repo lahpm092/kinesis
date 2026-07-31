@@ -1,0 +1,986 @@
+{
+ "measured": false,
+ "generator": "pipeline/22_lab.py",
+ "note": "Traces, metric values, cohort stats, flags, doses and affordance counts are read from joints.json / metrics.json / regimes.json / affordances.json. The instrument bench and per-day instrument assignment are the HPX equipment plan (planning estimates, not quotes); the projection and the affordance deltas are modelled, not validated.",
+ "athlete": {
+  "id": 5,
+  "label": "5",
+  "team": "A",
+  "position": "DM",
+  "minutes": 0.06,
+  "quality": 0.87,
+  "overall": 55
+ },
+ "loop": {
+  "cycle": "one match week",
+  "stations": [
+   {
+    "k": "video",
+    "t": "MATCH VIDEO",
+    "sub": "one broadcast feed \u00b7 25 fps"
+   },
+   {
+    "k": "body",
+    "t": "JOINT ANGLES \u00b7 \u03c9",
+    "sub": "kneeROM \u00b7 hipROM \u00b7 swingKnee \u00b7 anklePush deg/s \u00b7 cadence"
+   },
+   {
+    "k": "relation",
+    "t": "RELATIVE GEOMETRY",
+    "sub": "separation m \u00b7 losReactivity deg/s \u00b7 holdSec s \u00b7 tauMin s \u00b7 spaceControl m\u00b2"
+   },
+   {
+    "k": "metrics",
+    "t": "PERFORMANCE METRICS",
+    "sub": "25 metrics \u00b7 cohort z"
+   },
+   {
+    "k": "flag",
+    "t": "FLAG",
+    "sub": "cod_reorientation_slow"
+   },
+   {
+    "k": "instrument",
+    "t": "LAB INSTRUMENT",
+    "sub": "Timing gates \u2014 Freelap"
+   },
+   {
+    "k": "drill",
+    "t": "DRILL",
+    "sub": "cod_505 \u00b7 3 \u00d7 4"
+   }
+  ]
+ },
+ "chain": {
+  "body": {
+   "source": "joints.json",
+   "measured": true,
+   "model": "RTMPose-x \u00b7 halpe26",
+   "track": 6,
+   "fps": 25.0,
+   "frames": 175,
+   "joint": "kneeR",
+   "jointName": "Knee flexion, right",
+   "t": [
+    0.0,
+    0.08,
+    0.12,
+    0.2,
+    0.24,
+    0.32,
+    0.36,
+    0.44,
+    0.48,
+    0.56,
+    0.6,
+    0.68,
+    0.72,
+    0.8,
+    0.84,
+    0.92,
+    0.96,
+    1.04,
+    1.08,
+    1.16,
+    1.2,
+    1.28,
+    1.32,
+    1.4,
+    1.44,
+    1.52,
+    1.56,
+    1.64,
+    1.68,
+    1.76,
+    1.8,
+    1.88,
+    1.92,
+    2.0,
+    2.04,
+    2.12,
+    2.16,
+    2.24,
+    2.28,
+    2.36,
+    2.44,
+    2.48,
+    2.56,
+    2.6,
+    2.68,
+    2.72,
+    2.8,
+    2.84,
+    2.92,
+    2.96,
+    3.04,
+    3.08,
+    3.16,
+    3.2,
+    3.28,
+    3.32,
+    3.4,
+    3.44,
+    3.52,
+    3.56,
+    3.64,
+    3.68,
+    3.76,
+    3.8,
+    3.88,
+    3.92,
+    4.0,
+    4.04,
+    4.12,
+    4.16,
+    4.24,
+    4.28,
+    4.36,
+    4.4,
+    4.48,
+    4.52,
+    4.6,
+    4.68,
+    4.72,
+    4.8,
+    4.84,
+    4.92,
+    4.96,
+    5.04,
+    5.08,
+    5.16,
+    5.2,
+    5.28,
+    5.32,
+    5.4,
+    5.44,
+    5.52,
+    5.56,
+    5.64,
+    5.68,
+    5.76,
+    5.8,
+    5.88,
+    5.92,
+    6.0,
+    6.04,
+    6.12,
+    6.16,
+    6.24,
+    6.28,
+    6.36,
+    6.4,
+    6.48,
+    6.52,
+    6.6,
+    6.64,
+    6.72,
+    6.76,
+    6.84,
+    6.88,
+    6.96
+   ],
+   "angle": [
+    154.3,
+    166.3,
+    172.6,
+    174.6,
+    171.0,
+    167.1,
+    167.8,
+    169.6,
+    168.9,
+    162.0,
+    159.7,
+    169.0,
+    175.4,
+    179.2,
+    179.3,
+    179.2,
+    177.5,
+    170.1,
+    167.5,
+    167.7,
+    168.2,
+    169.0,
+    169.9,
+    170.6,
+    168.5,
+    157.8,
+    152.4,
+    138.6,
+    125.5,
+    97.8,
+    92.3,
+    99.9,
+    105.3,
+    114.4,
+    123.9,
+    136.9,
+    125.6,
+    99.0,
+    101.8,
+    117.3,
+    123.0,
+    123.6,
+    129.0,
+    127.5,
+    97.1,
+    83.2,
+    93.5,
+    112.6,
+    135.0,
+    132.5,
+    130.2,
+    122.8,
+    75.9,
+    62.4,
+    96.1,
+    122.6,
+    140.3,
+    137.7,
+    124.0,
+    103.9,
+    64.2,
+    67.3,
+    113.9,
+    133.5,
+    141.2,
+    138.7,
+    109.4,
+    82.0,
+    61.7,
+    82.4,
+    136.4,
+    145.9,
+    140.7,
+    132.1,
+    87.9,
+    66.8,
+    65.2,
+    117.3,
+    146.0,
+    156.9,
+    143.6,
+    96.0,
+    75.7,
+    84.4,
+    110.9,
+    157.7,
+    161.7,
+    142.5,
+    124.8,
+    78.0,
+    65.4,
+    98.1,
+    130.9,
+    165.8,
+    163.7,
+    146.5,
+    126.6,
+    73.0,
+    65.7,
+    111.2,
+    142.1,
+    162.3,
+    154.6,
+    140.8,
+    132.2,
+    104.4,
+    95.5,
+    109.5,
+    131.1,
+    158.5,
+    148.7,
+    117.1,
+    111.4,
+    113.2,
+    118.4,
+    143.5
+   ],
+   "omega": [
+    136.2,
+    160.4,
+    117.4,
+    -58.8,
+    -82.6,
+    -2.0,
+    23.2,
+    -0.0,
+    -42.1,
+    -81.4,
+    3.4,
+    163.4,
+    119.5,
+    9.1,
+    3.0,
+    -23.7,
+    -63.3,
+    -82.9,
+    -38.5,
+    14.5,
+    8.8,
+    18.1,
+    20.9,
+    -26.4,
+    -84.5,
+    -143.2,
+    -134.0,
+    -268.6,
+    -354.6,
+    -225.0,
+    -46.0,
+    139.8,
+    115.4,
+    184.8,
+    252.2,
+    -111.5,
+    -354.7,
+    -83.2,
+    140.9,
+    139.0,
+    27.4,
+    33.0,
+    22.4,
+    -168.9,
+    -403.8,
+    -190.9,
+    383.9,
+    444.1,
+    42.6,
+    -59.4,
+    -93.4,
+    -354.6,
+    -493.3,
+    -63.2,
+    646.3,
+    520.7,
+    -0.7,
+    -80.9,
+    -373.7,
+    -555.2,
+    -153.3,
+    291.3,
+    574.2,
+    338.8,
+    -29.0,
+    -142.3,
+    -598.0,
+    -593.7,
+    256.6,
+    635.1,
+    416.5,
+    105.6,
+    -159.1,
+    -338.5,
+    -584.9,
+    -365.6,
+    341.3,
+    750.4,
+    527.6,
+    -198.0,
+    -435.8,
+    -578.7,
+    -313.1,
+    499.9,
+    685.4,
+    279.9,
+    -35.6,
+    -375.8,
+    -512.7,
+    -450.6,
+    -69.9,
+    731.4,
+    724.3,
+    95.1,
+    -110.0,
+    -379.9,
+    -605.6,
+    -404.3,
+    97.7,
+    765.5,
+    615.3,
+    -72.1,
+    -193.6,
+    -182.4,
+    -275.0,
+    -290.5,
+    -97.3,
+    430.9,
+    525.1,
+    -35.0,
+    -344.5,
+    -244.4,
+    -75.6,
+    90.9,
+    194.5,
+    369.3
+   ],
+   "features": [
+    {
+     "key": "swingKnee",
+     "name": "Swing recovery flexion",
+     "unit": "deg",
+     "value": 121
+    },
+    {
+     "key": "hipROM",
+     "name": "Hip-extension range",
+     "unit": "deg",
+     "value": 55
+    },
+    {
+     "key": "anklePush",
+     "name": "Ankle push-off velocity",
+     "unit": "deg/s",
+     "value": 702
+    }
+   ]
+  },
+  "relation": [
+   {
+    "key": "separation",
+    "name": "Separation",
+    "unit": "m",
+    "value": 8.91,
+    "cohortMean": 6.936,
+    "z": 0.49
+   },
+   {
+    "key": "losReactivity",
+    "name": "Line-of-sight reactivity",
+    "unit": "deg/s",
+    "value": 9.71,
+    "cohortMean": 61.365,
+    "z": -0.81
+   },
+   {
+    "key": "holdSec",
+    "name": "Constant-bearing time",
+    "unit": "s",
+    "value": 0.88,
+    "cohortMean": 0.385,
+    "z": 1.23
+   },
+   {
+    "key": "tauMin",
+    "name": "Minimum time-to-contact",
+    "unit": "s",
+    "value": 4.8,
+    "cohortMean": 11.503,
+    "z": -0.23
+   },
+   {
+    "key": "spaceControl",
+    "name": "Space control",
+    "unit": "m^2",
+    "value": 796.02,
+    "cohortMean": 618.457,
+    "z": 0.37
+   }
+  ],
+  "metric": {
+   "key": "codPeak",
+   "name": "Sharpest turn",
+   "unit": "deg",
+   "formula": "headingDelta: max over the clip",
+   "value": 41.72,
+   "cohortMean": 30.912,
+   "cohortSd": 19.256,
+   "cohortN": 13,
+   "z": 0.54,
+   "flag": {
+    "id": "cod_reorientation_slow",
+    "level": "warning_strong",
+    "threshold": 115,
+    "thresholdBasis": "literature_absolute",
+    "deltaPct": -63.7,
+    "message": "Peak reorientation rate 41.72 deg/s is below 115 deg/s; median reaction latency 375 ms.",
+    "cofactor": "reactionMs",
+    "cofactorValue": 375.0
+   },
+   "caveat": "the largest heading change over a 0.4 s step inside the analysed window; a short clip that contains no cut will report a small value because the turn is absent, not because the player cannot turn."
+  }
+ },
+ "bench": {
+  "rows": [
+   {
+    "signal": "kneeROM \u00b7 hipROM \u00b7 anklePush",
+    "instrument": "Markerless mocap \u2014 Theia3D / KinaTrax",
+    "returns": "3D joint kinematics \u00b7 inter-athlete coordination",
+    "priority": "differentiator",
+    "band": "$40\u201380k"
+   },
+   {
+    "signal": "joint angles on the pitch",
+    "instrument": "IMU suit \u2014 Xsens MVN",
+    "returns": "joint angles + accelerations in play \u00b7 coordination variability",
+    "priority": "core",
+    "band": "$15\u201325k"
+   },
+   {
+    "signal": "topSpeed \u00b7 peakAccel",
+    "instrument": "Timing gates \u2014 Freelap",
+    "returns": "sprint splits m/s \u00b7 acceleration by segment",
+    "priority": "core",
+    "band": "$2\u20135k"
+   },
+   {
+    "signal": "codPeak \u00b7 peakDecel",
+    "instrument": "1080 Sprint \u2014 robotic resistance",
+    "returns": "force\u2013velocity profile \u00b7 resisted-sprint velocity",
+    "priority": "differentiator",
+    "band": "$25\u201335k"
+   },
+   {
+    "signal": "strideAsym \u00b7 hamstring risk",
+    "instrument": "VALD \u2014 ForceDecks \u00b7 NordBord \u00b7 GroinBar",
+    "returns": "L/R asymmetry \u00b7 eccentric hamstring & adductor force",
+    "priority": "core",
+    "band": "$40\u201370k"
+   },
+   {
+    "signal": "inferred %1RM loads",
+    "instrument": "VBT \u2014 GymAware",
+    "returns": "mean bar velocity m/s \u00b7 velocity loss",
+    "priority": "core",
+    "band": "$6\u201312k"
+   },
+   {
+    "signal": "separation \u00b7 spaceControl \u00b7 tauMin",
+    "instrument": "Optical game tracking \u2014 SkillCorner",
+    "returns": "contextual spatio-temporal position",
+    "priority": "differentiator",
+    "band": "$30\u201380k"
+   }
+  ],
+  "vision": {
+   "signal": "reactionMs \u00b7 losReactivity \u00b7 scanRate",
+   "label": "Vision & perception\u2013action",
+   "note": "el diferenciador \u2014 Dr. Laby",
+   "priority": "differentiator",
+   "items": [
+    {
+     "instrument": "Senaptec Sensory Station",
+     "returns": "visuomotor reaction time \u00b7 10 visual domains",
+     "band": "$10\u201315k"
+    },
+    {
+     "instrument": "NeuroTracker",
+     "returns": "3D multiple-object-tracking speed threshold",
+     "band": "$3\u20138k"
+    },
+    {
+     "instrument": "Eye tracking \u2014 Tobii / Pupil Labs",
+     "returns": "fixations \u00b7 Quiet Eye duration",
+     "band": "$10\u201335k"
+    },
+    {
+     "instrument": "Reaction lights \u2014 FitLight",
+     "returns": "reaction time \u00b7 decision speed",
+     "band": "$3\u201310k"
+    }
+   ]
+  },
+  "year1": {
+   "core": "~$180\u2013360k",
+   "full": "~$630k\u20131.2M",
+   "import": "+20\u201330% import + 16% IVA (Mexico)",
+   "label": "planning estimate, not a quote"
+  },
+  "nInstruments": 11
+ },
+ "week": {
+  "periodization": {
+   "model": "concurrent_hybrid",
+   "variant": "balanced",
+   "meso": "General preparation",
+   "weeks": 9
+  },
+  "days": [
+   {
+    "day": 1,
+    "session": "Speed and power",
+    "rest": false,
+    "blocks": [
+     {
+      "method": "straight",
+      "variant": null,
+      "label": "straight",
+      "category": "parallel",
+      "units": [
+       {
+        "id": "power_clean",
+        "dose": "5 \u00d7 3 \u00b7 80% 1RM"
+       }
+      ]
+     },
+     {
+      "method": "complex",
+      "variant": null,
+      "label": "complex",
+      "category": "conditioning",
+      "units": [
+       {
+        "id": "sprint_flying",
+        "dose": "4 \u00d7 20 m"
+       }
+      ]
+     },
+     {
+      "method": "complex",
+      "variant": null,
+      "label": "complex",
+      "category": "conditioning",
+      "units": [
+       {
+        "id": "cod_505",
+        "dose": "3 \u00d7 4"
+       },
+       {
+        "id": "cod_505",
+        "dose": "3 \u00d7 4"
+       },
+       {
+        "id": "lateral_shuffle",
+        "dose": "3 \u00d7 10 m"
+       }
+      ]
+     }
+    ],
+    "answers": [
+     "max_velocity_deficit",
+     "cod_reorientation_slow"
+    ],
+    "instrument": {
+     "name": "Timing gates \u2014 Freelap",
+     "returns": "flying-20 m split \u00b7 5-0-5 time"
+    }
+   },
+   {
+    "day": 2,
+    "session": "Lower strength \u2014 posterior chain",
+    "rest": false,
+    "blocks": [
+     {
+      "method": "straight",
+      "variant": null,
+      "label": "straight",
+      "category": "main",
+      "units": [
+       {
+        "id": "split_squat_barbell",
+        "dose": "4 \u00d7 8 \u00b7 absolute load"
+       }
+      ]
+     },
+     {
+      "method": "straight",
+      "variant": null,
+      "label": "straight",
+      "category": "main",
+      "units": [
+       {
+        "id": "deadlift_conventional",
+        "dose": "4 \u00d7 4 \u00b7 85% 1RM"
+       }
+      ]
+     }
+    ],
+    "answers": [
+     "cod_reorientation_slow"
+    ],
+    "instrument": {
+     "name": "VBT \u2014 GymAware",
+     "returns": "mean bar velocity \u00b7 velocity loss"
+    }
+   },
+   {
+    "day": 3,
+    "session": "Upper, trunk and prehab",
+    "rest": false,
+    "blocks": [
+     {
+      "method": "complex",
+      "variant": null,
+      "label": "complex",
+      "category": "main",
+      "units": [
+       {
+        "id": "copenhagen_adduction",
+        "dose": "3 \u00d7 8 \u00b7 bodyweight"
+       },
+       {
+        "id": "hanging_leg_raise",
+        "dose": "3 \u00d7 12 \u00b7 bodyweight"
+       }
+      ]
+     },
+     {
+      "method": "straight",
+      "variant": null,
+      "label": "straight",
+      "category": "main",
+      "units": [
+       {
+        "id": "bench_press_barbell",
+        "dose": "4 \u00d7 6 \u00b7 78% 1RM"
+       }
+      ]
+     },
+     {
+      "method": "straight",
+      "variant": null,
+      "label": "straight",
+      "category": "main",
+      "units": [
+       {
+        "id": "pull_up",
+        "dose": "4 \u00d7 6 \u00b7 bodyweight"
+       }
+      ]
+     }
+    ],
+    "answers": [],
+    "instrument": {
+     "name": "VALD \u2014 GroinBar \u00b7 NordBord",
+     "returns": "adductor squeeze \u00b7 eccentric force"
+    }
+   },
+   {
+    "day": 4,
+    "session": "Rest",
+    "rest": true,
+    "blocks": [],
+    "answers": [],
+    "instrument": {
+     "name": "HRV \u2014 Polar H10 \u2192 Kubios",
+     "returns": "rMSSD \u00b7 readiness"
+    }
+   },
+   {
+    "day": 5,
+    "session": "Repeated-sprint and mixed conditioning",
+    "rest": false,
+    "blocks": [
+     {
+      "method": "complex",
+      "variant": null,
+      "label": "complex",
+      "category": "conditioning",
+      "units": [
+       {
+        "id": "run",
+        "dose": "4 \u00d7 400 m"
+       },
+       {
+        "id": "sled_push",
+        "dose": "4 \u00d7 20 m \u00b7 absolute load"
+       }
+      ]
+     }
+    ],
+    "answers": [],
+    "instrument": {
+     "name": "GPS \u2014 Catapult",
+     "returns": "high-speed distance \u00b7 accel/decel load"
+    }
+   },
+   {
+    "day": 6,
+    "session": "Lower strength \u2014 squat and unilateral reactive",
+    "rest": false,
+    "blocks": [
+     {
+      "method": "straight",
+      "variant": null,
+      "label": "straight",
+      "category": "parallel",
+      "units": [
+       {
+        "id": "hop_single_leg",
+        "dose": "3 \u00d7 6 \u00b7 bodyweight"
+       }
+      ]
+     },
+     {
+      "method": "straight",
+      "variant": null,
+      "label": "straight",
+      "category": "main",
+      "units": [
+       {
+        "id": "back_squat",
+        "dose": "4 \u00d7 4 \u00b7 85% 1RM"
+       }
+      ]
+     }
+    ],
+    "answers": [
+     "cod_reorientation_slow"
+    ],
+    "instrument": {
+     "name": "Optojump \u2014 Microgate",
+     "returns": "contact time \u00b7 RSI"
+    }
+   },
+   {
+    "day": 7,
+    "session": "Rest",
+    "rest": true,
+    "blocks": [],
+    "answers": [],
+    "instrument": {
+     "name": "HRV \u2014 Polar H10 \u2192 Kubios",
+     "returns": "rMSSD \u00b7 readiness"
+    }
+   }
+  ],
+  "sessions": 5,
+  "nUnits": 15,
+  "projected": {
+   "horizon": 9,
+   "rows": [
+    {
+     "key": "topSpeed",
+     "name": "Top speed",
+     "unit": "m/s",
+     "before": 3.86,
+     "after": 3.922,
+     "deltaPct": 1.6,
+     "confidence": "low"
+    },
+    {
+     "key": "codPeak",
+     "name": "Sharpest turn",
+     "unit": "deg",
+     "before": 41.72,
+     "after": 43.389,
+     "deltaPct": 4.0,
+     "confidence": "low"
+    }
+   ],
+   "overall": 55,
+   "overallAfter": 56,
+   "confidence": "low"
+  }
+ },
+ "affordance": {
+  "source": "affordances.json",
+  "nSeeds": 400,
+  "unlockedPerRun": 3.81,
+  "driver": "Coordination +12.5 pts",
+  "rows": [
+   {
+    "key": "driving_run_into_space",
+    "name": "Driving run into space",
+    "perRunBefore": 0.1,
+    "perRunAfter": 1.465,
+    "before": 40,
+    "after": 586,
+    "limiting": "p_complete"
+   },
+   {
+    "key": "shot",
+    "name": "Shot",
+    "perRunBefore": 0,
+    "perRunAfter": 0.588,
+    "before": 0,
+    "after": 235,
+    "limiting": "p_complete"
+   },
+   {
+    "key": "through_ball_timing_run",
+    "name": "Through-ball timing run",
+    "perRunBefore": 0.058,
+    "perRunAfter": 0.478,
+    "before": 23,
+    "after": 191,
+    "limiting": "p_control"
+   },
+   {
+    "key": "switch_of_play",
+    "name": "Switch of play",
+    "perRunBefore": 0.048,
+    "perRunAfter": 0.39,
+    "before": 19,
+    "after": 156,
+    "limiting": "p_control"
+   },
+   {
+    "key": "one_v_one_dribble",
+    "name": "1v1 dribble",
+    "perRunBefore": 0.025,
+    "perRunAfter": 0.343,
+    "before": 10,
+    "after": 137,
+    "limiting": "p_complete"
+   },
+   {
+    "key": "line_splitting_pass",
+    "name": "Line-splitting pass",
+    "perRunBefore": 0.165,
+    "perRunAfter": 0.275,
+    "before": 66,
+    "after": 110,
+    "limiting": "p_control"
+   },
+   {
+    "key": "give_and_go",
+    "name": "Give-and-go",
+    "perRunBefore": 0.07,
+    "perRunAfter": 0.11,
+    "before": 28,
+    "after": 44,
+    "limiting": "p_control"
+   }
+  ],
+  "path": {
+   "deficits": [
+    {
+     "key": "topSpeed",
+     "value": 3.86
+    },
+    {
+     "key": "codPeak",
+     "value": 41.72
+    }
+   ],
+   "projected": [
+    {
+     "key": "topSpeed",
+     "name": "Top speed",
+     "unit": "m/s",
+     "before": 3.86,
+     "after": 3.922,
+     "deltaPct": 1.6,
+     "confidence": "low"
+    },
+    {
+     "key": "codPeak",
+     "name": "Sharpest turn",
+     "unit": "deg",
+     "before": 41.72,
+     "after": 43.389,
+     "deltaPct": 4.0,
+     "confidence": "low"
+    }
+   ],
+   "horizon": 9,
+   "confidence": "low"
+  },
+  "geometry": [
+   {
+    "k": "more lanes",
+    "reads": "line_splitting_pass \u00b7 through_ball_timing_run"
+   },
+   {
+    "k": "longer time to contact",
+    "reads": "tauMin s"
+   },
+   {
+    "k": "faster line-of-sight",
+    "reads": "losReactivity deg/s"
+   }
+  ]
+ }
+}

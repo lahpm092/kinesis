@@ -98,6 +98,60 @@ body.pitch-body {
   transition: color 500ms var(--ease);
 }
 
+/* --- language switch ---
+   Beside the wordmark, on the one strip of the frame that no beat may draw in
+   (content starts below y ~ 62). Two sizes: a full question on the opening
+   stage, two marks everywhere after it. */
+.deck-lang {
+  position: absolute;
+  top: clamp(15px, 2.0vh, 25px);
+  left: calc(clamp(20px, 3.4vw, 56px) + 148px);
+  pointer-events: auto;
+  transition: transform 460ms var(--ease);
+}
+.deck-lang-cap {
+  font-family: var(--mono);
+  font-size: 9px; letter-spacing: 0.26em; text-transform: uppercase;
+  color: var(--fg-3);
+  margin-bottom: 7px;
+  opacity: 0; height: 0; overflow: hidden;
+  transition: opacity 400ms var(--ease);
+}
+.deck-lang-row { display: flex; gap: 6px; align-items: center; }
+.deck-lang-b {
+  appearance: none; -webkit-appearance: none;
+  background: none; border: 1px solid var(--rule);
+  color: var(--fg-3);
+  font-family: var(--mono); font-weight: 400;
+  font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+  padding: 3px 8px; cursor: pointer;
+  transition: color 320ms var(--ease), border-color 320ms var(--ease);
+}
+.deck-lang-b:hover { color: var(--fg-2); border-color: var(--fg-3); }
+.deck-lang-b.is-on { color: var(--accent); border-color: var(--accent); }
+.deck-lang-b .lg { display: none; }
+
+/* the opening stage: the choice is the size of a question.
+   Beat I is full-bleed broadcast video, so the only way this is legible on
+   every frame of it is to carry its own ground. */
+.deck-lang.is-intro {
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  padding: 9px 14px 12px;
+  border: 1px solid var(--rule);
+}
+.deck-lang.is-intro .deck-lang-cap { opacity: 1; height: auto; }
+.deck-lang.is-intro .deck-lang-b {
+  font-size: 11px; letter-spacing: 0.18em; padding: 7px 16px;
+}
+.deck-lang.is-intro .deck-lang-b .sm { display: none; }
+.deck-lang.is-intro .deck-lang-b .lg { display: inline; }
+
+@media (prefers-reduced-motion: reduce) {
+  .deck-lang, .deck-lang-cap, .deck-lang-b { transition: none; }
+}
+html.no-anim .deck-lang, html.no-anim .deck-lang-cap,
+html.no-anim .deck-lang-b { transition: none; }
+
 /* --- beat id, top right --- */
 .deck-beatid {
   position: absolute;

@@ -21,24 +21,31 @@ import { T } from '../../core/theme.js';
 import { VectorFan } from '../sim/fan.js';
 import { Choreo, captionOf } from '../sim/choreo.js';
 import { installSimCss } from './sim/style.js';
+import { installDeltaCss } from './delta/style.js';
+import { createPrimer } from '../primer.js';
 import { Board, Pieces, Ball, SAGE, FAIL } from './sim/board.js';
 import { Glyphs, FACTOR_LABEL } from './sim/glyph.js';
 import { TextSprite } from '../../scenes/field/label.js';
 import {
   runOf, runOk, choreoRun, posAt, carrierAt, divergence, comparableDecision,
   pairOptions, paramDeltas, paramDeltaFor, fanOptions, affEvents, affName, affShort,
-  scrim, pollFor, nOrDash, intOrDash, signed, pct,
+  scrim, pollFor, nOrDash, intOrDash, signed,
 } from './sim/data.js';
 
 export const meta = {
   id: 'delta',
-  numeral: 'IX',
+  numeral: 'XI',
   title: 'Before / after',
   long: 'Before and after training',
   polarity: 'dark',
   sources: ['sim', 'affordances'],
   provenance: ['simulated', 'projected'],
   stages: [
+    {
+      eyebrow: 'The test',
+      line: 'One possession, run twice, with only the athlete changed.',
+      settleMs: 700,
+    },
     {
       eyebrow: 'Same scenario',
       line: 'Identical situation. The only change is the athlete.',
@@ -78,12 +85,25 @@ const METRICS = [
   { key: 'goals', label: 'goals', scale: 1, unit: 'per run', d: 3 },
 ];
 
+// The primer is shown WITHOUT a blurred scene here, unlike the DOM beats. This
+// beat's scene is a bloomed WebGL plate filling the stage, and a CSS blur over
+// it forces a full readback and a software convolution on every composite —
+// enough to stall a headless capture outright and to risk a stutter on the
+// presenter's machine. The veil's own scrim already pushes the two boards back;
+// nothing about the on-ramp depends on the blur.
+const PRIMER = {
+  kicker: 'Does it move?',
+  line: 'If the training works, the same possession should end differently. Here it is, before and after.',
+};
+
 export function create(ctx) {
   installSimCss();
+  installDeltaCss();
   const life = lifetime();
   const root = document.createElement('div');
-  root.className = 'sm-root';
+  root.className = 'sm-root dlx';
   ctx.mount.appendChild(root);
+  const primer = createPrimer(ctx.mount);
 
   let built = null;
   let curStage = 0;
@@ -268,23 +288,6 @@ export function create(ctx) {
       </div>`;
   }
 
-  /** what the split did to this one possession — never the claim, always named */
-  function outcomePanel(b) {
-    const ra = b.A.result || {};
-    const rb = b.B.result || {};
-    const row = (k, va, vb, f) => `
-      <div class="sm-kv"><span>${k}</span><b><s style="opacity:.5">${f(va)}</s> → <em class="${
-        (vb ?? 0) >= (va ?? 0) ? 'pos' : 'neg'}">${f(vb)}</em></b></div>`;
-    return `
-      <div class="sm-panel">
-        <div class="sm-h"><span>this possession</span><span class="sm-h-r">before → after</span></div>
-        <div class="sm-rule"></div>
-        ${row('xG', ra.xg, rb.xg, (v) => nOrDash(v, 3))}
-        ${row('pass completion', ra.completion, rb.completion, (v) => `${pct(v)}%`)}
-        <div class="sm-note" style="margin-top:7px">One sampled possession. The <b>claim</b> is the paired ensemble on the next stage.</div>
-      </div>`;
-  }
-
   function samePanel(b) {
     return `
       <div class="sm-panel">
@@ -295,8 +298,7 @@ export function create(ctx) {
         <div class="sm-kv"><span>press trigger</span><b>${nOrDash(b.A.strategy?.B?.press_trigger, 2)}</b></div>
         <div class="sm-note" style="margin-top:8px">Identical seed, identical opponent, identical random stream. Only the fitted parameters differ.</div>
       </div>
-      ${athletePanel(b)}
-      ${outcomePanel(b)}`;
+      ${athletePanel(b)}`;
   }
 
   function unlockedPanel(b) {
@@ -346,20 +348,10 @@ export function create(ctx) {
             r.v.significant ? 'significant' : 'not significant'}</span><span>95 % CI</span></div>
         </div>`;
     };
-    const h = b.hero;
-    const heroRow = h ? `
-      <div class="sm-panel">
-        <div class="sm-h"><span>the band that thickened</span><span class="sm-h-r">${
-          FACTOR_LABEL[h.factor] || h.factor}</span></div>
-        <div class="sm-rule"></div>
-        <div class="sm-kv"><span>${affName(h.pair.before.kind)}</span><b>${
-          h.pair.before.target != null ? `→ ${h.pair.before.target}` : '—'}</b></div>
-        <div class="sm-kv"><span>p_complete</span><b class="${h.pair.d.p_complete >= 0 ? 'pos' : 'neg'}">${signed(h.pair.d.p_complete, 3)}</b></div>
-        <div class="sm-kv"><span>p_control</span><b class="${h.pair.d.p_control >= 0 ? 'pos' : 'neg'}">${signed(h.pair.d.p_control, 3)}</b></div>
-        <div class="sm-kv"><span>1 − p_intercept</span><b class="${h.pair.d.p_clear >= 0 ? 'pos' : 'neg'}">${signed(h.pair.d.p_clear, 3)}</b></div>
-        <div class="sm-rule"></div>
-        <div class="sm-kv"><span>p_real</span><b class="${h.pair.d.p_real >= 0 ? 'pos' : 'neg'}">${signed(h.pair.d.p_real, 3)}</b></div>
-      </div>` : '';
+    // The five-row anatomy of the widened band (p_complete / p_control /
+    // 1 − p_intercept / p_real) used to sit under this panel. It is the deepest
+    // jargon in the deck, it pushed the rail off the bottom of a 720px stage,
+    // and the caption under the boards already names the band and its gain.
     return `
       <div class="sm-panel">
         <div class="sm-h"><span>paired ensemble</span><span class="sm-h-r">${
@@ -367,8 +359,7 @@ export function create(ctx) {
         <div class="sm-rule"></div>
         <div class="sm-dist">${rows.map(bar).join('')}</div>
         <div class="sm-note" style="margin-top:10px">Same seeds against both parameter sets. A delta whose interval covers zero is not a result.</div>
-      </div>
-      ${heroRow}`;
+      </div>`;
   }
 
   /* -------------------------------------------------------------- stages */
@@ -381,7 +372,11 @@ export function create(ctx) {
 
   function apply(i, dir = 1) {
     curStage = i;
-    if (!built) return Promise.resolve();
+    if (!built) {
+      if (i === 0) primer.show(null, PRIMER); else primer.hide();
+      return Promise.resolve();
+    }
+    if (i === 0) primer.show(null, PRIMER); else primer.hide();
     const b = built;
     const me = ++token;
     const alive = () => !life.dead && token === me;
@@ -397,19 +392,23 @@ export function create(ctx) {
       s.pieces.spotlight(id, k === 0 ? T.bone2 : T.amber);
       // on the fan stage the ribbons start at the carrier's feet, so a name
       // sprite there is drawn straight through them — the ring carries it, and
-      // the caption under the plate names both athletes
-      if (id == null || i === 2) { s.who.sprite.visible = false; return; }
+      // the caption under the plate names both athletes. The primer stage is
+      // one sentence over a blurred board and carries no labels at all.
+      if (id == null || i === 0 || i === 3) { s.who.sprite.visible = false; return; }
       s.who.set(`${b.nameOfId(id)} ${b.swapped ? 'GETS IT' : 'ON THE BALL'}`);
       s.who.sprite.visible = true;
       follow(s);
     });
 
-    const p = i === 0 ? stageSame(b, alive) : i === 1 ? stageUnlocked(b, alive) : stageDelta(b, alive);
+    const p = i === 0 ? stagePrimer(b, alive)
+      : i === 1 ? stageSame(b, alive)
+      : i === 2 ? stageUnlocked(b, alive)
+      : stageDelta(b, alive);
     return Promise.resolve(p).then(() => { if (alive()) rest(b, i); });
   }
 
   function rest(b, i) {
-    if (i === 2) {
+    if (i === 3) {
       if (b.dA) b.sides[0].fan.set(b.dA.pos, b.fanA, { shutBelow: 0.12 });
       if (b.dB) b.sides[1].fan.set(b.dB.pos, b.fanB, { shutBelow: 0.12 });
       // each board's own carrier: on the right that is a different athlete,
@@ -418,10 +417,42 @@ export function create(ctx) {
         const d = k === 0 ? b.dA : b.dB;
         s.pieces.carrier(d ? d.carrier : null, PULSE);
       });
-    } else if (i === 1) {
+    } else if (i === 2) {
       for (const s of b.sides) s.glyphs.fire(1, 380 * (Math.PI / 2));
     }
     b.board.idle();
+  }
+
+  // ---- 0. primer --------------------------------------------------------
+  // The two boards at rest under the veil's scrim, with one plain sentence
+  // over them. No rail, no caption, no name sprites: one thing to read.
+  function stagePrimer(b, alive) {
+    b.side.innerHTML = '';
+    b.board.moveTo(b.homePose.pos, b.homePose.tgt, 0);
+    for (const s of b.sides) {
+      const pos = posAt(s.run, 0);
+      s.pieces.items.forEach((it, k) => it.g.position.set(pos[k][0], 0, pos[k][1]));
+      s.pieces.reveal(1);
+      s.pieces.opacity(1);
+      s.pieces.carrier(null);
+      s.ball.clear();
+      const bs = s.cho.ballAt(0);
+      if (bs.mode === 'held' && bs.held != null) {
+        const q = s.cho.posAt(0, bs.held);
+        s.ball.set(q[0], 0, q[1], false);
+      }
+    }
+    ctx.deck.annotate({ stats: [] });
+    if (!alive()) return Promise.resolve();
+    // Every other stage drives the plate with a loop for seconds; this one
+    // comes to rest at once. Hold half a second of frames so the pose and the
+    // piece reveal have both landed before `rest()` freezes the plate on a
+    // single frame the presenter may sit on for a minute.
+    b.board.resize();
+    const t0 = performance.now();
+    const stop = b.board.loop((now) => { if (!alive() || now - t0 > 520) stop(); });
+    life.add(stop);
+    return wait(580);
   }
 
   // ---- 1. same scenario -------------------------------------------------
@@ -459,9 +490,11 @@ export function create(ctx) {
     }).then(() => {
       if (!alive() || !b.div) return;
       const nm = b.nameOfId;
+      // short lines: the caption lives in a ~280px column between the deck's
+      // annotation and this beat's rail, and must never reach either
       const head = b.swapped
-        ? `<span class="amb">t ${nOrDash(b.div.t, 1)} s</span> · same ball, same spot — a different athlete reaches it`
-        : `same seed to <span class="amb">t ${nOrDash(b.div.t, 1)} s</span> · then the boards part`;
+        ? `<span class="amb">t ${nOrDash(b.div.t, 1)} s</span> · same ball, same spot<br>a different athlete reaches it`
+        : `same seed to <span class="amb">t ${nOrDash(b.div.t, 1)} s</span><br>then the boards part`;
       b.foot.innerHTML = `<div class="sm-cap">${head}<br><b>${
         captionOf(b.div.before, nm)}</b><br><b style="color:${SAGE}">${
         captionOf(b.div.after, nm)}</b></div>`;
@@ -525,7 +558,7 @@ export function create(ctx) {
         u: nSeeds ? `in ${nSeeds} runs` : '', k: 'affordances taken',
       }],
     });
-    b.foot.innerHTML = `<div class="sm-cap">left <b>available, not taken</b> · right <b style="color:${SAGE}">now accepted</b></div>`;
+    b.foot.innerHTML = `<div class="sm-cap">left · <b>available, not taken</b><br>right · <b style="color:${SAGE}">now accepted</b></div>`;
     return wait(2000);
   }
 
@@ -575,10 +608,10 @@ export function create(ctx) {
     });
     const h = b.hero;
     const whoLine = b.swapped
-      ? `same ball at t ${nOrDash(b.dA.t, 1)} s · left <b>${b.nameOfId(b.dA.carrier)}</b> on it, right <b style="color:${SAGE}">${b.nameOfId(b.dB.carrier)}</b>`
-      : `<b>${b.nameOfId(b.dA.carrier)}</b> on the ball at t ${nOrDash(b.dA.t, 1)} s, both boards`;
+      ? `same ball at t ${nOrDash(b.dA.t, 1)} s<br>left <b>${b.nameOfId(b.dA.carrier)}</b> on it, right <b style="color:${SAGE}">${b.nameOfId(b.dB.carrier)}</b>`
+      : `<b>${b.nameOfId(b.dA.carrier)}</b> on the ball<br>at t ${nOrDash(b.dA.t, 1)} s, both boards`;
     b.foot.innerHTML = `<div class="sm-cap">${whoLine}${h
-      ? ` · <span class="amb">${FACTOR_LABEL[h.factor]}</span> band <b style="color:${SAGE}">${
+      ? `<br><span class="amb">${FACTOR_LABEL[h.factor]}</span> band <b style="color:${SAGE}">${
         signed(h.gain, 3)}</b>` : ''}</div>`;
     return wait(1200);
   }
@@ -608,8 +641,9 @@ export function create(ctx) {
     },
     dispose() {
       token++;
+      primer.dispose();
       if (built) {
-        try { built.board.dispose(); } catch (err) { console.error('[beat ix] dispose:', err); }
+        try { built.board.dispose(); } catch (err) { console.error('[beat xi] dispose:', err); }
         built = null;
       }
       life.end();

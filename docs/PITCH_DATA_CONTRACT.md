@@ -137,6 +137,15 @@ One focal player, one gait window. Mirrors the proven `gait.json` shape.
 }
 ```
 
+**Trailing unprojected frames.** `pos` may end with frames whose entries are all `null`, and
+the matching `team[]` frame then carries `"A": null, "B": null`. That is not corruption — it is
+the projection refusing to solve a frame it has nothing later to carry from, which beat IV
+states on its own plate. Beat VI's animation still runs to the end of the window, but its
+readout is clamped to `model.lastMeasured`, the last frame where at least two bodies were
+solved. Without that clamp the panel comes to rest on the empty frame and prints six em dashes,
+which reads as a broken beat rather than as an honest gap. Nothing is carried forward or
+interpolated across the gap: the values shown are that frame's own.
+
 ## `metrics.json` + `derivation.json` — beats VI and XI
 
 `derivation.json` is the causal graph rendered in beat VI. Every metric node must be
@@ -289,3 +298,161 @@ Every id must be a **real** identifier from `taxonomy-v2`.
 `faces/*.jpg` are crops taken from the footage at the frame where the track's head keypoints
 are largest and most confident. If no acceptable crop exists, `face` is `null` and the scene
 renders the team glyph instead.
+
+---
+
+# The investor beats (`kinesis-pitch` branch)
+
+Five artifacts were added for the investor deck. **None of them is a measurement.**
+Every one carries `"measured": false`, a `generator`, and a `note` saying in one line what
+is real and what is modelled. `pipeline/98_validate_new.py` enforces exactly that and exits
+non-zero if any of it is missing.
+
+They are held to one extra rule beyond the contract above:
+
+> A modelled number may never sit in the same visual register as a measured one, and any
+> invented entity — a player, a buying club — must render the word **SYNTHETIC** on its own
+> plate. `"synthetic": true` marks such an object in the JSON.
+
+## `landscape.json` — beat II
+
+```jsonc
+{
+  "measured": false, "generator": "pipeline/21_landscape.py",
+  "footnote": "Category comparison, not a vendor benchmark. No competitor product was tested.",
+  "categories": [ { "id": "event", "name": "Event data", "examples": ["Opta", "StatsBomb"],
+                    "yields": "...", "stops": "...", "cost": { "lo": 30, "hi": 80 } } ],
+  "matrix": { "columns": [ { "id": "event", "label": "Event data" }, ... ],
+              "rows": [ { "capability": "Joint angles", "cells": { "event": 0, ... },
+                          "note": "..." } ],
+              "legend": [ { "glyph": 2, "label": "measured" }, ... ] },
+  "kinesis": { "feed": { ...from source.json... }, "yields": [ ... ] }
+}
+```
+Glyphs are `2` measured, `1` partial or conditional, `0` not measured — never a tick and a
+cross. The feed spec and the derivation counts are read from `source.json` and
+`derivation.json`, so the closing stage cites real numbers. Carries **no** provenance chip:
+nothing here is simulated or projected, and the footnote is the honest statement instead.
+
+## `lab.json` — beat X
+
+```jsonc
+{
+  "measured": false, "generator": "pipeline/22_lab.py",
+  "athlete": { "id": 5, "label": "5", "team": "A", "overall": 55 },
+  "loop":  { "cycle": "one match week", "stations": [ ... ] },
+  "chain": { "body":     { "source": "joints.json", "measured": true,
+                           "joint": "kneeR", "t": [...], "deg": [...], "degPerS": [...] },
+             "relation": { ...separation, losReactivity, tauMin... },
+             "metric":   { "key": "codPeak", "value": 41.72, "cohortMean": 30.912,
+                           "z": 0.54, "flag": { "id": "cod_reorientation_slow" } } },
+  "bench": { "rows": [ { "signal": "kneeROM · hipROM · anklePush",
+                         "instrument": "Markerless mocap — Theia3D / KinaTrax",
+                         "returns": "...", "priority": "differentiator", "band": "$40–80k" } ],
+             "vision": { ... }, "year1": { "core": "~$180–360k", "full": "~$630k–1.2M",
+             "label": "planning estimate, not a quote" } },
+  "week": { "periodization": { "model": "concurrent_hybrid", "weeks": 9 },
+            "days": [ { "day": 1, "session": "Speed and power",
+                        "blocks": [ { "method": "straight",
+                                      "units": [ { "id": "power_clean", "dose": "5 × 3 · 80% 1RM" } ] } ],
+                        "answers": ["max_velocity_deficit"],   // the measured deficit this day answers
+                        "instrument": "..." } ] },
+  "affordance": { "source": "affordances.json", "rows": [ ... ] }
+}
+```
+Instrument names, priorities and cost bands come from the HPX Performance Lab equipment
+menu; method, exercise and flag identifiers come from `taxonomy-v2` and
+`pipeline/taxonomy_ext/`. Nothing in either list is invented.
+
+## `strategy.json` — beat XIII
+
+```jsonc
+{
+  "measured": false, "generator": "pipeline/23_strategy.py", "provenance": "simulated",
+  "book":   { "sims": 44133, "wall_clock_s": 16.57, "multiple": 63922,
+              "multiple_math": "44,133 sims × 24 s of play ÷ 16.57 s wall clock",
+              "matches_equiv": 196.1, "tiles": [ { "id": 0, "xy": [[x,y],...] } ] },
+  "funnel": { "candidates": 63, "resolved_away": 61, "survivors": [ ... ],
+              "champion": { "block_height": 26.67, "press_trigger": 0.5 } },
+  "board":  { "line_x": 26.7, ... },
+  "drills": { "drills": [ { "id": "trigger_close", "name": "Trigger and close",
+                            "say": "On the call, the nearest 3 go...",
+                            "setup": ["18 × 12 m grid", "4 v 3"], "moves": "..." } ],
+              "chess": "the engine proposes the line; the coach plays it" }
+}
+```
+Every strategy, trace, goal difference and noise band is read from `search.json`. The beat
+must state that the champion's margin sits inside the noise band — that honesty is the point
+of the stage, not a caveat to be buried.
+
+## `spectacle.json` — beat XIV
+
+```jsonc
+{
+  "measured": false, "generator": "pipeline/24_spectacle.py", "provenance": "simulated",
+  "index":     { "equation": "...", "terms": [ ... ] },   // the unpredictability index, printed
+  "disruptor": { "synthetic": true, "label": "SYNTHETIC", "fingerprint": [ ... ] },
+  "ranking":   { "formula": "...", "players": [ ... ] },  // real players, stated construct
+  "maps":      { "gd": [...], "entertainment": [...] },
+  "search":    { "protocol": { ... }, "strategies": [4], "bodies": [7],
+                 "fixtures": [28],                       // each with a stored ball trace
+                 "winner": { ... }, "recurrence": [ ... ] },
+  "duel":      { "note": "...", "protocol": { ... },
+                 "sides": [                              // exactly two, or the block is null
+                   { "id": "spectacle" | "procession",
+                     "fixture": 24, "rank": 1,           // a card the wall already scored
+                     "strategy": { ... }, "body": { ... },
+                     "u": 0.7671, "se": 0.0147,
+                     "windows": 240, "shots": 2.55, "quiet": 0.1958, ...,
+                     "run": { "fps": 12.5, "frames": 1125, "duration_s": 90,
+                              "recorded": { "fps": 25, "kept_every": 2 },
+                              "agents": [ { "id": 2, "xy": [[x,y], ...] } ],
+                              "ball": { "xy": [...], "z": [...], "carrier": [...] },
+                              "events": [ ... ], "result": { ... } } } ],
+                 "same": "the axis that does NOT separate them, printed",
+                 "contrast": [ { "key", "label", "a", "b", "better", "unit", "d" } ] }
+}
+```
+The synthetic disruptor and the thirteen real tracked players appear in the same beat and
+must never share a visual register.
+
+`duel` is the two ends of `search`'s own ordering, re-run with recording on so the deck can
+animate every piece and not only the ball. Its rules:
+
+* both sides must be **cards `search` already scored**, replayed on the **same window** the
+  card was showing — not a fresh run, and not a hand-picked seed;
+* `run.agents[i].xy.length === run.frames` for every agent, or `readDuel()` refuses the whole
+  block. Half a duel is not a comparison;
+* the per-side statistics are over `windows` (240), never over the single animated window.
+  The view prints that distinction as the heading of the numbers it qualifies;
+* `same` carries the axis on which the two fixtures do **not** differ. It is required: without
+  it the contrast table is a selection of the flattering columns.
+
+The frame arrays are written on one line each (`Compact` in the generator) so the rest of the
+file stays indented and auditable; indenting them costs three megabytes of whitespace.
+
+## `market.json` — beat XVI
+
+```jsonc
+{
+  "measured": false, "generator": "pipeline/25_market.py",
+  "analysed_s": 3.9,
+  "window_note": "every fit construct reads a 3.9 s analysed window",
+  "selection": { "archetypes": [ { "label": "High line, high press",
+                                   "block_height": 55.0, "press_trigger": 0.85,
+                                   "formula": "fit = 0.50·z topSpeed + 0.30·z peakAccel + ...",
+                                   "top": [ ... ] } ] },
+  "curve":    { "provenance": "projected",
+                "equation": "value(o) = €1.0 m × 2 ^ ((o − 50) ÷ 8)", "perPointPct": 9.05 },
+  "transfer": { "provenance": "projected",
+                "buyer": { "synthetic": true, "gap": "no ball-carrier who breaks the first line",
+                           "note": "No scouting data exists in this repository." },
+                "player": { "id": 5, ... },              // a real tracked player
+                "model": { "gdEq": "...", "sigmaFrom": "search.json noise_floor.sigma" },
+                "toBuyer": { "dGd": 0.0248, "outsideBand": true }, "premium": 2.14 },
+  "book":     { "rows": [ ... ], "counts": { "keep": 9, "develop": 1, "sell": 3 } }
+}
+```
+The value curve is the same equation beat XV already prints, so the deck cannot contradict
+itself. No transfer data exists anywhere in this repository; the anchor is a placeholder and
+the convexity is the claim.

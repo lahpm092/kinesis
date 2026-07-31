@@ -17,6 +17,7 @@
 // Copy: docs/PITCH_COPY.md — verbatim.
 import * as THREE from 'three';
 import { lifetime } from '../beat.js';
+import { createPrimer } from '../primer.js';
 import { T } from '../../core/theme.js';
 import { VectorFan, FACTORS } from '../sim/fan.js';
 import { Choreo, captionOf } from '../sim/choreo.js';
@@ -32,13 +33,19 @@ import {
 
 export const meta = {
   id: 'sim',
-  numeral: 'VII',
+  numeral: 'VIII',
   title: 'Simulation',
   long: 'Simulation and affordances',
   polarity: 'dark',
   sources: ['sim', 'affordances'],
   provenance: 'simulated',
   stages: [
+    {
+      // primer — the board, blurred, before any of it has to be read
+      eyebrow: 'What a simulation is',
+      line: 'Every player becomes a piece that moves the way we measured them moving.',
+      settleMs: 700,
+    },
     {
       eyebrow: 'The board',
       line: 'Measured players become pieces, carrying the parameters we measured.',
@@ -84,6 +91,7 @@ export function create(ctx) {
   const root = document.createElement('div');
   root.className = 'sm-root';
   ctx.mount.appendChild(root);
+  const primer = createPrimer(ctx.mount);
 
   let built = null;           // the live scene, or null while data is missing
   let curStage = 0;
@@ -240,7 +248,7 @@ export function create(ctx) {
     const keys = ['p_complete', 'p_control', 'p_intercept'];
     return `
       <div class="sm-bandbar">${f.map((v, i) => `<i style="width:${(v / sum) * 100}%;background:${sw[i]}"></i>`).join('')}</div>
-      <div class="sm-bandlab">${f.map((v, i) => `<span style="width:${(v / sum) * 100}%" class="${
+      <div class="sm-bandlab">${f.map((v, i) => `<span class="${
         keys[i] === lim ? 'lim' : ''}">${names[i]} ${v.toFixed(2)}</span>`).join('')}</div>`;
   }
 
@@ -279,7 +287,9 @@ export function create(ctx) {
         <div class="sm-rule"></div>
         <div class="sm-kv"><span>${affName(ch.kind)}</span><b>${ch.target != null ? `→ ${ch.target}` : '—'}</b></div>
         ${bandBar(ch, bandSwatches(T.bone))}
-        <div class="sm-note" style="margin-top:7px">the <em>${FACTOR_LABEL[limitOf(ch)]}</em> band is the narrow one</div>
+        <!-- the accented factor goes LAST so the sentence is one translatable
+             fragment; split around the <em> it rendered as half-English -->
+        <div class="sm-note" style="margin-top:7px">the narrowest band is <em>${FACTOR_LABEL[limitOf(ch)]}</em></div>
       </div>` : ''}
       <div class="sm-panel">
         <div class="sm-note">${b.opts.filter((x) => x.exists).length} live lanes · ${
@@ -328,6 +338,9 @@ export function create(ctx) {
   /* --------------------------------------------------------------- stages */
   function apply(i, dir = 1) {
     curStage = i;
+    // Stage 0 is the primer: the board, blurred, with one sentence over it.
+    const primed = i === 0;
+    const j = primed ? 0 : i - 1;
     if (!built) return Promise.resolve();
     const b = built;
     const me = ++token;
@@ -338,11 +351,23 @@ export function create(ctx) {
     b.glyphs.clear();
     b.foot.innerHTML = '';
 
-    const p = i === 0 ? stageBoard(b, alive)
-      : i === 1 ? stageVectors(b, alive)
-      : i === 2 ? stageAffordances(b, alive)
+    const p = j === 0 ? stageBoard(b, alive)
+      : j === 1 ? stageVectors(b, alive)
+      : j === 2 ? stageAffordances(b, alive)
       : stageSequence(b, alive);
-    return Promise.resolve(p).then(() => { if (alive()) rest(b, i); });
+    return Promise.resolve(p).then(() => {
+      if (!alive()) return;
+      rest(b, j);
+      if (primed) {
+        primer.show(root, {
+          kicker: 'What a simulation is',
+          line: 'Every player becomes a piece that moves the way we measured them moving. Then we play the match out.',
+          sub: 'measured bodies · modelled decisions',
+        });
+      } else {
+        primer.hide();
+      }
+    });
   }
 
   /** Come to rest on one stable frame — every pulse at its crest, then stop. */
@@ -530,6 +555,7 @@ export function create(ctx) {
     replay() { return apply(curStage, 1); },
     resize() { if (built) built.board.resize(); },
     dispose() {
+      primer.dispose();
       token++;
       if (built) {
         try { built.board.dispose(); } catch (err) { console.error('[beat vii] dispose:', err); }

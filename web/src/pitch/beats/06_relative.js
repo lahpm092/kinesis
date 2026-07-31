@@ -10,18 +10,24 @@
 // /data/demo.json otherwise; with neither, the beat shows a mono scrim.
 // ============================================================================
 import { lifetime } from '../beat.js';
+import { createPrimer } from '../primer.js';
 import { createShell } from './relative/ui.js';
 import { RelativePlate } from './relative/plate.js';
 import { loadModel, at, boundsOf, trimmedBounds, unionRect, wrap360 } from './relative/data.js';
 
 export const meta = {
   id: 'relative',
-  numeral: 'V',
+  numeral: 'VI',
   title: 'Geometry',
   long: 'Relative geometry between players',
   polarity: 'dark',
   sources: ['relative'],
   stages: [
+    {
+      eyebrow: 'The idea, first',
+      line: 'Football is not where players stand. It is what each one is doing to the other.',
+      settleMs: 700,
+    },
     {
       eyebrow: 'The dyad',
       line: 'Football is not positions. It is the relations between them.',
@@ -188,6 +194,9 @@ export function create(ctx) {
     return model.sync.all[i];
   }
 
+  /** The frame the panel may read: never past the last one that was measured. */
+  const readFrame = (fi) => Math.min(fi, model.lastMeasured);
+
   function readout(s, fi) {
     const { held, swept } = model.dyads;
     if (s === 0) {
@@ -225,7 +234,7 @@ export function create(ctx) {
   // beat earns them: separation, then the bearing rate, then synchrony.
   function annotate(s) {
     const { held } = model.dyads;
-    const last = model.n - 1;
+    const last = readFrame(model.n - 1);
     const dv = held ? at(held.d, last) : null;
     const ov = held && Number.isFinite(held.stats.meanAbs)
       ? Math.round(held.stats.meanAbs) : null;
@@ -274,13 +283,13 @@ export function create(ctx) {
         const fi = nMax * kp;
         plate.set({ stage: s, fi, reveal: clamp01(e / REVEAL_MS), fan: kp });
         plate.draw();
-        readout(s, fi);
+        readout(s, readFrame(fi));
         if (e >= total) {
           halt();
           plate.setView(to);
           plate.set({ stage: s, fi: nMax, reveal: 1, fan: 1 });
           plate.draw(true);
-          readout(s, nMax);
+          readout(s, readFrame(nMax));
           resolve();
         }
       };
@@ -288,10 +297,28 @@ export function create(ctx) {
     });
   }
 
+  // Stage 0 is the primer: the same dyad plate, blurred, with the plain-English
+  // version of the idea on it. Content stages are shifted by one.
+  let primer = null;
+  let deckStage = 0;               // the deck's index; `stage` is the content index
   function run(s, snap) {
     return ready.then(() => {
       if (dead || !model || !plate) return undefined;
-      return play(s, snap);
+      deckStage = s;
+      const primed = s === 0;
+      const j = primed ? 0 : s - 1;
+      const p = play(j, snap);
+      if (!primer) primer = createPrimer(ctx.mount);
+      if (primed) {
+        primer.show(ctx.mount.firstElementChild, {
+          kicker: 'The idea, first',
+          line: 'Football is not where players stand. It is what each one is doing to the other.',
+          sub: 'one defender, one attacker, measured',
+        });
+      } else {
+        primer.hide();
+      }
+      return p;
     });
   }
 
@@ -299,7 +326,7 @@ export function create(ctx) {
     preload() { return ready; },
     enter(s) { return run(s | 0, true); },
     stage(i) { return run(i | 0, false); },
-    replay() { return run(stage, true); },
+    replay() { return run(deckStage, true); },
     resize() {
       if (!plate || !model) return;
       plate.resize();
@@ -309,6 +336,7 @@ export function create(ctx) {
     dispose() {
       dead = true;
       halt();
+      if (primer) primer.dispose();
       life.end();
       ctx.mount.replaceChildren();
     },

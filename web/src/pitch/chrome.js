@@ -4,6 +4,7 @@
 // Owns no state beyond what it renders; the deck drives every method.
 // ============================================================================
 import { EASE } from './beat.js';
+import { t, translateTree, getLang, LANGS, LANG_LABEL } from './i18n.js';
 
 const ANNOT_OUT = 180;
 const ANNOT_IN = 320;
@@ -33,7 +34,8 @@ function statValue(v, d) {
  * @param {Array} metas       every beat's meta, in order
  * @param {object} hooks      { onJump(beatIndex), onClose() }
  */
-export function createChrome(root, metas, hooks = {}) {
+export function createChrome(root, metasIn, hooks = {}) {
+  let metas = metasIn;
   // ---------------------------------------------------------------- chrome
   const chrome = el('div', 'chrome');
 
@@ -67,9 +69,46 @@ export function createChrome(root, metas, hooks = {}) {
 
   root.appendChild(chrome);
 
+  // --- language switch ----------------------------------------------------
+  // One control, two sizes. On the deck's very first stage it is a full-size
+  // choice with a label over it — the room picks a language before anything is
+  // claimed. From the second stage on it shrinks to two marks beside the
+  // wordmark, present on every slide because the ask sometimes comes late.
+  // `l` does the same thing from the keyboard.
+  const langBar = el('div', 'deck-lang');
+  const langCap = el('div', 'deck-lang-cap', 'Language · Idioma');
+  langBar.appendChild(langCap);
+  const langRow = el('div', 'deck-lang-row');
+  const langBtns = LANGS.map((code) => {
+    const b = el('button', 'deck-lang-b');
+    b.type = 'button';
+    b.dataset.lang = code;
+    b.title = LANG_LABEL[code];
+    b.setAttribute('aria-label', LANG_LABEL[code]);
+    b.append(
+      el('span', 'sm', code.toUpperCase()),
+      el('span', 'lg', LANG_LABEL[code]),
+    );
+    b.addEventListener('click', () => hooks.onLang && hooks.onLang(code));
+    langRow.appendChild(b);
+    return b;
+  });
+  langBar.appendChild(langRow);
+  function paintLang() {
+    const cur = (hooks.getLang ? hooks.getLang() : getLang());
+    langBtns.forEach((b) => {
+      const on = b.dataset.lang === cur;
+      b.classList.toggle('is-on', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  }
+  paintLang();
+  chrome.appendChild(langBar);
+
   // --- index overlay ------------------------------------------------------
   const overlay = el('div', 'deck-idx');
-  overlay.appendChild(el('div', 'idx-kicker', 'Contents'));
+  const idxKicker = el('div', 'idx-kicker', t('Contents'));
+  overlay.appendChild(idxKicker);
   const grid = el('div', 'idx-grid');
   const idxCells = metas.map((m, i) => {
     const c = el('div', 'idx-cell');
@@ -85,9 +124,15 @@ export function createChrome(root, metas, hooks = {}) {
   overlay.appendChild(grid);
 
   const foot = el('div', 'idx-foot');
-  const keys = el('div', 'idx-keys',
-    '→ ← stage &nbsp;·&nbsp; ↓ ↑ beat &nbsp;·&nbsp; space replay &nbsp;·&nbsp; esc index<br>'
-    + '1–9 0 - jump &nbsp;·&nbsp; home first &nbsp;·&nbsp; f fullscreen');
+  const keys = el('div', 'idx-keys');
+  function paintKeys() {
+    keys.innerHTML =
+      `→ ← ${t('stage')} &nbsp;·&nbsp; ↓ ↑ ${t('beat')} &nbsp;·&nbsp; `
+      + `space ${t('replay')} &nbsp;·&nbsp; esc ${t('index')} &nbsp;·&nbsp; l ${t('language')}<br>`
+      + `1–9 0 - = q w e r t ${t('jump, or click')} &nbsp;·&nbsp; home ${t('first')}`
+      + ` &nbsp;·&nbsp; f ${t('fullscreen')}`;
+  }
+  paintKeys();
   const colophon = el('div', 'idx-colophon');
   foot.append(keys, colophon);
   overlay.appendChild(foot);
@@ -136,10 +181,12 @@ export function createChrome(root, metas, hooks = {}) {
     const tags = (tag == null ? [] : Array.isArray(tag) ? tag : [tag]).filter(Boolean);
     const have = [...provLine.children];
     if (have.length !== tags.length
-        || tags.some((t, i) => have[i].dataset.tag !== String(t))) {
-      provLine.replaceChildren(...tags.map((t) => {
-        const c = el('span', 'prov-chip', String(t));
-        c.dataset.tag = String(t);
+        || tags.some((tg, i) => have[i].dataset.tag !== String(tg))) {
+      provLine.replaceChildren(...tags.map((tg) => {
+        // the chip is a one-word claim about the numbers on screen — it is the
+        // last thing that should stay in a language the room does not read
+        const c = el('span', 'prov-chip', t(String(tg)));
+        c.dataset.tag = String(tg);
         return c;
       }));
       // next frame so the opacity transition actually runs
@@ -173,7 +220,13 @@ export function createChrome(root, metas, hooks = {}) {
    * `immediate` skips the fade (first paint / in-place value patch).
    */
   function setAnnotation(stage, immediate = false) {
-    const paint = () => annotBody.replaceChildren(buildAnnot(stage || {}));
+    // A beat may patch its own stat keys in through deck.annotate(), which
+    // skips the stage-meta translation entirely — so the block is translated
+    // after it is painted, whoever wrote it.
+    const paint = () => {
+      annotBody.replaceChildren(buildAnnot(stage || {}));
+      translateTree(annotBody);
+    };
     if (annotAnim) { try { annotAnim.cancel(); } catch (_) {} annotAnim = null; }
     if (immediate) { paint(); annotBody.style.opacity = '1'; annotBody.style.transform = 'none'; return; }
     const out = annotBody.animate(
@@ -209,16 +262,23 @@ export function createChrome(root, metas, hooks = {}) {
     );
   }
 
+  /** the opening frame, where the language choice is a full-size question */
+  function paintIntro() {
+    langBar.classList.toggle('is-intro', curBeat === 0 && curStage === 0);
+  }
+
   function setBeat(bi, si, meta) {
     curBeat = bi; curStage = si;
     renderRail(bi, si);
     renderBeatId(meta);
     idxCells.forEach((c, i) => c.classList.toggle('is-active', i === bi));
+    paintIntro();
   }
 
   function setStage(bi, si) {
     curStage = si;
     renderRail(bi, si);
+    paintIntro();
   }
 
   // --- index overlay ------------------------------------------------------
@@ -236,12 +296,32 @@ export function createChrome(root, metas, hooks = {}) {
     if (!data) return;
     const rows = (data.keys || []).map((k) => {
       const d = data[k];
-      if (!d) return `<span class="absent">${k}.json — pending</span>`;
+      if (!d) return `<span class="absent">${k}.json — ${t('pending')}</span>`;
+      // the file name and the generator PATH are what is on disk and are never
+      // translated; only the provenance word is
       const gen = d.generator || '—';
-      const m = d.measured === true ? 'measured' : d.measured === false ? 'simulated' : '—';
+      const m = d.measured === true ? t('measured')
+        : d.measured === false ? t('simulated') : '—';
       return `<span class="ok">${k}.json · ${gen} · ${m}</span>`;
     });
     colophon.innerHTML = rows.join('<br>');
+  }
+
+  /**
+   * Re-label everything the chrome owns after a language switch. The deck
+   * rebuilds the beats; this rebuilds the frame around them.
+   */
+  function relabel(nextMetas) {
+    metas = nextMetas || metas;
+    paintLang();
+    paintKeys();
+    idxKicker.textContent = t('Contents');
+    metas.forEach((m, i) => {
+      railBeats[i].title = `${m.numeral} · ${m.title}`;
+      const cell = idxCells[i];
+      if (cell && cell.children[1]) cell.children[1].textContent = m.long || m.title;
+    });
+    if (curBeat >= 0 && metas[curBeat]) renderBeatId(metas[curBeat]);
   }
 
   function dispose() {
@@ -250,7 +330,7 @@ export function createChrome(root, metas, hooks = {}) {
 
   return {
     setPolarity, setBeat, setStage, setAnnotation, setProvenance,
-    runWipe, toggleIndex, isIndexOpen, setColophon, dispose,
+    runWipe, toggleIndex, isIndexOpen, setColophon, relabel, dispose,
     get annotEl() { return annotBody; },
   };
 }

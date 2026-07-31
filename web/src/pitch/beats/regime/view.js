@@ -1,23 +1,42 @@
-// Beat VIII — personalized training regimes. The scene itself.
+// Beat IX — personalized training regimes. The scene itself.
 //
+//   0 primer        the scene blurs back and one sentence says what it is for
 //   1 deficits      measured metric → threshold crossed → flag raised
 //   2 prescription  flag → catalogue method → real work-unit ids and doses
 //   3 the week      the microcycle grid, with the interference audit named
 //   4 another       a second athlete: another position, another week
 //
 // Every identifier on screen comes out of regimes.json. Projections live in
-// their own panel, in amber, under a PROJECTED chip — never in the same
+// their own row, in amber, under a PROJECTED chip — never in the same
 // register as a measurement.
+//
+// Two screens were doing too much at once for a room that is not technical.
+// The deficit stage carried an eleven-cell strip of every measured metric ON
+// TOP of the four-column table that only three of them matter to; the strip is
+// gone and the table is the stage. The prescription stage carried the flag
+// panels AND the projected-outcome panel in one grid; the projection now lives
+// with the other projected numbers on the two-athlete stage, where its
+// "conservative point estimate, no interval" caveat sits beside it.
 import { EASE, lifetime } from '../../beat.js';
+import { createPrimer } from '../../primer.js';
 import { ensureStyle } from './style.js';
 import {
   readRegimes, prescriptionFor, primary, contrast, fmtNum, fmtDelta, dose,
 } from './model.js';
 
-const MAX_CELLS = 11;
-const MAX_PANELS = 4;
+const MAX_PANELS = 3;
+const MAX_BLOCKS = 2;
+const MAX_DAYS = 6;
 const STEP = 46;
 const CAP = 420;
+
+const PRIMER = {
+  kicker: 'From measurement to work',
+  line: 'The measurement finds the weakness. The weakness picks the training. Nobody guesses.',
+};
+
+/** Under this the stack is ~290px tall and every list gives up a row. */
+const shortStage = () => (window.innerHeight || 900) < 640;
 
 function h(tag, cls, txt) {
   const n = document.createElement(tag);
@@ -100,25 +119,10 @@ function provenanceTail(model) {
   return h('div', 'rgm-meta', bits.join(' · '));
 }
 
-function metricStrip(a) {
-  const cells = a.metrics.slice(0, MAX_CELLS);
-  if (!cells.length) return null;
-  const strip = h('div', 'rgm-strip rgm-r');
-  for (const m of cells) {
-    const c = h('div', `rgm-cell${m.flagged ? ' is-flag' : ''}`);
-    c.appendChild(valueNode('rgm-cell-v', m.value, m.unit, m.d));
-    c.appendChild(h('div', 'rgm-cell-k', m.name));
-    strip.appendChild(c);
-  }
-  return strip;
-}
-
 // ------------------------------------------------------------- stage one ---
 function buildDeficits(a, model) {
   const v = h('div', 'rgm-view');
   v.appendChild(whoStrip(a, provenanceTail(model)));
-  const strip = metricStrip(a);
-  if (strip) v.appendChild(strip);
 
   const tbl = h('div', 'rgm-tbl rgm-r');
   const head = h('div', 'rgm-tr rgm-tr--h');
@@ -227,46 +231,6 @@ function blockNode(b) {
   return wrap;
 }
 
-function projectionPanel(a) {
-  const pj = a.proj;
-  if (!pj || (!pj.rows.length && pj.overallAfter == null)) return null;
-  const p = h('div', 'rgm-proj rgm-r');
-  const head = h('div', 'rgm-proj-h');
-  const horizon = pj.horizon != null ? pj.horizon : a.periodization.weeks;
-  head.appendChild(h('span', null, horizon != null ? `${fmtNum(horizon)}-week horizon` : 'post-training'));
-  head.appendChild(h('span', 'rgm-projchip', 'projected'));
-  p.appendChild(head);
-
-  if (pj.overall != null && pj.overallAfter != null) {
-    const ovr = h('div', 'rgm-ovr');
-    const now = h('div', 'rgm-ovr-b');
-    now.append(h('div', 'rgm-ovr-v', fmtNum(pj.overall)), h('div', 'rgm-ovr-k', 'measured'));
-    const next = h('div', 'rgm-ovr-b next');
-    next.append(h('div', 'rgm-ovr-v', fmtNum(pj.overallAfter)), h('div', 'rgm-ovr-k', 'projected'));
-    ovr.append(now, h('div', 'rgm-ovr-arr', '→'), next);
-    p.appendChild(ovr);
-    p.appendChild(h('div', 'rgm-delta', `${fmtDelta(pj.overallAfter - pj.overall)} overall`));
-  }
-
-  for (const r of pj.rows.slice(0, 6)) {
-    const row = h('div', 'rgm-tgt');
-    row.appendChild(h('span', null, r.name));
-    const vs = h('span', 'rgm-tgt-v');
-    vs.append(
-      h('span', 'rgm-tgt-from', `${fmtNum(r.from, r.d)}${r.unit ? ` ${r.unit}` : ''}`),
-      h('span', 'rgm-tgt-arr', '→'),
-      h('span', 'rgm-tgt-to', `${fmtNum(r.to, r.d)}${r.unit ? ` ${r.unit}` : ''}`),
-    );
-    row.appendChild(vs);
-    p.appendChild(row);
-  }
-  const note = [];
-  if (pj.confidence) note.push(`projection confidence ${pj.confidence}`);
-  note.push('conservative point estimate, no interval');
-  p.appendChild(h('div', 'rgm-note', note.join(' · ')));
-  return p;
-}
-
 function buildPrescription(a, model) {
   const v = h('div', 'rgm-view');
   v.appendChild(whoStrip(a, provenanceTail(model)));
@@ -274,10 +238,10 @@ function buildPrescription(a, model) {
   const grid = h('div', 'rgm-presc');
   const pres = prescriptionFor(a).filter((p) => p.blocks.length);
   const shown = pres.slice(0, MAX_PANELS);
-  const proj = projectionPanel(a);
-  grid.style.gridTemplateColumns =
-    `repeat(${Math.max(1, shown.length)}, minmax(0, 1fr))${proj ? ' minmax(238px, 0.78fr)' : ''}`;
+  grid.style.gridTemplateColumns = `repeat(${Math.max(1, shown.length)}, minmax(0, 1fr))`;
 
+  const cap = shortStage() ? 1 : MAX_BLOCKS;
+  let held = 0;
   for (const { flag, blocks } of shown) {
     const panel = h('div', 'rgm-fp rgm-r');
     const head = h('div', 'rgm-fp-h');
@@ -286,7 +250,12 @@ function buildPrescription(a, model) {
     if (lv) head.appendChild(lv);
     panel.appendChild(head);
     if (flag.from.length) panel.appendChild(h('div', 'rgm-fp-from', `from ${flag.from.join(' · ')}`));
-    for (const b of blocks.slice(0, 3)) panel.appendChild(blockNode(b));
+    // the blocks live in their own box so that the catalogue's sentence below
+    // is pinned and can never be the thing a short stage slices off
+    const body = h('div', 'rgm-fp-body');
+    for (const b of blocks.slice(0, cap)) body.appendChild(blockNode(b));
+    held += Math.max(0, blocks.length - cap);
+    panel.appendChild(body);
     // the catalogue's own words for why this work, not ours
     if (flag.suggestion) panel.appendChild(h('div', 'rgm-fp-why', flag.suggestion));
     grid.appendChild(panel);
@@ -296,19 +265,23 @@ function buildPrescription(a, model) {
     empty.appendChild(h('div', 'rgm-fp-from', 'no flag-driven block in regimes.json for this athlete'));
     grid.appendChild(empty);
   }
-  if (proj) grid.appendChild(proj);
   v.appendChild(grid);
 
   const foot = h('div', 'rgm-rules rgm-r');
   const rest = pres.length - shown.length;
   if (rest > 0) foot.appendChild(h('span', null, `${rest} further flag${rest > 1 ? 's' : ''} prescribed`));
+  if (held > 0) {
+    const s = h('span');
+    s.appendChild(h('b', null, String(held)));
+    s.appendChild(document.createTextNode(` further block${held > 1 ? 's' : ''} in these methods`));
+    foot.appendChild(s);
+  }
   if (a.dropped) {
     const s = h('span');
     s.appendChild(h('b', null, String(a.dropped)));
     s.appendChild(document.createTextNode(' blocks dropped by the slot cap'));
     foot.appendChild(s);
   }
-  if (model.policy) foot.appendChild(h('span', null, 'every projection is a planning aid, not a forecast'));
   if (foot.childElementCount) v.appendChild(foot);
   return v;
 }
@@ -324,6 +297,7 @@ function buildWeek(a, model) {
   v.appendChild(whoStrip(a, bits.length ? h('div', 'rgm-meta', bits.join(' · ')) : provenanceTail(model)));
 
   const week = h('div', 'rgm-week');
+  let held = 0;
   for (const d of a.micro) {
     const col = h('div', `rgm-day rgm-r${d.rest ? ' is-rest' : ''}`);
     const head = h('div', 'rgm-day-h');
@@ -332,7 +306,13 @@ function buildWeek(a, model) {
     col.appendChild(head);
     col.appendChild(h('div', 'rgm-day-s', d.session || (d.rest ? 'Rest' : '—')));
 
-    for (const b of d.blocks) {
+    // A day column is ~330px tall at 720 and ~200px at 560, and the busiest
+    // day has three blocks. Rather than have the third one sliced by the
+    // column's own clip, the day shows what it has room for and the foot says
+    // how many blocks the grid is holding back.
+    const cap = shortStage() ? 2 : 3;
+    held += Math.max(0, d.blocks.length - cap);
+    for (const b of d.blocks.slice(0, cap)) {
       const blk = h('div', 'rgm-blk');
       const bh = h('div', 'rgm-blk-h');
       if (b.label) bh.appendChild(h('div', 'rgm-blk-m', b.label));
@@ -359,18 +339,19 @@ function buildWeek(a, model) {
     s.appendChild(document.createTextNode(` ${t}`));
     rules.appendChild(s);
   };
+  // One line, not two. The conditioning and frequency tallies were the two
+  // most jargon-heavy items and the pair of them wrapped the foot onto a
+  // second line that landed on the deck's own eyebrow at 720px. What is left
+  // is still the audit: how much work, what the volume model flagged, that the
+  // interference rules ran and what they said, and how much rest.
   add(a.micro.filter((d) => !d.rest).length, 'sessions');
   add(a.nUnits, 'work units');
-  for (const f of a.volumeFlags.slice(0, 2)) {
+  if (held > 0) add(held, `further block${held > 1 ? 's' : ''} in the week`);
+  for (const f of a.volumeFlags.slice(0, 1)) {
     rules.appendChild(h('span', null, `volume landmark · ${f.id}`));
   }
   if (a.audit) {
     add(a.audit.rules, `interference rules checked · ${a.audit.warnings.length} warnings`);
-    if (a.audit.cond) {
-      add(`${a.audit.cond.high}/${a.audit.cond.high_max}`,
-        `high conditioning · ${a.audit.cond.moderate}/${a.audit.cond.moderate_max} moderate`);
-    }
-    if (a.audit.freqN) add(`${a.audit.freqOk}/${a.audit.freqN}`, 'frequency targets met');
     add(a.audit.restDays, `rest days of ${a.audit.span != null ? a.audit.span : '—'}`);
   }
   v.appendChild(rules);
@@ -390,7 +371,7 @@ function miniColumn(a, accent) {
   head.appendChild(m);
   col.appendChild(head);
 
-  const chips = h('div', 'rgm-chips');
+  const chips = h('div', 'rgm-chips rgm-mchips');
   const fl = a.metricFlags.length ? a.metricFlags : a.flags;
   for (const f of fl.slice(0, 4)) chips.appendChild(chip(f.id, !accent));
   if (!fl.length) chips.appendChild(h('div', 'rgm-fp-from', 'no flag raised'));
@@ -399,7 +380,7 @@ function miniColumn(a, accent) {
   // what was measured, and what it crossed — the reason this week differs
   if (a.deficits.length) {
     const list = h('div', 'rgm-mdef');
-    for (const d of a.deficits.slice(0, 4)) {
+    for (const d of a.deficits.slice(0, shortStage() ? 2 : 3)) {
       const lab = a.metrics.find((m) => m.key === d.metric);
       const row = h('div', 'rgm-mdef-r');
       row.appendChild(h('span', 'k', (lab && lab.name) || d.name || d.metric));
@@ -424,13 +405,18 @@ function miniColumn(a, accent) {
     col.appendChild(row);
   }
 
-  for (const d of a.micro) {
-    const row = h('div', `rgm-mrow${d.rest ? ' is-rest' : ''}`);
+  // Sessions only. The rest days were two of the seven rows and said nothing
+  // the comparison needs; their count is stated under the columns instead, so
+  // both weeks fit without the taller one being sliced off.
+  const days = a.micro.filter((d) => !d.rest).slice(0, MAX_DAYS);
+  const week = h('div', 'rgm-mweek');
+  for (const d of days) {
+    const row = h('div', 'rgm-mrow');
     row.appendChild(h('div', 'rgm-mday', d.day || '—'));
     const body = h('div');
-    body.appendChild(h('div', 'rgm-msess', d.session || (d.rest ? 'Rest' : '—')));
+    body.appendChild(h('div', 'rgm-msess', d.session || '—'));
     const ids = h('div', 'rgm-mids');
-    const units = d.blocks.flatMap((b) => b.units);
+    const units = d.blocks.flatMap((b) => b.units).slice(0, 3);
     units.forEach((u, i) => {
       if (i) ids.appendChild(h('span', 'sep', '  ·  '));
       const at = u.id.indexOf('@');
@@ -442,12 +428,13 @@ function miniColumn(a, accent) {
     });
     if (units.length) body.appendChild(ids);
     row.appendChild(body);
-    col.appendChild(row);
+    week.appendChild(row);
   }
+  col.appendChild(week);
   return col;
 }
 
-function buildTwo(a, b) {
+function buildTwo(a, b, model) {
   const v = h('div', 'rgm-view');
   const two = h('div', 'rgm-two');
   two.appendChild(miniColumn(a, false));
@@ -458,6 +445,24 @@ function buildTwo(a, b) {
     two.appendChild(empty);
   }
   v.appendChild(two);
+
+  // The projected numbers live on this stage now, so their caveats do too.
+  const foot = h('div', 'rgm-rules rgm-r');
+  const rests = [a, b].filter(Boolean)
+    .map((x) => x.micro.filter((d) => d.rest).length);
+  if (rests.length) {
+    const s = h('span');
+    s.appendChild(h('b', null, rests.join(' / ')));
+    s.appendChild(document.createTextNode(` rest day${rests[0] === 1 ? '' : 's'} not shown`));
+    foot.appendChild(s);
+  }
+  const conf = a.proj && a.proj.confidence;
+  foot.appendChild(h('span', null,
+    `${conf ? `projection confidence ${conf} · ` : ''}conservative point estimate, no interval`));
+  if (model && model.policy) {
+    foot.appendChild(h('span', null, 'every projection is a planning aid, not a forecast'));
+  }
+  v.appendChild(foot);
   return v;
 }
 
@@ -483,8 +488,15 @@ export function createRegimeView(ctx) {
 
   const frame = h('div', 'rgm-frame');
   const stack = h('div', 'rgm-stack');
-  frame.appendChild(stack);
+  const veilcap = h('div', 'rgm-veilcap');
+  frame.append(stack, veilcap);
   ctx.mount.appendChild(frame);
+  const primer = createPrimer(ctx.mount);
+
+  function prime(on) {
+    veilcap.classList.toggle('is-on', on);
+    if (on) primer.show(stack, PRIMER); else primer.hide();
+  }
 
   const model = readRegimes(ctx.data);
   const A = model ? primary(model) : null;
@@ -492,6 +504,7 @@ export function createRegimeView(ctx) {
 
   let cur = null;
   let curStage = -1;
+  let wasShort = shortStage();
 
   const raf = (fn) => {
     const id = requestAnimationFrame((t) => { rafs.delete(id); if (!dead) fn(t); });
@@ -530,26 +543,29 @@ export function createRegimeView(ctx) {
     const methods = { v: a ? a.methods.length || null : null, u: '', k: 'methods selected' };
     const weeks = { v: a ? a.periodization.weeks : null, u: 'wk', k: 'block' };
     // The three stats docs/PITCH_COPY.md names for this beat, revealed as the
-    // prescription earns them. Stage 4 re-reads all three off the second
-    // athlete, which is the whole point of that stage.
-    if (i === 0) return [flags];
-    if (i === 1) return [flags, methods];
-    if (i >= 2) return [flags, methods, weeks];
-    return [flags, methods];
+    // prescription earns them. The primer carries no number at all; stage 4
+    // re-reads all three off the second athlete, which is its whole point.
+    if (i === 0) return [];
+    if (i === 1) return [flags];
+    if (i === 2) return [flags, methods];
+    return [flags, methods, weeks];
   }
 
   function render(i) {
     if (!model || !A) {
       if (!cur) { cur = scrim(); stack.appendChild(cur); }
       ctx.deck.annotate({ stats: statsFor(i, null) });
+      prime(i === 0);
       return Promise.resolve();
     }
-    ctx.deck.annotate({ stats: statsFor(i, i === 3 && B ? B : A) });
-    const view = i === 0 ? buildDeficits(A, model)
-      : i === 1 ? buildPrescription(A, model)
-      : i === 2 ? buildWeek(A, model)
-      : buildTwo(A, B);
-    return wait(show(view));
+    ctx.deck.annotate({ stats: statsFor(i, i === 4 && B ? B : A) });
+    const view = i <= 1 ? buildDeficits(A, model)
+      : i === 2 ? buildPrescription(A, model)
+      : i === 3 ? buildWeek(A, model)
+      : buildTwo(A, B, model);
+    const ms = wait(show(view));
+    prime(i === 0);
+    return ms;
   }
 
   return {
@@ -560,13 +576,21 @@ export function createRegimeView(ctx) {
       return render(i);
     },
     replay() { return render(curStage < 0 ? 0 : curStage); },
-    resize() { /* pure CSS layout */ },
+    resize() {
+      // layout is pure CSS, but how many blocks and deficit rows a column is
+      // built with is decided once, off the stage height — rebuild if the
+      // window has crossed that line
+      if (shortStage() === wasShort || curStage < 0) return;
+      wasShort = shortStage();
+      render(curStage);
+    },
     dispose() {
       dead = true;
       for (const id of timers) clearTimeout(id);
       timers.clear();
       for (const id of rafs) cancelAnimationFrame(id);
       rafs.clear();
+      primer.dispose();
       life.end();
       frame.remove();
       cur = null;

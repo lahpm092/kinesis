@@ -12,6 +12,8 @@ models/
 # --- Node ---
 node_modules/
 web/dist/
+# scratch build dirs used by the QA sweeps (dist2, dist3, …)
+dist[0-9]*/
 dist/
 
 # --- OS / editor ---

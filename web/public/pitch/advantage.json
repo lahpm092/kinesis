@@ -1,0 +1,242 @@
+{
+ "measured": false,
+ "generator": "pipeline/26_advantage.py",
+ "note": "Nothing on this beat is modelled here. Every value in chain[] is counted from the artifact named in its `source` field. The 'everyone else' column is a CATEGORY comparison on each category's own terms, never a claim about a named vendor's product, and no competitor product was tested; where beat II already scored the capability the value is derived from landscape.json (basis says which), the rest is category-level editorial. The KINESIS column cites the beat that delivered the outcome and carries the register that beat carried.",
+ "footnote": "Category comparison, not a vendor benchmark. No competitor product was tested.",
+ "footnote_source": "landscape.json · beat II",
+ "scope": "each category on its own terms — where it stops is in the note",
+ "chain": [
+  {
+   "v": 1,
+   "u": "",
+   "k": "broadcast half",
+   "note": "45 min · 1280×720 · 25 fps",
+   "source": "source.json"
+  },
+  {
+   "v": 38,
+   "u": "",
+   "k": "clips of live play",
+   "note": "18 min of live play kept from 45",
+   "source": "cuts.json"
+  },
+  {
+   "v": 18,
+   "u": "",
+   "k": "tracked identities",
+   "note": "17 players + the ball, held through occlusion",
+   "source": "tracks.json"
+  },
+  {
+   "v": 4550,
+   "u": "",
+   "k": "body keypoints",
+   "note": "26 joints × 175 frames",
+   "source": "joints.json"
+  },
+  {
+   "v": 25,
+   "u": "",
+   "k": "metrics",
+   "note": "65-node audit trail · 80 operations",
+   "source": "metrics.json · derivation.json"
+  },
+  {
+   "v": 44133,
+   "u": "",
+   "k": "simulations",
+   "note": "2,627 per second on 8 workers",
+   "source": "search.json"
+  },
+  {
+   "v": 1,
+   "u": "",
+   "k": "training week",
+   "note": "5 sessions · 15 units · prescribed for 13",
+   "source": "lab.json · regimes.json"
+  },
+  {
+   "v": 13,
+   "u": "",
+   "k": "players ranked and priced",
+   "note": "keep 9 · develop 1 · sell 3",
+   "source": "roster.json · market.json"
+  }
+ ],
+ "chain_foot": [
+  "no hardware",
+  "no vests",
+  "no install",
+  "nothing asked of the athletes"
+ ],
+ "columns": [
+  {
+   "id": "capability",
+   "label": "What a club actually wants"
+  },
+  {
+   "id": "field",
+   "label": "What everyone else can do"
+  },
+  {
+   "id": "kinesis",
+   "label": "Kinesis"
+  }
+ ],
+ "rows": [
+  {
+   "capability": "See the body, not just the position",
+   "cites": [
+    "V",
+    "VII"
+   ],
+   "register": "measured",
+   "field": {
+    "glyph": 2,
+    "note": "markerless lab mocap does it — in a rig, never during a match"
+   },
+   "kinesis": {
+    "glyph": 2
+   },
+   "basis": "landscape.json · beat II"
+  },
+  {
+   "capability": "See what players do to each other",
+   "cites": [
+    "VI"
+   ],
+   "register": "measured",
+   "field": {
+    "glyph": 2,
+    "note": "optical tracking does it — from positions, with an install or a licensed feed"
+   },
+   "kinesis": {
+    "glyph": 2
+   },
+   "basis": "landscape.json · beat II"
+  },
+  {
+   "capability": "Measure the opponent too, with no cooperation",
+   "cites": [
+    "IV",
+    "VI"
+   ],
+   "register": "measured",
+   "field": {
+    "glyph": 2,
+    "note": "event and optical cover both teams — bought as a feed, or installed in the ground"
+   },
+   "kinesis": {
+    "glyph": 2
+   },
+   "basis": "landscape.json · beat II"
+  },
+  {
+   "capability": "Turn a weakness into a specific week of training",
+   "cites": [
+    "IX",
+    "X"
+   ],
+   "register": "projected",
+   "field": {
+    "glyph": 1,
+    "note": "planning software exists — nothing connects it to what the match measured"
+   },
+   "kinesis": {
+    "glyph": 2
+   },
+   "basis": "category-level editorial"
+  },
+  {
+   "capability": "Test a match plan before playing it",
+   "cites": [
+    "XII",
+    "XIII"
+   ],
+   "register": "simulated",
+   "field": {
+    "glyph": 1,
+    "note": "tactical models exist — not fitted to the players you just measured"
+   },
+   "kinesis": {
+    "glyph": 2
+   },
+   "basis": "category-level editorial"
+  },
+  {
+   "capability": "Find the players who make matches worth watching",
+   "cites": [
+    "XIV"
+   ],
+   "register": "simulated",
+   "field": {
+    "glyph": 1,
+    "note": "audience numbers arrive after the match — not from the players' own behaviour"
+   },
+   "kinesis": {
+    "glyph": 2
+   },
+   "basis": "category-level editorial"
+  },
+  {
+   "capability": "Price a player for a specific buyer",
+   "cites": [
+    "XVI"
+   ],
+   "register": "projected",
+   "field": {
+    "glyph": 1,
+    "note": "valuation models price a player — not the gap in one named buyer's squad"
+   },
+   "kinesis": {
+    "glyph": 2
+   },
+   "basis": "category-level editorial"
+  },
+  {
+   "capability": "Work from footage you already own, with no install",
+   "cites": [
+    "I",
+    "II"
+   ],
+   "register": "measured",
+   "field": {
+    "glyph": 1,
+    "note": "re-tagging is possible, some optical products read broadcast — installs do not"
+   },
+   "kinesis": {
+    "glyph": 2
+   },
+   "basis": "landscape.json · beat II"
+  }
+ ],
+ "legend": [
+  {
+   "glyph": 2,
+   "label": "delivered"
+  },
+  {
+   "glyph": 1,
+   "label": "partial or conditional"
+  },
+  {
+   "glyph": 0,
+   "label": "not available"
+  }
+ ],
+ "cited_beats": [
+  "V",
+  "VII",
+  "VI",
+  "IV",
+  "IX",
+  "X",
+  "XII",
+  "XIII",
+  "XIV",
+  "XVI",
+  "I",
+  "II"
+ ],
+ "close": "Every one of these exists somewhere. None of them, until this feed, in the same system."
+}

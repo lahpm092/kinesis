@@ -1,4 +1,4 @@
-// Beat VIII — Personalized training regimes.
+// Beat IX — Personalized training regimes.
 //
 // The measurement names the limitation, and the limitation selects real methods
 // from the taxonomy-v2 catalogue. Every identifier on screen — every flag id,
@@ -12,13 +12,18 @@ import { createRegimeView } from './regime/view.js';
 
 export const meta = {
   id: 'regime',
-  numeral: 'VIII',
+  numeral: 'IX',
   title: 'Training',
   long: 'Personalized training regimes',
   polarity: 'dark',
   sources: ['regimes'],
   provenance: 'projected',
   stages: [
+    {
+      eyebrow: 'How the plan is chosen',
+      line: 'What decides the training an athlete is given.',
+      settleMs: 900,
+    },
     {
       eyebrow: 'Deficits',
       line: 'The measurement names the limitation.',

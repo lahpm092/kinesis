@@ -1,0 +1,278 @@
+{
+ "measured": false,
+ "generator": "pipeline/21_landscape.py",
+ "note": "Feed spec, derivation counts and team count are read from source.json / derivation.json / roster.json (measured). Cost bands and category examples are transcribed from the HPX Performance Lab planning document (planning estimates, USD — not quotes). The capability matrix is a category-level assessment; no competitor product was tested.",
+ "footnote": "Category comparison, not a vendor benchmark. No competitor product was tested.",
+ "cost_label": "planning estimate, USD",
+ "cost_source": "HPX Performance Lab equipment plan",
+ "categories": [
+  {
+   "id": "event",
+   "name": "Event data",
+   "examples": [
+    "Opta",
+    "StatsBomb"
+   ],
+   "yields": "What happened, hand-tagged: every pass, shot and tackle, with a timestamp.",
+   "stops": "Never how. No bodies, no joints — thousands of labels per match, each one a human judgment.",
+   "cost": null,
+   "cost_note": "not in the HPX equipment plan",
+   "priority": null
+  },
+  {
+   "id": "gps",
+   "name": "GPS / GNSS vests",
+   "examples": [
+    "Catapult",
+    "STATSports"
+   ],
+   "yields": "External load from a worn vest: distance, accelerations, PlayerLoad.",
+   "stops": "Your own squad only. Never the opponent, and never a match you did not kit.",
+   "cost": {
+    "lo": 50,
+    "hi": 100
+   },
+   "cost_note": null,
+   "priority": "core"
+  },
+  {
+   "id": "optical",
+   "name": "Optical game tracking",
+   "examples": [
+    "SkillCorner",
+    "TrackMan"
+   ],
+   "yields": "Spatio-temporal x, y for every player on the pitch, both teams.",
+   "stops": "Positions, not bodies. A multi-camera install, or a licensed feed.",
+   "cost": {
+    "lo": 30,
+    "hi": 80
+   },
+   "cost_note": null,
+   "priority": "differentiator"
+  },
+  {
+   "id": "lab",
+   "name": "Markerless lab mocap",
+   "examples": [
+    "Theia3D",
+    "KinaTrax"
+   ],
+   "yields": "True 3D joint kinematics — the reference for a body in motion.",
+   "stops": "In a rig. Not from a broadcast, and never during a competitive match.",
+   "cost": {
+    "lo": 40,
+    "hi": 80
+   },
+   "cost_note": null,
+   "priority": "differentiator"
+  }
+ ],
+ "matrix": {
+  "columns": [
+   {
+    "id": "event",
+    "label": "Event data"
+   },
+   {
+    "id": "gps",
+    "label": "GPS / GNSS"
+   },
+   {
+    "id": "optical",
+    "label": "Optical"
+   },
+   {
+    "id": "lab",
+    "label": "Lab mocap"
+   },
+   {
+    "id": "kinesis",
+    "label": "Kinesis"
+   }
+  ],
+  "rows": [
+   {
+    "capability": "Joint angles",
+    "cells": {
+     "event": 0,
+     "gps": 0,
+     "optical": 0,
+     "lab": 2,
+     "kinesis": 2
+    },
+    "note": null
+   },
+   {
+    "capability": "Joint angular velocity",
+    "cells": {
+     "event": 0,
+     "gps": 0,
+     "optical": 0,
+     "lab": 2,
+     "kinesis": 2
+    },
+    "note": null
+   },
+   {
+    "capability": "Inter-player relative position & velocity",
+    "cells": {
+     "event": 1,
+     "gps": 1,
+     "optical": 2,
+     "lab": 1,
+     "kinesis": 2
+    },
+    "note": "event: at tagged moments only · GPS: the kitted squad only · lab: inside the rig, not a match"
+   },
+   {
+    "capability": "The opponent measured too",
+    "cells": {
+     "event": 2,
+     "gps": 0,
+     "optical": 2,
+     "lab": 0,
+     "kinesis": 2
+    },
+    "note": null
+   },
+   {
+    "capability": "No hardware on the athlete",
+    "cells": {
+     "event": 2,
+     "gps": 0,
+     "optical": 2,
+     "lab": 2,
+     "kinesis": 2
+    },
+    "note": null
+   },
+   {
+    "capability": "Works on archive & third-party footage",
+    "cells": {
+     "event": 1,
+     "gps": 0,
+     "optical": 1,
+     "lab": 0,
+     "kinesis": 2
+    },
+    "note": "event: bespoke re-tagging is possible · optical: some products read broadcast, installs do not"
+   },
+   {
+    "capability": "Every number traceable to its source frame",
+    "cells": {
+     "event": 1,
+     "gps": 0,
+     "optical": 1,
+     "lab": 2,
+     "kinesis": 2
+    },
+    "note": "event: timestamped, but the label is a judgment · GPS: no frame exists · optical: derivation not exposed"
+   }
+  ],
+  "legend": [
+   {
+    "glyph": 2,
+    "label": "measured"
+   },
+   {
+    "glyph": 1,
+    "label": "partial or conditional"
+   },
+   {
+    "glyph": 0,
+    "label": "not measured"
+   }
+  ],
+  "complete_columns": [
+   "kinesis"
+  ]
+ },
+ "kinesis": {
+  "feed": {
+   "width": 1280,
+   "height": 720,
+   "fps": 25.0,
+   "codec": "h264",
+   "match": "Manchester City 0 – 1 Manchester United",
+   "competition": "Premier League 2015/2016",
+   "date": "2016-03-20",
+   "measured": true
+  },
+  "yields": [
+   {
+    "k": "Bodies",
+    "line": "Joint angles and angular velocities, per player, frame by frame."
+   },
+   {
+    "k": "Relations",
+    "line": "Relative position and velocity between players — both teams at once."
+   },
+   {
+    "k": "Identity",
+    "line": "Every object keeps its identity through contact, occlusion and camera pan."
+   }
+  ],
+  "teams": {
+   "n": 2,
+   "ids": [
+    "A",
+    "B"
+   ]
+  },
+  "derivation": {
+   "nodes": 65,
+   "edges": 80,
+   "inputs": 12,
+   "derived": 22,
+   "metrics": 31,
+   "quote": "Every metric node is reachable from a measured input; the build fails otherwise. Edge labels are the operations actually run.",
+   "generator": "pipeline/60_metrics.py",
+   "measured": true
+  },
+  "chain": [
+   {
+    "id": "pitchPos",
+    "label": "Pitch position",
+    "unit": "m",
+    "tier": "input",
+    "op": "Savitzky-Golay w<=11 o2, np.gradient"
+   },
+   {
+    "id": "velocity",
+    "label": "Velocity",
+    "unit": "m/s",
+    "tier": "derived",
+    "op": "|v|, clipped to 11 m/s"
+   },
+   {
+    "id": "speed",
+    "label": "Speed",
+    "unit": "m/s",
+    "tier": "derived",
+    "op": "max over the clip"
+   },
+   {
+    "id": "topSpeed",
+    "label": "Top speed",
+    "unit": "m/s",
+    "tier": "metric",
+    "op": "z vs the cohort observed in this match"
+   },
+   {
+    "id": "cohortZ",
+    "label": "Cohort z-score",
+    "unit": "sigma",
+    "tier": "derived",
+    "op": "0.40*z(topSpeed) + 0.30*z(peakAccel) + 0.30*z(sprints); clip +/-2.5; 50 + 20*z"
+   },
+   {
+    "id": "explosiveness",
+    "label": "Explosiveness",
+    "unit": "0-100",
+    "tier": "metric",
+    "op": null
+   }
+  ]
+ }
+}

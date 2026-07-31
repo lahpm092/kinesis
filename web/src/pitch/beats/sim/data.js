@@ -127,7 +127,15 @@ const SMOOTHED = new WeakMap();
  */
 export function runOf(sim, id) {
   if (!sim || !Array.isArray(sim.runs)) return null;
-  const raw = sim.runs.find((r) => r.id === id) || null;
+  return smoothedRun(sim.runs.find((r) => r.id === id) || null);
+}
+
+/**
+ * The same repair, for a recorded run that did not come out of sim.json —
+ * spectacle.json's duel carries two of them in exactly this shape. Memoised on
+ * the raw object, so every caller shares one repaired copy.
+ */
+export function smoothedRun(raw) {
   if (!raw || !Array.isArray(raw.agents)) return raw;
   const seen = SMOOTHED.get(raw);
   if (seen) return seen;

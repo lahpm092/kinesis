@@ -73,4 +73,19 @@ export const CUT_CSS = `
   font-size: 9.5px; letter-spacing: 0.18em; text-transform: uppercase;
   color: var(--ink-3);
 }
+
+/* The deck's annotation is a fixed block of ink in the bottom-left and does not
+   shrink with the window. Below ~620px tall the timeline's own caption row was
+   landing on it, so the area gives up height instead. */
+@media (max-height: 620px) {
+  /* .cut-tl is absolutely positioned at the top of the area and grows
+     downward, so the area's floor never moved it — the timeline canvas is the
+     only lever. Shorten it and the caption rises clear of the annotation. */
+  .cut-tl canvas { height: 150px; }
+  .cut-head { padding-bottom: 8px; margin-bottom: 10px; }
+  .cut-cap { margin-top: 8px; padding-top: 7px; font-size: 9px; }
+}
+@media (max-height: 560px) {
+  .cut-tl canvas { height: 124px; }
+}
 `;

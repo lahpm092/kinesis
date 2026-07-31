@@ -4,15 +4,19 @@
 // ============================================================================
 
 const SAMPLES = 20;
-const GAP = 24;
-const NARROW = 88;
+// Tightened from 24/88/108 so that six wide sub-columns plus the two narrow
+// ones still fit BESIDE the record card at 1280 wide. They used to overrun it
+// and the composites column was painted over by the panel.
+const GAP = 18;
+const NARROW = 76;
+const MIN_WIDE = 96;
 
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 
 /**
  * @param {object} g      graph from buildGraph
  * @param {object} box    { w, h } of the graph container, in CSS pixels
- * @returns {object}      { width, subCols, rowPitch }
+ * @returns {object}      { width, subCols, rowPitch, nodeH, top }
  */
 export function layout(g, box) {
   const subCols = [];
@@ -25,7 +29,7 @@ export function layout(g, box) {
   const nWide = Math.max(1, subCols.length - nNarrow);
   const avail = Math.max(320, box.w);
   let wide = (avail - NARROW * nNarrow - GAP * (subCols.length - 1)) / nWide;
-  wide = clamp(wide, 108, 208);
+  wide = clamp(wide, MIN_WIDE, 208);
 
   const top = 26;                                    // room for the column heads
   const H = Math.max(120, box.h - top - 8);
@@ -46,7 +50,13 @@ export function layout(g, box) {
     s.pitch = H / Math.max(1, s.nodes.length);
     if (s.pitch < minPitch) minPitch = s.pitch;
   }
-  const nodeH = clamp(Math.round(minPitch - 10), 26, 52);
+  // A 1280x720 stage gives the thirteen-row columns ~30px of pitch and a 560px
+  // one barely 17px. A fixed 26px floor made the cells taller than their own
+  // pitch, so the labels overlapped each other and the second line was sliced.
+  // The gap shrinks with the pitch instead, and the beat re-styles the cells
+  // (one-line labels, no unit foot) at the sizes where that is all that fits.
+  const gap = minPitch >= 36 ? 10 : minPitch >= 26 ? 6 : 3;
+  const nodeH = clamp(Math.round(minPitch - gap), 12, 52);
 
   for (const s of subCols) {
     s.nodes.forEach((n, i) => {

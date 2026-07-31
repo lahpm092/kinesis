@@ -24,7 +24,7 @@ import { createTraces } from './skeleton/traces.js';
 
 export const meta = {
   id: 'skeleton',
-  numeral: 'IV',
+  numeral: 'V',
   title: 'Skeleton',
   long: 'Skeleton, joint angles, angular velocity',
   polarity: 'dark',
@@ -68,6 +68,14 @@ const CSS = `
   transition:height 720ms cubic-bezier(0.22,1,0.36,1);
 }
 .b4-band.is-low { height:min(38vh,376px); }
+/* Below ~620px tall the deck's annotation block does not shrink, so the band
+   has to. Without this its foot row ("47 of 4550 rejected") lands on the
+   annotation eyebrow. */
+@media (max-height: 620px) {
+  .b4-band { height:min(50vh,676px); }
+  .b4-band.is-low { height:min(30vh,376px); }
+  .b4-traces { height:min(20vh,258px); }
+}
 .b4-panel {
   position:relative; display:flex; flex-direction:column; min-width:0; min-height:0;
   border:1px solid var(--coal-hair); background:var(--coal-2);

@@ -1,30 +1,51 @@
 // ============================================================================
-// Beat VI — Performance metrics, explicitly derived.
+// Beat VII — Performance metrics, explicitly derived.
 //
-//   1  measured inputs   the left column lights in sequence
-//   2  derivation        ink travels the real graph, edges carry the real op
-//   3  the player        one record; every number still wired to its source
-//   4  at scale          the same chain, once per clip
+//   0  primer           the plate blurs back and one sentence says what it is
+//   1  measured inputs  the left column lights in sequence
+//   2  derivation       ink travels the real graph — nothing else on screen
+//   3  one chain        a single path stays lit and its operations are printed
+//   4  the player       one record; every number still wired to its source
+//   5  at scale         the same chain, once per clip
+//
+// Stage 2 used to carry the travelling ink AND the printed operations AND the
+// whole record card's worth of side text at once, which is the densest thing
+// in the deck for a room that is not technical. It is now two stages: look at
+// the shape, then read one path of it. The record card lost the written
+// derivation (stage 3 says it) and the measured sample (the plate cells carry
+// their own values), so the card is six numbers and its provenance foot.
 //
 // Copy is verbatim from docs/PITCH_COPY.md. The graph is rendered from
 // /pitch/derivation.json; with only metrics.json it is synthesised from the
 // metric definitions; with neither, the beat shows a mono scrim.
 // ============================================================================
 import { lifetime } from '../beat.js';
+import { createPrimer } from '../primer.js';
 import { createShell, el, fmtVal } from './metrics/ui.js';
 import { buildGraph, ancestryOf, spineOf } from './metrics/graph.js';
 import { layout } from './metrics/layout.js';
 import { Plate } from './metrics/render.js';
 import { buildCard } from './metrics/card.js';
 
+const PRIMER = {
+  kicker: 'The audit trail',
+  line: 'Every number in this deck can be traced back to the frame it came from. This is that map.',
+  sub: '65 nodes · 80 operations',
+};
+
 export const meta = {
   id: 'metrics',
-  numeral: 'VI',
+  numeral: 'VII',
   title: 'Metrics',
   long: 'Performance metrics, derived',
   polarity: 'light',
   sources: ['metrics', 'derivation'],
   stages: [
+    {
+      eyebrow: 'The map',
+      line: 'Where every number in this deck comes from.',
+      settleMs: 900,
+    },
     {
       eyebrow: 'Measured inputs',
       line: 'Every metric starts at a measured angle or a measured relation.',
@@ -39,6 +60,15 @@ export const meta = {
         { v: null, u: '', k: 'metrics' },
       ],
       settleMs: 2600,
+    },
+    {
+      eyebrow: 'One chain',
+      line: 'Pick any score and the operations behind it can be printed, in order.',
+      stats: [
+        { v: null, u: '', k: 'inputs' },
+        { v: null, u: '', k: 'metrics' },
+      ],
+      settleMs: 1200,
     },
     {
       eyebrow: 'The player',
@@ -87,16 +117,29 @@ const ease = bezier(0.22, 1, 0.36, 1);
 const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 
-const CARD_W = 322;
-const CARD_GAP = 30;
-const TOP = 100;
-const BOTTOM = 246;
+const CARD_W = 288;
+const CARD_GAP = 26;
 const FLOW_MS = 1700;
 const FLOW_DELAY = 240;
+
+/**
+ * Top and bottom insets, in CSS px, for a stage of height `H`.
+ * The deck's annotation is bottom-left and grows with its own stats: measured
+ * at 1280x720 and 1280x560 its ink starts 179px above the floor with three
+ * stats on it. The plate footnote sits inside this budget too, so the floor is
+ * never below 216px however short the stage is.
+ */
+function insets(H) {
+  return {
+    top: Math.round(clamp(H * 0.11, 84, 100)),
+    bot: Math.round(clamp(H * 0.29, 216, 260)),
+  };
+}
 
 export function create(ctx) {
   const life = lifetime();
   const ui = createShell(ctx.mount);
+  const primer = createPrimer(ctx.mount);
 
   const data = ctx.data || {};
   const graph = buildGraph(data);
@@ -112,8 +155,10 @@ export function create(ctx) {
   if (!graph) {
     ui.scrim('derivation.json · pipeline rendering');
     return {
-      enter() {}, stage() {}, replay() {}, resize() {},
-      dispose() { dead = true; life.end(); ctx.mount.replaceChildren(); },
+      enter(s) { if ((s | 0) === 0) primer.show(ui.root, PRIMER); else primer.hide(); },
+      stage(i) { if ((i | 0) === 0) primer.show(ui.root, PRIMER); else primer.hide(); },
+      replay() {}, resize() {},
+      dispose() { dead = true; primer.dispose(); life.end(); ctx.mount.replaceChildren(); },
     };
   }
 
@@ -136,7 +181,7 @@ export function create(ctx) {
     n.unitEl = unit;
     n.footEl = foot;
     n.valEl = null;
-    d.addEventListener('mouseenter', () => { if (stage === 2) setFocus(n.id); });
+    d.addEventListener('mouseenter', () => { if (stage === 4) setFocus(n.id); });
     ui.graph.appendChild(d);
   }
   for (const c of graph.cols) {
@@ -190,28 +235,42 @@ export function create(ctx) {
   buildScale();
 
   spine = spineOf(graph);
-  buildOps(spine.slice(0, 6));
+  const spineHi = {
+    nodes: new Set(spine.flatMap((e) => [e.from, e.to])),
+    edges: new Set(spine.map((e) => e.i)),
+    tag: null,
+  };
+  // four operations, not six: the point of the stage is that a path CAN be
+  // printed, not that the room reads all of it off the wall
+  buildOps(spine.slice(0, 4));
 
   // ------------------------------------------------------------- geometry --
   function measure() {
     const W = ui.root.clientWidth || window.innerWidth;
     const H = ui.root.clientHeight || window.innerHeight;
+    const { top: TOP, bot: BOTTOM } = insets(H);
     const pad = Math.round(clamp(W * 0.034, 20, 56));
     const avail = Math.max(320, W - pad * 2);
-    const height = Math.max(220, H - TOP - BOTTOM);
+    const height = Math.max(160, H - TOP - BOTTOM);
     const target = Math.max(280, avail - CARD_W - CARD_GAP);
     const g = layout(graph, { w: target, h: height });
-    geom = { W, H, pad, avail, height, ...g };
+    geom = { W, H, pad, avail, height, top: TOP, ...g };
 
     ui.graph.style.left = `${pad}px`;
     ui.graph.style.top = `${TOP}px`;
     ui.graph.style.width = `${Math.round(g.width)}px`;
     ui.graph.style.height = `${height}px`;
+    // the cells are as tall as thirteen rows of the stage allow, and restyle
+    // themselves rather than spill: one clamped line at ~24px, label only at ~14
+    ui.graph.classList.toggle('is-tight', g.nodeH < 34);
+    ui.graph.classList.toggle('is-tiny', g.nodeH < 22);
 
     for (const panel of [ui.card, ui.ops]) {
       panel.style.right = `${pad}px`;
       panel.style.top = `${TOP}px`;
       panel.style.width = `${CARD_W}px`;
+      panel.style.height = `${height}px`;
+      panel.classList.toggle('is-tight', height < 340);
     }
 
     ui.scale.style.left = `${pad}px`;
@@ -244,7 +303,9 @@ export function create(ctx) {
     if (!geom) return 0;
     const inputCol = graph.cols[0];
     const colW = inputCol && inputCol.subs[0] && inputCol.subs[0][0] ? inputCol.subs[0][0].w : geom.width;
-    if (s === 0) return Math.max(0, (geom.avail - colW) / 2);
+    // the inputs stage shows the input column alone, centred; the primer shows
+    // the whole plate, which is the thing its sentence is about
+    if (s === 1) return Math.max(0, (geom.avail - colW) / 2);
     return 0;                              // every other stage is flush left
   }
 
@@ -261,10 +322,10 @@ export function create(ctx) {
   }
 
   function paintNodes() {
-    const inputsOnly = stage === 0;
+    const inputsOnly = stage === 1;
     for (const n of graph.nodes.values()) {
-      const on = inputsOnly ? n.tier === 'input' : stage >= 1;
-      n.el.classList.toggle('is-on', on && stage < 3);
+      const on = inputsOnly ? n.tier === 'input' : true;
+      n.el.classList.toggle('is-on', on && stage < 5);
       const hot = hi ? hi.nodes.has(n.id) : false;
       n.el.classList.toggle('is-hot', !!hi && hot);
       n.el.classList.toggle('is-mute', !!hi && !hot);
@@ -284,18 +345,20 @@ export function create(ctx) {
       }
       // a metric with nothing behind it for this player is only worth calling
       // out on the stage that shows this player's numbers
-      n.el.classList.toggle('is-null', stage === 2 && !!player && n.tier === 'metric'
+      n.el.classList.toggle('is-null', stage === 4 && !!player && n.tier === 'metric'
         && (player.measured || {})[n.id] == null && (player.scores || {})[n.id] == null);
     }
   }
 
   // The three stats docs/PITCH_COPY.md names for this beat, revealed as the
   // chain earns them. The operation count is already stated on the graph's own
-  // footer and does not need the annotation as well.
+  // footer and does not need the annotation as well. The primer carries no
+  // number at all beyond the one on its own card.
   function annotate(s) {
+    if (s === 0) { ctx.deck.annotate({ stats: [] }); return; }
     const row = [{ v: graph.counts.input || null, u: '', k: 'inputs' }];
-    if (s >= 1) row.push({ v: graph.counts.metric || null, u: '', k: 'metrics' });
-    if (s >= 3) row.push({ v: clips || null, u: '', k: 'clips' });
+    if (s >= 2) row.push({ v: graph.counts.metric || null, u: '', k: 'metrics' });
+    if (s >= 5) row.push({ v: clips || null, u: '', k: 'clips' });
     ctx.deck.annotate({ stats: row });
   }
 
@@ -307,36 +370,40 @@ export function create(ctx) {
     stage = s;
     annotate(s);
 
-    ui.root.classList.toggle('is-focusable', s === 2);
+    if (s === 0) primer.show(ui.root, PRIMER);
+    else primer.hide();
+
+    ui.root.classList.toggle('is-focusable', s === 4);
     ui.graph.style.transition = snap ? 'none' : '';
     ui.graph.style.transform = `translateX(${Math.round(txFor(s))}px)`;
     if (snap) requestAnimationFrame(() => { if (!dead) ui.graph.style.transition = ''; });
 
     for (const c of graph.cols) {
-      c.headEl.classList.toggle('is-on', s === 0 ? c.key === 'input' : s < 3);
+      c.headEl.classList.toggle('is-on', s === 1 ? c.key === 'input' : s < 5);
     }
-    ui.note.style.opacity = s === 3 ? '0' : '0.75';
-    ui.ops.classList.toggle('is-on', s === 1);
-    ui.card.classList.toggle('is-on', s === 2);
-    ui.scale.classList.toggle('is-on', s === 3);
+    ui.note.style.opacity = s === 5 ? '0' : '0.75';
+    ui.ops.classList.toggle('is-on', s === 3);
+    ui.card.classList.toggle('is-on', s === 4);
+    ui.scale.classList.toggle('is-on', s === 5);
 
     // per-node entrance stagger
     const maxLayer = Math.max(1, ...[...graph.nodes.values()].map((n) => n.layer));
     let i = 0;
     for (const n of graph.nodes.values()) {
       let delay = 0;
-      if (s === 0 && n.tier === 'input') delay = 70 * (i++);
-      else if (s === 1) delay = FLOW_DELAY + (n.layer / maxLayer) * 0.62 * FLOW_MS;
+      if (s === 1 && n.tier === 'input') delay = 70 * (i++);
+      else if (s === 2) delay = FLOW_DELAY + (n.layer / maxLayer) * 0.62 * FLOW_MS;
       n.el.style.transitionDelay = snap ? '0ms' : `${Math.round(delay)}ms`;
     }
 
-    if (s === 2) setFocus(card.focusId || card.defaultFocus);
+    if (s === 4) setFocus(card.focusId || card.defaultFocus);
+    else if (s === 3) { hi = spineHi; card.setFocus(null); }
     else if (hi) { hi = null; card.setFocus(null); }
     paintNodes();
 
-    if (s === 3) {
+    if (s === 5) {
       plate.set({ mode: 'tiles', hi: null, spine: null, labels: null });
-      const top = Math.min(320, Math.max(120, ui.scale.offsetHeight + 26));
+      const top = Math.min(320, Math.max(110, ui.scale.offsetHeight + 24));
       return anim(1450, (e) => {
         const k = ease(clamp01((e - 240) / 1000));
         plate.set({ tiles: { solid: solidTiles(), ghost: ghostTiles(), k, top } });
@@ -346,27 +413,37 @@ export function create(ctx) {
 
     plate.set({ mode: 'graph', tiles: null, hi, dim: 1 });
     if (s === 0) {
+      // the whole plate, inked and pushed back — the sentence over it says
+      // what it is, and stage 1 then walks back to where it starts
+      plate.set({ flow: 1, labels: null, spine: null });
+      plate.draw(true);
+      return anim(700, () => {});
+    }
+    if (s === 1) {
       plate.set({ flow: 0, labels: null, spine: null });
       plate.draw(true);
       return anim(1240, () => {});
     }
-    if (s === 2) {
+    if (s === 3) {
+      // the one path, lit and named — everything else steps back
+      plate.set({ flow: 1, labels: null, spine: null });
+      plate.draw(true);
+      return anim(900, () => {});
+    }
+    if (s === 4) {
       plate.set({ flow: 1, labels: null, spine: null });
       plate.draw(true);
       return anim(1150, () => {});
     }
 
-    // stage 2 — the ink travels the whole graph, then one chain stays lit and
-    // its operations are printed, in order, beside the plate
-    const spineSet = new Set(spine.map((e) => e.i));
-    const total = FLOW_DELAY + FLOW_MS + 560;
+    // stage 2 — the ink travels the whole graph and nothing else is on screen
+    const total = FLOW_DELAY + FLOW_MS + 320;
     return anim(total, (e) => {
       const f = ease(clamp01((e - FLOW_DELAY) / FLOW_MS));
-      const lk = clamp01((e - (FLOW_DELAY + FLOW_MS - 160)) / 560);
-      plate.set({ flow: f, spine: lk > 0.01 ? spineSet : null, labels: null });
+      plate.set({ flow: f, spine: null, labels: null });
       plate.draw();
     }, () => {
-      plate.set({ flow: 1, spine: spineSet, labels: null });
+      plate.set({ flow: 1, spine: null, labels: null });
       plate.draw(true);
     });
   }
@@ -438,6 +515,7 @@ export function create(ctx) {
     dispose() {
       dead = true;
       halt();
+      primer.dispose();
       life.end();
       ctx.mount.replaceChildren();
     },

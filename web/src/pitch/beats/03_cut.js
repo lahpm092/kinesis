@@ -8,7 +8,7 @@ import { createCutView } from './cut/view.js';
 
 export const meta = {
   id: 'cut',
-  numeral: 'II',
+  numeral: 'III',
   title: 'Clipping',
   long: 'Clipping / dead-time removal',
   polarity: 'light',
