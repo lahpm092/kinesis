@@ -6,9 +6,26 @@ broadcast footage** — the original scripts were hardcoded to two specific matc
 
 **To present it, read [`PRESENTING.md`](PRESENTING.md).** One page, one key.
 
+## Clone and run
+
+Node 20.19+ or 22.12+ (Vite 8). Nothing else — the video, face plates and JSON the
+deck reads are committed, so there is no pipeline to run and no footage to fetch.
+
 ```bash
-cd web && npm install && npm run dev     # → http://localhost:5173/pitch.html
+git clone https://github.com/lahpm092/kinesis.git
+cd kinesis/web
+npm install
+npm run dev -- --host 127.0.0.1     # → http://127.0.0.1:5173/pitch.html
 ```
+
+`--host 127.0.0.1` is not decoration. Vite's default binding answers on IPv6 `::1`
+on some machines, and a browser that resolves `localhost` to `127.0.0.1` then fails
+to connect. Binding explicitly sidesteps it; plain `npm run dev` is fine if
+`http://localhost:5173/pitch.html` loads for you.
+
+The clone is ~180 MB — the committed match video and face plates.
+
+To serve it built instead: `npm run build && npm run preview`.
 
 Eighteen beats, seventy-nine steps.
 
